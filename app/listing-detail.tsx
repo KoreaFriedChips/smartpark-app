@@ -1,24 +1,25 @@
-import React, { useState } from "react";
-import { StyleSheet, FlatList } from "react-native";
+import React from "react";
+import { StyleSheet, useColorScheme, FlatList } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import ListingCard, { ListingItem } from "@/components/ListingCard/ListingCard";
-import TagsContainer from "@/components/TagsContainer";
 import { listingData } from "@/components/utils/ListingData";
 
-export default function HomeScreen() {
-  const [filteredListingData, setFilteredListingData] = useState<ListingItem[]>([]);
+
+export default function MessagesScreen() {
+  const themeColors = Colors[useColorScheme() || "light"];
+  const params = useLocalSearchParams();
+  const { id } = params;
+  const spotData = listingData.find((item) => item.id === id);
 
   return (
     <View style={styles.container}>
-      <TagsContainer listingData={listingData} onFilterChange={setFilteredListingData} search={true} />
       <FlatList
-        data={filteredListingData}
+        data={spotData ? [spotData] : []}
         renderItem={({ item }) => <ListingCard item={item} />}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
-        // onEndReached={loadMoreListings}
-        // onEndReachedThreshold={0.5}
-        // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No spots found.</Text> : null}
       />
     </View>
   );
@@ -27,6 +28,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   noListings: {
     textAlign: "center",
