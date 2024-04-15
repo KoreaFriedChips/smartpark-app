@@ -4,6 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useOAuth, useAuth } from "@clerk/clerk-expo";
 import { useNavigation } from "@react-navigation/native";
 import { Text, View } from "@/components/Themed";
+import { signin } from '@/serverconn';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -19,7 +20,7 @@ const useWarmUpBrowser = () => {
 export default function SignInScreen() {
   useWarmUpBrowser();
 
-  const { isLoaded, isSignedIn, userId } = useAuth();
+  const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
   useEffect(() => {
     if (isLoaded && isSignedIn) {
       console.log('User ID:', userId);
@@ -36,14 +37,19 @@ export default function SignInScreen() {
       const startOAuthFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
 
       const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow();
-
       if (createdSessionId && setActive) {
-        setActive({ session: createdSessionId });
+        try {
+          await setActive({ session: createdSessionId });
+          await signin(await getToken() ?? "");
+        } catch (err) {
+          console.error(err)
+          signOut()
+        }
       } else {
         // Handle additional steps such as MFA or account selection
       }
-    } catch (err) {
-      console.error("OAuth error", err);
+    } catch (err: any) {
+      console.error(err.toString())
     }
   }, [startGoogleOAuthFlow, startFacebookOAuthFlow, startAppleOAuthFlow]);
 

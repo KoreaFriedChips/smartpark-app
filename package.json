@@ -3,10 +3,10 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "dotenv -f .env.local run -- expo start",
+    "android": "dotenv -f .env.local run -- expo start --android",
+    "ios": "dotenv -f .env.local run -- expo start --ios",
+    "web": "dotenv -f .env.local run -- expo start --web",
     "test": "jest --watchAll",
     "postinstall": "node postinstall.js"
   },
@@ -20,6 +20,7 @@
     "@react-native-picker/picker": "github:react-native-picker/picker",
     "@react-navigation/native": "^6.0.2",
     "axios": "^1.6.8",
+    "chalk": "^4.1.2",
     "dotenv": "^16.4.5",
     "expo": "~50.0.14",
     "expo-font": "~11.10.3",
