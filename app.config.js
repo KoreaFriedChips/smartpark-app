@@ -1,6 +1,4 @@
 require("dotenv").config();
-const filteredEnv = Object.fromEntries(Object.entries(process.env)
-  .filter(([key, val]) => key.indexOf("EXPO_PUBLIC_") === 0));
 
 export default {
   "expo": {
@@ -43,7 +41,8 @@ export default {
       "typedRoutes": true
     },
     "extra": {
-      "env": filteredEnv,
+      clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      serverURL: process.env.SERVER_URL
     }
   }
 };

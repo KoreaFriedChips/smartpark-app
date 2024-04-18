@@ -1,4 +1,4 @@
-import { Clerk, ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
+import { Clerk, ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import { DarkTheme, DefaultTheme, ThemeProvider, useNavigation } from "@react-navigation/native";
 import { Link } from "expo-router";
@@ -91,19 +91,19 @@ export default function RootLayout() {
     return null;
   }
 
-  // const env = Constants.expoConfig?.extra?.env;
-  // const clerkPublishableKey = env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const env = Constants.expoConfig?.extra;
+  const clerkPublishableKey = env?.clerkPublishableKey;
 
   return (
-    // <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
-    //   <SignedIn>
-    //     <RootLayoutNav />
-    //   </SignedIn>
-    //   <SignedOut>
-    //     <SignInScreen />
-    //   </SignedOut>
-    // </ClerkProvider>
-    <RootLayoutNav />
+    <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+      <SignedIn>
+        <RootLayoutNav />
+      </SignedIn>
+      <SignedOut>
+        <SignInScreen />
+      </SignedOut>
+    </ClerkProvider>
+    // <RootLayoutNav />
   );
 }
 
