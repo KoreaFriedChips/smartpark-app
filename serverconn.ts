@@ -1,6 +1,5 @@
 import Constants from "expo-constants";
 
-
 export const signin = async (t: string) => { return await sendToServer(t, "/api/signin", "POST", {}, {}) };
 
 const sendToServer = async (token: string, path: string, method: string, data: any, params: any) => {
@@ -20,24 +19,6 @@ const buildSearchParams = (params: any) => {
     return searchParams;
 }
 
-interface UserParams {
-    name?: string,
-    clerkId?: string,
-    description?: string | null | undefined,
-    rating?: number,
-    reviews?: number,
-    city?: string | null | undefined,
-    state?: string | null | undefined,
-    profilePicture?: | null | undefined,
-    activeSince?: Date,
-    verified?: boolean
-}
-
-interface UserCreate extends UserParams {
-    name: string,
-    clerkId: string,
-}
-
 export const createUser = async(token: string, data: UserCreate) => {
     return await sendToServer(token, "/api/users", "POST", data, {});
 }
@@ -52,50 +33,6 @@ export const updateUser = async( token: string, id: string, data: UserParams ) =
 
 export const deleteUser = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
-}
-
-interface ListingParams {
-    id?: string,
-    thumbnail?: string,
-    images?: string[],
-    latitude?: number,
-    longitude?: number,
-    distance?: number,
-    city?: string,
-    state?: string,
-    listingType?: string,
-    price?: number,
-    duration?: string,
-    relist?: boolean,
-    relistDuration?: string | null | undefined,
-    description?: string | null | undefined,
-    availability?: object,
-    active?: boolean,
-    rating?: number,
-    reviews?: number,
-    date?: Date,
-    ends?: Date | null | undefined,
-    bids?: number,
-    capacity?: number,
-    spotsLeft?: number,
-    tags?: string[],
-    amenities?: string[],
-    sellerId?: string
-}
-
-interface ListingCreate extends ListingParams {
-    thumbnail: string,
-    images: string[],
-    latitude: number,
-    longitude: number,
-    city: string,
-    state: string,
-    listingType: string,
-    price: number,
-    duration: string,
-    availability: object,
-    date: Date,
-    sellerId: string
 }
 
 export const createListing = async(token: string, data: ListingCreate) => {
@@ -114,22 +51,6 @@ export const deleteListing = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
 }
 
-interface ReviewParams {
-    id?: string,
-    rating?: number,
-    review?: string,
-    date?: Date,
-    listingId?: string,
-    userId?: string
-}
-
-interface ReviewCreate extends ReviewParams {
-    rating: number,
-    review: string,
-    date: Date,
-    userId: string,
-    listingId: string
-}
 
 export const createReview = async(token: string, data: ReviewCreate) => {
     return await sendToServer(token, "/api/users", "POST", data, {});
@@ -147,22 +68,6 @@ export const deleteReview = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
 }
 
-interface WaitlistParams {
-    id?: string,
-    name?: string,
-    email?: string,
-    use?: string | null | undefined,
-    place?: number | null | undefined,
-    createdAt?: Date,
-    updatedAt?: Date
-}
-
-interface WaitlistCreate extends WaitlistParams {
-    name: string,
-    email: string
-}
-
-
 export const createWaitlist = async(token: string, data: WaitlistCreate) => {
     return await sendToServer(token, "/api/users", "POST", data, {});
 }
@@ -177,21 +82,6 @@ export const updateWaitlist = async( token: string, id: string, data: WaitlistPa
 
 export const deleteWaitlist = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
-}
-
-interface BidParams {
-    id?: string,
-    amount?: number,
-    createdAt?: Date,
-    updatedAt?: Date,
-    userId?: string,
-    listingId?: string
-}
-
-interface BidCreate extends BidParams {
-    amount: number,
-    userId: string,
-    listingId: string
 }
 
 export const createBid = async(token: string, data: BidCreate) => {
@@ -210,21 +100,6 @@ export const deleteBid = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
 }
 
-interface TransactionParams {
-    id?: string,
-    transactionDate?: Date,
-    amount?: number,
-    paymentMethod?: string | null | undefined,
-    userId?: string,
-    listingId?: string
-}
-
-interface TransactionCreate extends TransactionParams {
-    amount: number,
-    userId: string,
-    listingId: string
-}
-
 export const createTransaction = async(token: string, data: TransactionCreate) => {
     return await sendToServer(token, "/api/users", "POST", data, {});
 }
@@ -241,17 +116,6 @@ export const deleteTransaction = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
 }
 
-interface FavoriteParams {
-    id?: string,
-    userId?: string,
-    listingId?: string
-}
-
-interface FavoriteCreate extends FavoriteParams{
-    userId: string,
-    listingId: string
-}
-
 export const createFavorite = async(token: string, data: FavoriteCreate) => {
     return await sendToServer(token, "/api/users", "POST", data, {});
 }
@@ -266,18 +130,6 @@ export const updateFavorite = async( token: string, id: string, data: FavoritePa
 
 export const deleteFavorite = async ( token: string, id: string ) => {
     return await sendToServer(token, `/api/users/${id}`, "DELETE", {}, {});
-}
-
-interface ConfirmationParams {
-    id?: string,
-    confirmed?: Date,
-    transactionId?: string,
-    userId?: string
-}
-
-interface ConfirmationCreate extends ConfirmationParams {
-    transactionId: string,
-    userId: string
 }
 
 export const createConfirmation = async(token: string, data: ConfirmationCreate) => {
