@@ -5,7 +5,7 @@ import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
 import { listingData } from '@/components/utils/ListingData';
-import { createListing, readUsers } from '@/serverconn';
+import { createListing, readUsers, getUserIdFromClerkId } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 
@@ -35,10 +35,11 @@ export default function CreateListing() {
   React.useEffect(() => {
     const getId = async () => {
       try {
-        const users: any = await readUsers(await getToken() ?? "", { clerkId: userId || "" });
-        setSellerId(users[0].id);
+        const newSellerId = await getUserIdFromClerkId(await getToken() ?? "", userId ?? "");
+        setSellerId(newSellerId);
       } catch (err) {
         console.log(err);
+        signOut();
       }
     }
     getId();

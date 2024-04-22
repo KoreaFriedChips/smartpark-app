@@ -1,5 +1,12 @@
 import Constants from "expo-constants";
 import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
+import { useAuth } from "@clerk/clerk-expo";
+
+export const getUserIdFromClerkId = async (token: string, clerkId: string) => {
+    const users: any = await readUsers(token, { clerkId: clerkId || "" });
+    if (!users) throw new Error("clerkId not found");
+    return users[0].id;
+}
 
 export const signin = async (t: string) => { return await sendToServer(t, "/api/signin", "POST", {}, {}) };
 
