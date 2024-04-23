@@ -1,4 +1,4 @@
-import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
+import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Button } from 'react-native';
 import { Text, View, TextInput } from '@/components/Themed';
 import React, { useState } from 'react';
 import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
@@ -8,6 +8,7 @@ import { listingData } from '@/components/utils/ListingData';
 import { createListing, readUsers, getUserIdFromClerkId } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
+import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 interface Availability {
   day: string,
@@ -31,20 +32,6 @@ export default function CreateListing() {
   const [spotAddress, setSpotAddress] = useState<Address>();
 
   const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
-  const [sellerId, setSellerId] = useState("");
-  React.useEffect(() => {
-    const getId = async () => {
-      try {
-        const newSellerId = await getUserIdFromClerkId(await getToken() ?? "", userId ?? "");
-        setSellerId(newSellerId);
-      } catch (err) {
-        console.log(err);
-        signOut();
-      }
-    }
-    getId();
-  }, []);
-
 
   const verifyListingData = (listingData: any) => {
     return true;
@@ -61,8 +48,41 @@ export default function CreateListing() {
   const [listingType, setListingType] = useState("Parking Spot");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("hour");
-  const [availability, setAvailability] = useState<Array<Availability>>([]);
   const [description, setDescription] = useState("");
+
+  const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const [availability, setAvailability] = useState<Array<Availability>>(weekDays.map((value, index) => { return {
+    day: value,
+    availableHours: [],
+    isAvailable: false
+  }}));
+  const [showTimePicker, setShowTimePicker] = useState(0);
+  const [startTime, setStartTime] = useState(0);
+  const [availIndex, setAvailIndex] = useState(0);
+  const timeToStr = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`
+  }
+  const handleTimePick = (event: DateTimePickerEvent) => {
+    if (event.type === 'dismissed') {
+      setShowTimePicker(0);
+      return;
+    }
+    if (showTimePicker === 1) {
+      setStartTime(event.nativeEvent.timestamp);
+    } 
+    else {
+      let newAvailability = availability;
+      const start = timeToStr(startTime);
+      const end = timeToStr(event.nativeEvent.timestamp);
+      newAvailability[availIndex].availableHours.push(`${start}-${end}`);
+      newAvailability[availIndex].isAvailable = true;
+      setAvailability(newAvailability);
+    }
+    setShowTimePicker((showTimePicker + 1) % 3);
+  }
 
   const mapRef = React.useRef<MapView>(null);
   const handleAddressChange = async (coord: LatLng) => {
@@ -72,7 +92,6 @@ export default function CreateListing() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll}>
-        <Text style={styles.title}>Create Listing</Text>
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
           <MapView
           ref={mapRef}
@@ -144,9 +163,24 @@ export default function CreateListing() {
             <Picker.Item label="Month" value="month"/>
           </Picker>
         </View>
+        <Text weight="semibold" style={{ color: themeColors.third }}> Availability </Text>
+        <View style={styles.availabilityView}>
+          {weekDays.flatMap((day, index) => {
+            return (
+              <TouchableOpacity 
+                key={index} 
+                style={[styles.availabilityButton, 
+                {backgroundColor: themeColors.secondary}]} 
+                onPress={()=>{setAvailIndex(index); setShowTimePicker(1); }}
+              >
+                <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.header,}}>{day[0] + day[1]}</Text>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
         <TouchableOpacity 
           style={[
-            styles.button,
+            styles.submitButton,
            {
               backgroundColor: Colors['accent'],
               borderColor: Colors['accentAlt'],
@@ -166,19 +200,33 @@ export default function CreateListing() {
             description: description,
             availability: availability,
             date: new Date(),
-            sellerId: sellerId,
           })}
         >
-        <Text
-          weight="bold"
-          style={{
-            ...styles.buttonText,
-            color: Colors["light"].primary,
-          }}
-        >
+          <Text
+            weight="bold"
+            style={{
+              ...styles.buttonText,
+              color: Colors["light"].primary,
+            }}>
             Create Listing
           </Text>
         </TouchableOpacity>
+        {showTimePicker === 1 && <RNDateTimePicker
+          key={1} 
+          value={new Date(0)} 
+          textColor={Colors['light'].primary}
+          accentColor={Colors['accent']}
+          mode="time"
+          onChange={handleTimePick}
+        />}
+        {showTimePicker === 2 && <RNDateTimePicker 
+          key={2}
+          value={new Date(startTime)} 
+          textColor={Colors['light'].primary}
+          accentColor={Colors['accent']}
+          mode="time"
+          onChange={handleTimePick}
+        />}
         <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       </ScrollView>
     </View>
@@ -221,7 +269,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 3,
   },
-  button: {
+  submitButton: {
     padding: 10,
     borderRadius: 4,
     marginTop: 12,
@@ -235,6 +283,28 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     textAlign: "center",
+  },
+  availabilityView: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    width: '100%',
+  },
+  availabilityButton: {
+    padding: 10,
+    borderRadius: 4,
+    marginTop: 12,
+    marginBottom: 4,
+    borderWidth: 1,
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  availabilityButtonText: {
+   
   },
   input: {
     width: "100%",
