@@ -17,7 +17,7 @@ import { styles } from "./PhoneInput";
 
 type CodeVerificationProps = {
     navigation: StackNavigationProp<RootStackParamList, "CodeVerification">;
-    setGlobal: (code: string) => keyof RootStackParamList;
+    setGlobal: (code: string) => Promise<keyof RootStackParamList>;
     resend: () => void
 };
 
@@ -33,13 +33,13 @@ export const CodeVerification = (props: CodeVerificationProps) => {
         setSCode(t);
     };
 
-    const next = () => {
+    const next = async () => {
         if (!/^\d{6}$/.test(code)) {
             setError("You've entered an invalid code.")
             return;  
         }
         try {
-            const nextStep = props.setGlobal(code);
+            const nextStep = await props.setGlobal(code);
             setError("")
             props.navigation.push(nextStep, {})
         } catch (err) {
@@ -70,7 +70,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
                     keyboardType="default"
                     clearButtonMode="while-editing"
                 />
-                <TouchableOpacity onPress={resend}>
+                <TouchableOpacity onPressOut={resend}>
                     <Text weight="bold">Resend</Text>
                 </TouchableOpacity>
                 <TouchableOpacity

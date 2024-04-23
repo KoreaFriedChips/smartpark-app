@@ -17,20 +17,20 @@ import { styles } from "./PhoneInput";
 
 type NameInputProps = {
     navigation: StackNavigationProp<RootStackParamList, "NameInput">;
-    setGlobal: (name: string) => keyof RootStackParamList;
+    setGlobal: (name: string) => Promise<keyof RootStackParamList>;
 };
 
 export const NameInput = (props: NameInputProps) => {
     const [name, setName] = useState("");
     const [error, setError] = useState("");
 
-    const next = () => {
+    const next = async () => {
         if (!/.+/.test(name)) {
             setError("Enter at least one character for your name.");
             return;
         }
         try {
-            const nextStep = props.setGlobal(name);
+            const nextStep = await props.setGlobal(name);
             setError("");
             props.navigation.push(nextStep, {});
         } catch (err) {

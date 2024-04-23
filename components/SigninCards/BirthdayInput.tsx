@@ -18,14 +18,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 type BirthdayInputProps = {
     navigation: StackNavigationProp<RootStackParamList, "BirthdayInput">;
-    setGlobal: (birthday: Date) => keyof RootStackParamList;
+    setGlobal: (birthday: Date) => Promise<keyof RootStackParamList>;
 };
 
 export const BirthdayInput = (props: BirthdayInputProps) => {
     const [date, setDate] = useState(new Date());
     const [error, setError] = useState("");
 
-    const next = () => {
+    const next = async () => {
         const today = new Date();
         const date16YearsAgo = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
         if (date > date16YearsAgo) {
@@ -33,7 +33,7 @@ export const BirthdayInput = (props: BirthdayInputProps) => {
             return;
         }
         try {
-            const nextStep = props.setGlobal(date);
+            const nextStep = await props.setGlobal(date);
             setError("");
             props.navigation.push(nextStep, {});
         } catch (err) {

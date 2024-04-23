@@ -7,7 +7,7 @@ import {
     Modal,
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import { useOAuth, useAuth, useSignUp } from "@clerk/clerk-expo";
+import { useOAuth, useAuth, useSignUp, useSignIn } from "@clerk/clerk-expo";
 import type { SignUpResource, SignInResource, SetActive } from "@clerk/types"
 import { Text, View } from "@/components/Themed";
 import { signin } from "@/serverconn";
@@ -62,12 +62,6 @@ export default function SignInScreen() {
     const Stack = createNativeStackNavigator();
 
     const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
-    useEffect(() => {
-        if (isLoaded && isSignedIn) {
-            console.log("User ID:", userId);
-            // Redirect the user or refresh the user interface
-        }
-    }, [isLoaded, isSignedIn, userId]);
 
     const { startOAuthFlow: startGoogleOAuthFlow } = useOAuth({
         strategy: "oauth_google",
@@ -79,39 +73,41 @@ export default function SignInScreen() {
         strategy: "oauth_apple",
     });
 
-    let { signUp: sUp, setActive: sActive } = useSignUp();
-    let sIn: SignInResource;
+    let { signUp: sUp, setActive: sActiveU } = useSignUp();
+    let { signIn: sIn, setActive: sActiveI } = useSignIn();
     let csi: string;
-    let missingFields: string[] = ["birthday"]
-    let phone;
-    let email;
-    let name;
-    let birthday;
+    let phone: string;
+    let email: string;
+    let name: string;
+    let birthday: Date;
 
-    const handleOAuthSignIn = React.useCallback(
+    const handleSignIn = React.useCallback(
         async (provider: string) => {
             try {
-                const startOAuthFlow =
+                const startFlow =
                     provider === "google"
                         ? startGoogleOAuthFlow
-                        : provider === "facebook"
+                    : provider === "facebook"
                         ? startFacebookOAuthFlow
-                        : startAppleOAuthFlow;
+                    : startAppleOAuthFlow
 
-                const { createdSessionId, signIn, signUp, setActive } =
-                    await startOAuthFlow();
-                csi = createdSessionId;
-                if (setActive) {
-                    sActive = setActive;
-                    await completeSignUp();
+                const { createdSessionId, signUp, setActive } =
+                    await startFlow();
+                if (createdSessionId) {
+                    await completeSignUp(createdSessionId, setActive!);
                 } else {
                     if (signUp) {
                         sUp = signUp;
+                        if (sUp.emailAddress) {
+                            email = sUp.emailAddress
+                        }
+                        if (sUp.firstName && sUp.lastName) {
+                            name = sUp.firstName + " " + sUp.lastName
+                        }
+                        if (sUp.phoneNumber) {
+                            phone = sUp.phoneNumber
+                        }
                         startSignUp();
-                    } else {
-                        if (!signIn) return;
-                        sIn = signIn;
-                        startSignIn();
                     }
                 }
             } catch (err: any) {
@@ -121,33 +117,83 @@ export default function SignInScreen() {
         [startGoogleOAuthFlow, startFacebookOAuthFlow, startAppleOAuthFlow]
     );
 
-    type RSP = () => keyof RootStackParamList
-    const setGlobalPhone: RSP  = () => {return "CodeVerification"};
-    const setGlobalCode: RSP  = () => {return "EmailInput"};
-    const setGlobalEmail: RSP  = () => {return "EmailVerification"};
-    const setGlobalEmailVerify: RSP  = () => {return "NameInput"};
-    const setGlobalName: RSP  = () => {return "BirthdayInput"};
-    const setGlobalBirthday: RSP  = () => {return "PhoneInput"};
+    type RSP = (...args: any[]) => Promise<keyof RootStackParamList>
+    const setGlobalPhone: RSP  = async (p: string) => {
+        console.log(p)
+        phone = p;
+        try {
+            sIn = await sIn?.create({ identifier: p });
+            sIn = await sIn?.prepareFirstFactor({ strategy: "phone_code", phoneNumberId: p })
+        } catch (err: any) {
+            console.log(err.errors[0])
+            try {
+                await sUp?.update({ phoneNumber: phone });
+                await sUp?.preparePhoneNumberVerification({ strategy: "phone_code" })
+            } catch (err: any) { 
+                throw Error(err.errors[0].longMessage)
+            }
+        }
+        return "CodeVerification";
+    };
+    const setGlobalCode: RSP  = async (code: string) => {
+        try {
+            const s = await sIn?.attemptFirstFactor({code, strategy: "phone_code"})
+            if (s?.createdSessionId) {
+                completeSignUp(s.createdSessionId, sActiveI!);
+                return "CodeVerification";
+            } 
+            throw Error();
+        } catch {
+            const s1 = await sUp?.attemptPhoneNumberVerification({code});
+            if (s1!.missingFields.indexOf("phone_number") < 0) {
+                return email ? (name ? "BirthdayInput" : "NameInput") : "EmailInput";
+            } else {
+                throw Error("Your code is invalid.")
+            }
+        }
+    };
+    const setGlobalEmail: RSP = async (e: string) => {
+        email = e;
+        await sUp?.update({ emailAddress: e });
+        await sUp?.prepareEmailAddressVerification({ strategy: "email_link", redirectUrl: "https://trysmartpark.com" });
+        return "EmailVerification";
+    };
+    const setGlobalEmailVerify: RSP = async () => {
+        if (!sUp?.createdSessionId) throw Error("Please click the link before tapping next!")
+        csi = sUp.createdSessionId;
+        return name ? "BirthdayInput" : "NameInput"
+    };
+    const setGlobalName: RSP = async (n: string) => {
+        name = n    
+        return "BirthdayInput"
+    };
+    const setGlobalBirthday: RSP = async (b: Date) => {
+        birthday = b;
+        await sActiveU!({ session: csi });
+        setModalVisible(false);
+        return "PhoneInput"
+    };
 
-    const resendCode = () => {};
-    const resendEmail = () => {};
+    const resendCode = async () => {
+        try {
+            sIn = await sIn?.prepareFirstFactor({ phoneNumberId: phone, strategy: "phone_code" })
+        } catch {
+            await sUp?.preparePhoneNumberVerification({ strategy: "phone_code" })
+        }
+    };
+    const resendEmail = () => {
+        sUp?.prepareEmailAddressVerification({ strategy: "email_link", redirectUrl: "https://trysmartpark.com" });
+    };
 
     const startSignUp = () => {
-        if (!sUp) return;
-        missingFields.push(...sUp.missingFields)
-        
+        setModalVisible(true);
     }
 
-    const startSignIn = () => {
-
-    }
-
-    async function completeSignUp() {
+    const completeSignUp = async (csi: string, setA: SetActive) => {
         try {
-            if (sActive) {
-                await sActive({ session: csi });
-                await signin((await getToken()) ?? "");
-            }
+            await setA({ session: csi });
+            console.log("works")
+            await signin((await getToken()) ?? "");
         } catch (err) {
             console.error(err);
             signOut();
@@ -189,13 +235,13 @@ export default function SignInScreen() {
                             },
                         }}
                     >
-                        <Stack.Screen name="PhoneInput">
+                         <Stack.Screen name="PhoneInput">
                             {(props) => (
                                 <PhoneInput
                                     {...props}
                                     setGlobal={setGlobalPhone}
                                 />
-                            )}
+                            )} 
                         </Stack.Screen>
                         <Stack.Screen name="CodeVerification">
                             {(props) => (
@@ -251,7 +297,7 @@ export default function SignInScreen() {
             />
             <TouchableOpacity
                 style={buttonStyle}
-                onPress={() => handleOAuthSignIn("google")}
+                onPress={() => handleSignIn("google")}
             >
                 <Image
                     source={require("../assets/images/google.webp")}
@@ -262,7 +308,7 @@ export default function SignInScreen() {
 
             <TouchableOpacity
                 style={buttonStyle}
-                onPress={() => handleOAuthSignIn("facebook")}
+                onPress={() => handleSignIn("facebook")}
             >
                 <Image
                     source={require("../assets/images/facebook.png")}
@@ -273,7 +319,7 @@ export default function SignInScreen() {
 
             <TouchableOpacity
                 style={buttonStyle}
-                onPress={() => handleOAuthSignIn("apple")}
+                onPress={() => handleSignIn("apple")}
             >
                 <Image
                     source={require("../assets/images/apple.png")}
@@ -282,7 +328,7 @@ export default function SignInScreen() {
                 <Text style={buttonTextStyle}>Continue with Apple</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={buttonStyle} onPress={startSignUp}>
+            <TouchableOpacity style={buttonStyle} onPress={() => startSignUp()}>
                 <Text style={poundStyle}>#</Text>
                 <Text style={buttonTextStyle}>Continue with Number</Text>
             </TouchableOpacity>

@@ -17,20 +17,20 @@ import { styles } from "./PhoneInput";
 
 type EmailInputProps = {
     navigation: StackNavigationProp<RootStackParamList, "EmailInput">;
-    setGlobal: (email: string) => keyof RootStackParamList;
+    setGlobal: (email: string) => Promise<keyof RootStackParamList>;
 };
 
 export const EmailInput = (props: EmailInputProps) => {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
 
-    const next = () => {
+    const next = async () => {
         if (!/^.*@.*\..*$/.test(email)) {
             setError("You've entered an invalid email.")
             return;  
         }
         try {
-            const nextStep = props.setGlobal(email);
+            const nextStep = await props.setGlobal(email);
             setError("")
             props.navigation.push(nextStep, {})
         } catch (err) {

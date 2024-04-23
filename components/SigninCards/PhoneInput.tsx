@@ -13,7 +13,7 @@ import { RootStackParamList } from "../SignInScreen";
 
 type PhoneInputProps = {
     navigation: StackNavigationProp<RootStackParamList, 'PhoneInput'>;
-    setGlobal: (phone: string) => keyof RootStackParamList;
+    setGlobal: (phone: string) => Promise<keyof RootStackParamList>;
   };
 
 export const PhoneInput = (props: PhoneInputProps) => {
@@ -49,16 +49,17 @@ export const PhoneInput = (props: PhoneInputProps) => {
         }
 
         setSphone(t);
-        console.log("test");
     };
 
-    const next = () => {
+    const next = async () => {
         if (!phoneRegex.test(phone)) {
             setError("You've entered an invalid phone number.")
             return;  
         }
         try {
-            const nextStep = props.setGlobal(phone);
+            const p = phone.replaceAll(/[^0-9]/g, "")
+            console.log(p)
+            const nextStep = await props.setGlobal("+1" + p);
             setError("")
             props.navigation.push(nextStep, {})
         } catch (err) {

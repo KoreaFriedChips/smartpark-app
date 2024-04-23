@@ -17,16 +17,18 @@ import { styles } from "./PhoneInput";
 
 type EmailVerificationProps = {
     navigation: StackNavigationProp<RootStackParamList, "EmailVerification">;
-    setGlobal: () => keyof RootStackParamList;
+    setGlobal: () => Promise<keyof RootStackParamList>;
     resend: () => void
 };
 
 export const EmailVerification = (props: EmailVerificationProps) => {
     const [error, setError] = useState("");
 
-    const next = () => {
+
+
+    const next = async () => {
         try {
-            const nextStep = props.setGlobal();
+            const nextStep = await props.setGlobal();
             setError("")
             props.navigation.push(nextStep, {})
         } catch (err) {
@@ -48,7 +50,7 @@ export const EmailVerification = (props: EmailVerificationProps) => {
                 <Text style={styles.subText}>
                     We've just sent you an email. Click the link and tap next.
                 </Text>
-                <TouchableOpacity onPress={resend}>
+                <TouchableOpacity onPressOut={resend}>
                     <Text weight="bold">Resend</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
