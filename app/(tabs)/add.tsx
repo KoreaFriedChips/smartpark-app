@@ -46,10 +46,10 @@ export default function CreateListing() {
   }, []);
 
 
-  const verifyListingData = (listingData: ListingCreate) => {
+  const verifyListingData = (listingData: any) => {
     return true;
   }
-  const handleSubmitCreateListing = React.useCallback(async (listingData: ListingCreate) => {
+  const handleSubmitCreateListing = React.useCallback(async (listingData: any) => {
     console.log(listingData);
     if (!verifyListingData(listingData)) {
       return;

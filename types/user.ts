@@ -10,6 +10,6 @@ export const UserModel = z.object({
   city: z.string().nullish(),
   state: z.string().nullish(),
   profilePicture: z.string().nullish(),
-  activeSince: z.date(),
+  activeSince: z.coerce.date(),
   verified: z.boolean(),
 })

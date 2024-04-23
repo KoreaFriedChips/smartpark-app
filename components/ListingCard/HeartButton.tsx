@@ -14,26 +14,22 @@ interface ButtonProps {
 export default function HeartButton({ id: listingId, style }: ButtonProps) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
-  const [ favoriteId, setFavoriteId] = React.useState(null);
+  const [ favoriteId, setFavoriteId] = React.useState<string>();
   const [ userId, setUserId ] = React.useState("");
-  const { isLoaded, isSignedIn, userId: clerkId, signOut, getToken } = useAuth();
+  const { getToken } = useAuth();
 
   const token = React.useCallback(async () => { return await getToken() ?? ""; }, [getToken]);
 
   React.useEffect(() => {
     const initIsLiked = async () => {
-      if (isLoaded && isSignedIn) {
-        try {
-          const users = await readUsers(await token(), { clerkId: clerkId });
-          setUserId(users[0].id);
-          const favorites = await readFavorites(await token(), { userId: users[0].id, listingId: listingId });
-          if (favorites.length > 0) {
-            setFavoriteId(favorites[0].id);
-            setIsLiked(true);
-          }
-        } catch (err) {
-          console.log(err);
+      try {
+        const favorites = await readFavorites(await token(), { listingId: listingId });
+        if (favorites.length > 0) {
+          setFavoriteId(favorites[0].id);
+          setIsLiked(true);
         }
+      } catch (err) {
+        console.log(err);
       }
     }
     initIsLiked();
@@ -41,20 +37,28 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
 
 
   const handleLike = async () => {
-    setIsLiked(!isLiked);
+    if (isLiked) {
+      setIsLiked(false);
+      favoriteId && await deleteFavorite(await token(), favoriteId);
+      setFavoriteId(undefined);
+    } else {
+      setIsLiked(true);
+      const favorite = await createFavorite(await token(), { listingId: listingId });
+      setFavoriteId(favorite.id);
+    }
   };
 
-  React.useEffect(() => { 
-    (async () => {
-      if (isLiked && !favoriteId) {
-        const favorite = await createFavorite(await token(), { listingId: listingId, userId: userId });
-        setFavoriteId(favorite.id);
-      } else {
-        favoriteId && await deleteFavorite(await token(), favoriteId);
-        setFavoriteId(null);
-      }
-    })();
-  }, [ isLiked ]);
+  // React.useEffect(() => { 
+  //   (async () => {
+  //     if (isLiked && !favoriteId) {
+  //       const favorite = await createFavorite(await token(), { listingId: listingId, userId: userId });
+  //       setFavoriteId(favorite.id);
+  //     } else {
+  //       favoriteId && await deleteFavorite(await token(), favoriteId);
+  //       setFavoriteId(undefined);
+  //     }
+  //   })();
+  // }, [ isLiked ]);
 
   return (
     <View style={[styles.heartContainer, style]}>
