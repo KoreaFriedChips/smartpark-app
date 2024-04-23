@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useOAuth, useAuth, useSignUp, useSignIn } from "@clerk/clerk-expo";
-import type { SignUpResource, SignInResource, SetActive } from "@clerk/types"
+import type { SignUpResource, SignInResource, SetActive } from "@clerk/types";
 import { Text, View } from "@/components/Themed";
 import { signin } from "@/serverconn";
 import Colors from "@/constants/Colors";
@@ -61,7 +61,7 @@ export default function SignInScreen() {
 
     const Stack = createNativeStackNavigator();
 
-    const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
+    const { signOut, getToken } = useAuth();
 
     const { startOAuthFlow: startGoogleOAuthFlow } = useOAuth({
         strategy: "oauth_google",
@@ -73,132 +73,179 @@ export default function SignInScreen() {
         strategy: "oauth_apple",
     });
 
-    let { signUp: sUp, setActive: sActiveU } = useSignUp();
+    let { signUp: sUp, setActive: sActiveU, isLoaded: il } = useSignUp();
     let { signIn: sIn, setActive: sActiveI } = useSignIn();
+    let isSigningIn = false;
     let csi: string;
     let phone: string;
-    let email: string;
-    let name: string;
+    const [email, setEmail] = useState("");
+    const [name, setName] = useState("");
     let birthday: Date;
 
-    const handleSignIn = React.useCallback(
-        async (provider: string) => {
-            try {
-                const startFlow =
-                    provider === "google"
-                        ? startGoogleOAuthFlow
-                    : provider === "facebook"
-                        ? startFacebookOAuthFlow
-                    : startAppleOAuthFlow
-
-                const { createdSessionId, signUp, setActive } =
-                    await startFlow();
-                if (createdSessionId) {
-                    await completeSignUp(createdSessionId, setActive!);
-                } else {
-                    if (signUp) {
-                        sUp = signUp;
-                        if (sUp.emailAddress) {
-                            email = sUp.emailAddress
-                        }
-                        if (sUp.firstName && sUp.lastName) {
-                            name = sUp.firstName + " " + sUp.lastName
-                        }
-                        if (sUp.phoneNumber) {
-                            phone = sUp.phoneNumber
-                        }
-                        startSignUp();
-                    }
-                }
-            } catch (err: any) {
-                console.error(err.toString());
-            }
-        },
-        [startGoogleOAuthFlow, startFacebookOAuthFlow, startAppleOAuthFlow]
-    );
-
-    type RSP = (...args: any[]) => Promise<keyof RootStackParamList>
-    const setGlobalPhone: RSP  = async (p: string) => {
-        console.log(p)
-        phone = p;
+    const handleSignIn = async (provider: string) => {
         try {
-            sIn = await sIn?.create({ identifier: p });
-            sIn = await sIn?.prepareFirstFactor({ strategy: "phone_code", phoneNumberId: p })
+            const startFlow =
+                provider === "google"
+                    ? startGoogleOAuthFlow
+                    : provider === "facebook"
+                    ? startFacebookOAuthFlow
+                    : startAppleOAuthFlow;
+
+            const { createdSessionId, signUp, setActive } = await startFlow();
+            if (createdSessionId) {
+                await completeSignUp(createdSessionId, setActive!);
+            } else {
+                if (signUp) {
+                    sUp = signUp;
+                    console.log(signUp);
+                    if (sUp.emailAddress) {
+                        setEmail(sUp.emailAddress);
+                    }
+                    if (sUp.firstName && sUp.lastName) {
+                        setName(sUp.firstName + " " + sUp.lastName);
+                    }
+                    startSignUp();
+                }
+            }
         } catch (err: any) {
-            console.log(err.errors[0])
+            console.error(err.toString());
+        }
+    };
+
+    type RSP = (...args: any[]) => Promise<keyof RootStackParamList>;
+    const setGlobalPhone: RSP = async (p: string) => {
+        phone = p;
+        console.log(email);
+        try {
+            await sIn?.create({ identifier: p, strategy: "phone_code" });
+            isSigningIn = true;
+        } catch (err: any) {
+            console.log(err.errors[0]);
             try {
                 await sUp?.update({ phoneNumber: phone });
-                await sUp?.preparePhoneNumberVerification({ strategy: "phone_code" })
-            } catch (err: any) { 
-                throw Error(err.errors[0].longMessage)
+                await sUp?.preparePhoneNumberVerification({
+                    strategy: "phone_code",
+                });
+            } catch (err: any) {
+                throw Error(err.errors[0].longMessage);
             }
         }
         return "CodeVerification";
     };
-    const setGlobalCode: RSP  = async (code: string) => {
-        try {
-            const s = await sIn?.attemptFirstFactor({code, strategy: "phone_code"})
+    const setGlobalCode: RSP = async (code: string) => {
+        if (isSigningIn) {
+            let s;
+            try {
+                s = await sIn?.attemptFirstFactor({
+                    code,
+                    strategy: "phone_code",
+                });
+            } catch (err: any) {
+                throw Error(err.errors[0].longMessage);
+            }
             if (s?.createdSessionId) {
                 completeSignUp(s.createdSessionId, sActiveI!);
                 return "CodeVerification";
-            } 
-            throw Error();
-        } catch {
-            const s1 = await sUp?.attemptPhoneNumberVerification({code});
-            if (s1!.missingFields.indexOf("phone_number") < 0) {
-                return email ? (name ? "BirthdayInput" : "NameInput") : "EmailInput";
             } else {
-                throw Error("Your code is invalid.")
+                throw Error("Your code is invalid.");
+            }
+        } else {
+            let s;
+            try {
+                s = await sUp?.attemptPhoneNumberVerification({ code });
+            } catch (err: any) {
+                throw Error(err.errors[0].longMessage);
+            }
+            if (s!.missingFields.indexOf("phone_number") < 0) {
+                if (s?.createdSessionId) {
+                    csi = s.createdSessionId;
+                }
+                return email
+                    ? name
+                        ? "BirthdayInput"
+                        : "NameInput"
+                    : "EmailInput";
+            } else {
+                throw Error("Your code is invalid.");
             }
         }
     };
     const setGlobalEmail: RSP = async (e: string) => {
-        email = e;
-        await sUp?.update({ emailAddress: e });
-        await sUp?.prepareEmailAddressVerification({ strategy: "email_link", redirectUrl: "https://trysmartpark.com" });
+        setEmail(e);
+        try {
+            await sUp?.update({ emailAddress: e });
+            await sUp?.prepareEmailAddressVerification({
+                strategy: "email_code",
+            });
+        } catch (err: any) {
+            throw Error(err.errors[0].longMessage);
+        }
         return "EmailVerification";
     };
-    const setGlobalEmailVerify: RSP = async () => {
-        if (!sUp?.createdSessionId) throw Error("Please click the link before tapping next!")
-        csi = sUp.createdSessionId;
-        return name ? "BirthdayInput" : "NameInput"
+    const setGlobalEmailVerify: RSP = async (code: string) => {
+        let s;
+        try {
+            s = await sUp?.attemptEmailAddressVerification({ code });
+        } catch (err: any) {
+            throw Error(err.errors[0].longMessage);
+        }
+        if (s?.createdSessionId) {
+            csi = s.createdSessionId;
+            return name ? "BirthdayInput" : "NameInput";
+        } else {
+            throw Error("Your code is invalid.");
+        }
     };
     const setGlobalName: RSP = async (n: string) => {
-        name = n    
-        return "BirthdayInput"
+        setName(n);
+        return "BirthdayInput";
     };
     const setGlobalBirthday: RSP = async (b: Date) => {
         birthday = b;
-        await sActiveU!({ session: csi });
+        completeSignUp(csi, sActiveU!);
         setModalVisible(false);
-        return "PhoneInput"
+        return "PhoneInput";
     };
 
     const resendCode = async () => {
         try {
-            sIn = await sIn?.prepareFirstFactor({ phoneNumberId: phone, strategy: "phone_code" })
-        } catch {
-            await sUp?.preparePhoneNumberVerification({ strategy: "phone_code" })
+            if (isSigningIn) {
+                await sIn?.create({
+                    identifier: phone,
+                    strategy: "phone_code",
+                });
+            } else {
+                await sUp?.preparePhoneNumberVerification({
+                    strategy: "phone_code",
+                });
+            }
+        } catch (err: any) {
+            throw Error(err.errors[0].longMessage);
         }
     };
-    const resendEmail = () => {
-        sUp?.prepareEmailAddressVerification({ strategy: "email_link", redirectUrl: "https://trysmartpark.com" });
+    const resendEmail = async () => {
+        try {
+            await sUp?.prepareEmailAddressVerification({
+                strategy: "email_code",
+            });
+        } catch (err: any) {
+            throw Error(err.errors[0].longMessage);
+        }
     };
 
     const startSignUp = () => {
         setModalVisible(true);
-    }
+    };
 
     const completeSignUp = async (csi: string, setA: SetActive) => {
         try {
             await setA({ session: csi });
-            console.log("works")
             await signin((await getToken()) ?? "");
         } catch (err) {
             console.error(err);
             signOut();
         }
-    }
+    };
 
     return (
         <View style={styles.container}>
@@ -235,13 +282,13 @@ export default function SignInScreen() {
                             },
                         }}
                     >
-                         <Stack.Screen name="PhoneInput">
+                        <Stack.Screen name="PhoneInput">
                             {(props) => (
                                 <PhoneInput
                                     {...props}
                                     setGlobal={setGlobalPhone}
                                 />
-                            )} 
+                            )}
                         </Stack.Screen>
                         <Stack.Screen name="CodeVerification">
                             {(props) => (

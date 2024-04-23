@@ -23,7 +23,10 @@ type CodeVerificationProps = {
 
 export const CodeVerification = (props: CodeVerificationProps) => {
     const [code, setSCode] = useState("");
-    const [error, setError] = useState("")
+    const [error, setError] = useState("");
+    const [resendT, setResendT] = useState("Resend");
+    let shouldResend = true;
+
     const setCode = (t: string) => {
         console.log(t);
         if (!/^\d{0,6}$/.test(t)) {
@@ -48,8 +51,21 @@ export const CodeVerification = (props: CodeVerificationProps) => {
     }
 
     const resend = () => {
+        if (!shouldResend) return;
         try {
             props.resend()
+            shouldResend = false;
+            let i = 60;
+            const inter = setInterval(() => {
+                if (i == 0) {
+                    shouldResend = true;
+                    setResendT("Resend");
+                    clearInterval(inter)
+                } else {
+                    setResendT(`Try again in ${i}`)
+                    i--;
+                }
+            }, 1000)
         } catch (err) {
             setError((err as Error).message)
         }
@@ -71,7 +87,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
                     clearButtonMode="while-editing"
                 />
                 <TouchableOpacity onPressOut={resend}>
-                    <Text weight="bold">Resend</Text>
+                    <Text weight="bold">{resendT}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[

@@ -17,18 +17,20 @@ import { styles } from "./PhoneInput";
 
 type EmailVerificationProps = {
     navigation: StackNavigationProp<RootStackParamList, "EmailVerification">;
-    setGlobal: () => Promise<keyof RootStackParamList>;
+    setGlobal: (code: string) => Promise<keyof RootStackParamList>;
     resend: () => void
 };
 
 export const EmailVerification = (props: EmailVerificationProps) => {
+    const [code, setSCode] = useState("");
     const [error, setError] = useState("");
-
-
+    const [resendT, setResendT] = useState("Resend");
+    let shouldResend = true;
 
     const next = async () => {
+        if (!code) { setError("Please enter a verification code."); return; }
         try {
-            const nextStep = await props.setGlobal();
+            const nextStep = await props.setGlobal(code);
             setError("")
             props.navigation.push(nextStep, {})
         } catch (err) {
@@ -37,8 +39,21 @@ export const EmailVerification = (props: EmailVerificationProps) => {
     }
 
     const resend = () => {
+        if (!shouldResend) return;
         try {
             props.resend()
+            shouldResend = false;
+            let i = 60;
+            const inter = setInterval(() => {
+                if (i == 0) {
+                    shouldResend = true;
+                    setResendT("Resend");
+                    clearInterval(inter)
+                } else {
+                    setResendT(`Try again in ${i}`)
+                    i--;
+                }
+            }, 1000)
         } catch (err) {
             setError((err as Error).message)
         }
@@ -48,10 +63,19 @@ export const EmailVerification = (props: EmailVerificationProps) => {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ ...styles.container, ...styles.modalContainer }}>
                 <Text style={styles.subText}>
-                    We've just sent you an email. Click the link and tap next.
+                    We've just sent you an email. Enter the verification code
+                    here.
                 </Text>
+                <TextInput
+                    style={styles.textInput}
+                    placeholder="123456"
+                    onChangeText={setSCode}
+                    value={code}
+                    keyboardType="default"
+                    clearButtonMode="while-editing"
+                />
                 <TouchableOpacity onPressOut={resend}>
-                    <Text weight="bold">Resend</Text>
+                    <Text weight="bold">{resendT}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[
