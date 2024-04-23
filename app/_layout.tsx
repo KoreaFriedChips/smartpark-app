@@ -87,7 +87,7 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded || !isLocationFetched) {
+  if (!loaded) {
     return null;
   }
 
