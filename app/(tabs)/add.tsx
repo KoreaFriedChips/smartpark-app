@@ -51,17 +51,6 @@ export default function CreateListing() {
 
   const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
 
-  const verifyListingData = (listingData: any) => {
-    return true;
-  }
-  const handleSubmitCreateListing = React.useCallback(async (listingData: any) => {
-    console.log(listingData);
-    if (!verifyListingData(listingData)) {
-      return;
-    }
-    await createListing(await getToken() ?? "", listingData);
-  }, [ listingData ]);
-
 
   const [listingType, setListingType] = useState("Parking Spot");
   const [price, setPrice] = useState("");
@@ -125,7 +114,20 @@ export default function CreateListing() {
     }
   }
 
-  React.useEffect(() => console.log(images), [images])
+  const listingDataValid = React.useMemo(() => {
+    if (images[0] === "") {
+      return false;
+    }
+    return true;
+  }, [images]);
+
+  const handleSubmitCreateListing = React.useCallback(async (listingData: any) => {
+    console.log(listingData);
+    if (!listingDataValid) {
+      return;
+    }
+    await createListing(await getToken() ?? "", listingData);
+  }, [ listingData ]);
 
   return (
     <View style={styles.container}>
@@ -229,8 +231,8 @@ export default function CreateListing() {
             }]
           }
           onPress={async () => handleSubmitCreateListing({
-            thumbnail: "",
-            images: [],
+            thumbnail: images[0],
+            images: images,
             latitude: spotCoords.latitude,
             longitude: spotCoords.longitude,
             city: spotAddress?.locality ?? "",
