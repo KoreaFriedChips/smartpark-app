@@ -6,6 +6,12 @@ type Json = Literal | { [key: string]: Json } | Json[]
 const literalSchema = z.union([z.string(), z.coerce.number(), z.boolean()])
 const jsonSchema: z.ZodSchema<Json> = z.lazy(() => z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)]))
 
+const AvailabilityModel = z.object({
+  day: z.string(),
+  availableHours: z.string().array(),
+  isAvailable: z.boolean()
+})
+
 export const ListingModel = z.object({
   id: z.string(),
   thumbnail: z.string(),
@@ -21,7 +27,7 @@ export const ListingModel = z.object({
   relist: z.boolean(),
   relistDuration: z.string().nullish(),
   description: z.string().nullish(),
-  availability: jsonSchema,
+  availability: z.array(AvailabilityModel),
   active: z.boolean(),
   rating: z.coerce.number(),
   reviews: z.coerce.number().int(),

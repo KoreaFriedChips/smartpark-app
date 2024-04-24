@@ -21,6 +21,7 @@ import moment from "moment";
 import SellerQuickInfo from "@/components/SellerQuickInfo";
 import { getSeller } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
+import ListingBidWidget from "@/components/ListingBidWidget";
 
 export default function Listing() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -149,18 +150,7 @@ export default function Listing() {
     }
   }, [spotData]);
 
-  const [nextAvailableSlot, setNextAvailableSlot] = useState<{ day: string; time: string } | undefined>(undefined);
-  useEffect(() => {
-    if (spotData) {
-      const availableSlot = getSpotAvailability(spotData.availability);
-      if (availableSlot) {
-        setNextAvailableSlot({
-          ...availableSlot,
-          time: convertToHour(availableSlot.time),
-        });
-      }
-    }
-  }, [spotData]);
+
 
   const mapStyle = [
     {
@@ -192,126 +182,7 @@ export default function Listing() {
             <RatingsText rating={spotData.rating} reviews={spotData.reviews} full={true} style={{ fontSize: 16, color: themeColors.primary }} />
             <Text weight="semibold" style={styles.location}>{`${spotData.city}, ${spotData.state}`}</Text>
           </View>
-          <View style={{ ...styles.bidContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
-            <View style={{ ...styles.bidDetails, backgroundColor: "transparent", alignItems: "flex-start" }}>
-              <View style={{ backgroundColor: "transparent" }}>
-                <Text weight="bold" style={styles.price}>{`$${spotData.price} / ${spotData.duration}`}</Text>
-                {/* <Text style={{ color: themeColors.secondary }}>Current bid</Text> */}
-              </View>
-              <View style={{ backgroundColor: "transparent" }}>
-                {nextAvailableSlot ? (
-                  <View style={{ backgroundColor: "transparent" }}>
-                    <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Available {nextAvailableSlot.day === moment().format("dddd") ? "today" : nextAvailableSlot.day}</Text>
-                    <Text weight="semibold" style={{ fontSize: 18 }}>
-                      {nextAvailableSlot.time}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Not available in the near future</Text>
-                )}
-              </View>
-            </View>
-            <Link
-              href={{
-                pathname: "/add-bid",
-                params: { id: spotData.id },
-              }}
-              asChild
-              style={[
-                styles.button,
-                {
-                  backgroundColor: Colors["accent"],
-                  borderColor: Colors["accentAlt"],
-                  marginTop: 16,
-                },
-              ]}
-            >
-              <TouchableOpacity>
-                <Sparkles
-                  size={14}
-                  color={Colors["light"].primary}
-                  strokeWidth={3}
-                  style={{
-                    marginRight: 4,
-                  }}
-                />
-                <Text
-                  weight="bold"
-                  style={{
-                    ...styles.buttonText,
-                    color: Colors["light"].primary,
-                  }}
-                >
-                  Bid now
-                </Text>
-              </TouchableOpacity>
-            </Link>
-            <Link
-              href={{
-                pathname: "/listing-schedule",
-                params: { id: spotData.id },
-              }}
-              asChild
-              style={[
-                styles.button,
-                {
-                  // backgroundColor: themeColors.background,
-                  backgroundColor: "transparent",
-                  borderColor: themeColors.outline,
-                  marginTop: 4,
-                },
-              ]}
-            >
-              <TouchableOpacity>
-                <CalendarSearch
-                  size={14}
-                  color={themeColors.secondary}
-                  strokeWidth={3}
-                  style={{
-                    marginRight: 4,
-                  }}
-                />
-                <Text
-                  weight="bold"
-                  style={{
-                    ...styles.buttonText,
-                    color: themeColors.secondary,
-                  }}
-                >
-                  Change dates
-                </Text>
-              </TouchableOpacity>
-            </Link>
-            <View style={{ ...styles.separator, backgroundColor: themeColors.outline, marginVertical: 14 }}></View>
-            <View style={{ ...styles.bidDetails, backgroundColor: "transparent" }}>
-              <View style={{ ...styles.textContainer, backgroundColor: "transparent" }}>
-                <Clock
-                  size={12}
-                  color={themeColors.primary}
-                  strokeWidth={3}
-                  style={{
-                    marginRight: 4,
-                  }}
-                />
-                <Text weight="semibold" italic style={{ color: themeColors.secondary }}>
-                  Ends in: {timeRemaining}
-                </Text>
-              </View>
-              <View style={{ ...styles.textContainer, backgroundColor: "transparent" }}>
-                <TrendingUp
-                  size={12}
-                  color={themeColors.primary}
-                  strokeWidth={3}
-                  style={{
-                    marginRight: 4,
-                  }}
-                />
-                <Text style={{ color: themeColors.secondary }} weight="semibold">
-                  {spotData.bids} bids / {spotData.spotsLeft} {spotData.spotsLeft > 1 ? "spots" : "spot"} left
-                </Text>
-              </View>
-            </View>
-          </View>
+          {listing && <ListingBidWidget listing={listing}  />}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Spot amenities
@@ -479,37 +350,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
-  textContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: -2,
-  },
-  bidContainer: {
-    padding: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginVertical: 12,
-    // marginTop: 10,
-    marginBottom: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  bidDetails: {
-    display: "flex",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    // marginTop: 12,
-  },
+  
   amenities: {
     display: "flex",
     alignItems: "flex-start",
