@@ -76,13 +76,7 @@ export default function Listing() {
   const handleShare = () => console.log("Share");
   const handleMessageSeller = () => console.log("Message Seller");
 
-  const [region, setRegion] = useState<Region>({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.00922,
-    longitudeDelta: 0.00421,
-  });
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
 
   // const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -115,27 +109,7 @@ export default function Listing() {
   //   );
   // };
 
-  useEffect(() => {
-    if (spotData) {
-      setRegion({
-        latitude: spotData.coordinates.latitude,
-        longitude: spotData.coordinates.longitude,
-        latitudeDelta: 0.000222,
-        longitudeDelta: 0.00221,
-      });
-    }
-  }, [spotData]);
 
-  const mapStyle = [
-    {
-      elementType: "labels",
-      stylers: [
-        {
-          visibility: "off",
-        },
-      ],
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -189,61 +163,7 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Where you'll be parked
           </Text>
-          <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-            <MapView style={[styles.map, { borderColor: themeColors.outline }]} zoomEnabled={false} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
-              <Marker
-                coordinate={{
-                  latitude: spotData.coordinates.latitude,
-                  longitude: spotData.coordinates.longitude,
-                }}
-                title={"Location"}
-              >
-                <Tag
-                  name={"Relative location"}
-                  Icon={MapPin}
-                  isSelected={true}
-                  onPress={() => {
-                    // mapRef.current?.animateToRegion({
-                    //   latitude: location.coords.latitude,
-                    //   longitude: location.coords.longitude,
-                    //   latitudeDelta: 0.00922,
-                    //   longitudeDelta: 0.00421,
-                    // });
-                  }}
-                  weight="bold"
-                  shadow={true}
-                />
-                <View style={{ ...styles.pinRadius, borderColor: themeColors.outline }}></View>
-                <Callout tooltip>
-                  {/* <View>
-                <Text>Callout text</Text>
-              </View> */}
-                </Callout>
-              </Marker>
-            </MapView>
-          </View>
-          {/* <TouchableOpacity style={[styles.button, { borderColor: themeColors.outline }]} onPress={handleShare}>
-            <Share
-              size={20}
-              color={Colors["accent"]}
-              strokeWidth={2}
-              style={{
-                marginRight: 4,
-              }}
-            />
-            <Text style={styles.buttonText}>Share</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleMessageSeller}>
-            <MessageCircle
-              size={20}
-              color={Colors["accent"]}
-              strokeWidth={2}
-              style={{
-                marginRight: 4,
-              }}
-            />
-            <Text style={styles.buttonText}>Message Seller</Text>
-          </TouchableOpacity> */}
+          {listing && <ListingMiniMap listing={listing}/>}
         </ScrollView>
       )}
     </View>
