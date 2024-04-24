@@ -82,7 +82,6 @@ export default function Listing() {
     longitudeDelta: 0.00421,
   });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState("");
 
   // const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -125,32 +124,6 @@ export default function Listing() {
       });
     }
   }, [spotData]);
-
-  useEffect(() => {
-    if (spotData) {
-      const endTime = new Date(spotData.ends);
-
-      const intervalId = setInterval(() => {
-        const now = new Date();
-        const diffMs = endTime.getTime() - now.getTime();
-
-        if (diffMs > 0) {
-          const diffHrs = Math.floor(diffMs / 1000 / 60 / 60);
-          const diffMins = Math.floor((diffMs / 1000 / 60) % 60);
-          const diffSecs = Math.floor((diffMs / 1000) % 60);
-
-          setTimeRemaining(`${diffHrs}hr ${diffMins}m ${diffSecs}s`);
-        } else {
-          clearInterval(intervalId);
-          setTimeRemaining("Ended");
-        }
-      }, 1000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [spotData]);
-
-
 
   const mapStyle = [
     {

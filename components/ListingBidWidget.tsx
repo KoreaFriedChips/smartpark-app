@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import Colors from "@/constants/Colors";
-import { Clock, TrendingUp, Sparkles, CalendarSearch} from "lucide-react-native";
+import { Clock, TrendingUp, Sparkles, ShoppingCart} from "lucide-react-native";
 import { getSpotAvailability, convertToHour } from "@/components/utils/ListingUtils";
 import moment from "moment";
 
@@ -102,7 +102,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
       </Link>
       <Link
         href={{
-          pathname: "/listing-schedule",
+          pathname: "/buy-now",
           params: { id: listing.id },
         }}
         asChild
@@ -116,7 +116,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
         ]}
       >
         <TouchableOpacity>
-          <CalendarSearch
+          <ShoppingCart
             size={14}
             color={themeColors.secondary}
             strokeWidth={3}
@@ -131,7 +131,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
               color: themeColors.secondary,
             }}
           >
-            Change dates
+            Buy Now
           </Text>
         </TouchableOpacity>
       </Link>
