@@ -14,6 +14,7 @@ import SignInScreen from "@/components/SignInScreen";
 import ModalScreen from "@/components/ModalScreen";
 import Colors from "@/constants/Colors";
 import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-react-native";
+import * as Linking from 'expo-linking';
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListing } from "@/hooks/hooks";
@@ -112,13 +113,12 @@ function RootLayoutNav() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
 
-  const listing = useListing();
-
-  const handleShare = async () => {
+  const handleShare = async (listing: Listing | undefined) => {
     try {
+      const url = Linking.createURL(`listing/${listing?.id}`);
       const result = await Share.share({
-        message: `Check out this parking spot I found on the SmartPark app. Only $${listing?.price} per ${listing?.duration} in ${listing?.city}!`,
-        url: `https://www.trysmartpark.com/listing/${listing?.id}`,
+        message: `Check out this parking spot I found on the SmartPark app. Only $${listing?.price} per ${listing?.duration} in ${listing?.city}! ${url}`,
+        url: url
       });
 
       if (result.action === Share.sharedAction) {
@@ -191,9 +191,10 @@ function RootLayoutNav() {
   };
 
   const headerRight = () => {
+    const listing = useListing();
     return (
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity onPress={handleShare}>
+        <TouchableOpacity onPress={() => handleShare(listing)}>
           <ShareIcon
             size={22}
             color={themeColors.primary}
@@ -250,7 +251,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="listing"
+          name="listing/[id]"
           options={{
             title: "",
             // headerTitle: () => headerTitle("Listing"),

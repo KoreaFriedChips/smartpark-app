@@ -7,7 +7,7 @@ export default {
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/smartpark-icon.png",
-    "scheme": "myapp",
+    "scheme": "smartpark",
     "userInterfaceStyle": "automatic",
     "experiments": {
       "typedRoutes": true
