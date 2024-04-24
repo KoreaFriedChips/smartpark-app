@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, ScrollView, Image, Dimensions, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
@@ -10,33 +10,25 @@ import RatingsText from "@/components/ListingCard/RatingsText";
 import RatingsQuickView from "@/components/RatingsQuickView";
 import ListingDetail from "@/components/ListingDetail";
 import SellerQuickInfo from "@/components/SellerQuickInfo";
-import { getSeller, readListings } from "@/serverconn";
+import { getSeller } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import ListingBidWidget from "@/components/ListingBidWidget";
 import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
 import ListingMiniMap from "@/components/ListingMiniMap";
+import { useListing } from "@/hooks/hooks";
+
 
 export default function Listing() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const themeColors = Colors[useColorScheme() || "light"];
-  const { id, distance } = useLocalSearchParams();
-  const [listing, setListing] = useState<Listing>();
+  const { distance } = useLocalSearchParams();
+  const listing = useListing();
   const { getToken } = useAuth();
 
   useEffect(() => {
     if (errorMsg) console.log(errorMsg);
   }, [errorMsg]);
-  useEffect(() => {
-    const fetchListing = async() => {
-      const listings = await readListings(await getToken() ?? "", { id: id });
-      if (!listings) {
-        console.log("could not load listing");
-        setErrorMsg("could not load listing");
-      }
-      setListing(listings[0]);
-    }
-    fetchListing();
-  }, [id]);
+ 
   
   const [seller, setSeller] = useState<User>();
   useEffect(() => {
