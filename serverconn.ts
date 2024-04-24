@@ -2,6 +2,16 @@ import Constants from "expo-constants";
 import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
 import { useAuth } from "@clerk/clerk-expo";
 
+export const getReviewer = async (token: string, review: Review) => {
+    const users = await readUsers(token, { id: review.userId });
+    return users[0];
+}
+
+export const getSeller = async (token: string, listing: Listing) => {
+    const users = await readUsers(token, { id: listing.sellerId });
+    return users[0];
+}
+
 export const getUserIdFromClerkId = async (token: string, clerkId: string) => {
     const users: any = await readUsers(token, { clerkId: clerkId || "" });
     if (!users) throw new Error("clerkId not found");

@@ -68,7 +68,7 @@ export const listingData = [
     tags: ["Events", "Concerts"],
     amenities: ["Near Venue", "Covered Parking", "24/7 Access", "Surveillance", "Oversized Vehicles", "Gated", "Lighting", "Electric Charging"],
     seller: {
-      id: "1",
+      id: "6628a522fe82e9bdd501183f",
       name: "John Doe",
       description: "I'm a friendly and reliable host who enjoys meeting new people and providing a safe and secure parking experience.",
       rating: 4.8,
@@ -82,31 +82,18 @@ export const listingData = [
     },
     spotReviews: [
       {
-        id: "1",
+        id: "6628a9aefe82e9bdd50a5a97",
         rating: 4.5,
         review: "Great spot! Very convenient and secure.",
         date: "2024-03-01T14:23:00Z",
         reviewer: {
-          id: "3",
+          id: "6628a94afe82e9bdd5099c06",
           name: "Jane Doe",
           city: "Minnetonka",
           state: "MN",
           profilePicture: "https://source.unsplash.com/random?person&3",
         },
       },
-      // {
-      //   id: "1",
-      //   rating: 4.5,
-      //   review: "Great spot! Very convenient and secure.",
-      //   date: "2024-03-01T14:23:00Z",
-      //   reviewer: {
-      //     id: "3",
-      //     name: "Jane Doe",
-      //     city: "Minnetonka",
-      //     state: "MN",
-      //     profilePicture: "https://source.unsplash.com/random?person&3",
-      //   },
-      // },
     ],
   },
   {
@@ -179,7 +166,7 @@ export const listingData = [
     tags: ["Sports"],
     amenities: ["24/7 Access", "Lighting", "Electric Charging"],
     seller: {
-      id: "2",
+      id: "6628a4ebfe82e9bdd500aa2b",
       name: "Dris Elamri",
       description: "I'm a sports enthusiast who enjoys hosting fellow fans for game day parking.",
       rating: 4.3,
@@ -193,12 +180,12 @@ export const listingData = [
     },
     spotReviews: [
       {
-        id: "1",
+        id: "6628a8b9fe82e9bdd5086e29",
         rating: 4.5,
         review: "Great spot! Very convenient and secure.",
         date: "2024-03-01T14:23:00Z",
         reviewer: {
-          id: "3",
+          id: "6628a94afe82e9bdd5099c06",
           name: "Jane Doe",
           city: "Minnetonka",
           state: "MN",

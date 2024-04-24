@@ -10,6 +10,7 @@ import { Clock, TrendingUp, Sparkles, CalendarSearch, Share, Star, MapPin, Messa
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import RatingsText from "@/components/ListingCard/RatingsText";
+import RatingsQuickView from "@/components/RatingsQuickView";
 import { getTagIcon } from "@/components/TagsContainer";
 import Tag from "@/components/Tag";
 import { listingData } from "@/components/utils/ListingData";
@@ -441,83 +442,35 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             What people are saying
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ ...styles.sellerContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
-              <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                {/* {spotData.spotReviews.length < 1 ? (
-                <View style={{ backgroundColor: "transparent" }}>
-                  <Text weight="semibold" style={{ fontSize: 16 }}>
-                    No reviews yet
-                  </Text>
-                  <Link
-                    href={{
-                      pathname: "/listing",
-                      params: { id: spotData.id },
-                    }}
-                    asChild
-                    style={[
-                      styles.button,
-                      {
-                        backgroundColor: Colors["accent"],
-                        borderColor: Colors["accentAlt"],
-                        marginTop: 0,
-                        marginBottom: 0,
-                      },
-                    ]}
-                  >
-                    <TouchableOpacity>
-                      <Star
-                        size={14}
-                        color={Colors["light"].primary}
-                        strokeWidth={3}
-                        style={{
-                          marginRight: 4,
-                        }}
-                      />
-                      <Text
-                        weight="bold"
-                        style={{
-                          ...styles.buttonText,
-                          color: Colors["light"].primary,
-                        }}
-                      >
-                        Leave a review
-                      </Text>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-              ) : ( */}
-                {spotData.spotReviews.map((review, index) => {
-                  return (
-                    <TouchableOpacity key={index}>
-                      <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-                        <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                          <Image source={{ uri: review.reviewer.profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
-                          <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
-                            <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                              <Text weight="semibold" style={{ fontSize: 16 }}>
-                                {review.reviewer.name}
-                              </Text>
-                              <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
-                            </View>
-                            <Text style={{ marginTop: 2 }}>
-                              {review.reviewer.city}, {review.reviewer.state}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
-                          <RatingsText rating={review.rating} reviews={spotData.seller.reviews} full={true} />
-                        </View>
-                      </View>
-                      <Text weight="semibold" style={{ marginTop: 13, textAlign: "left" }}>{`Posted ${new Date(review.date).toLocaleDateString()}`}</Text>
-                      <Text style={{ marginTop: 4 }}>{review.review}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-                {/* )} */}
-              </View>
-            </View>
-          </ScrollView>
+          <RatingsQuickView listing={{
+            id: spotData.id,
+            thumbnail: spotData.thumbnail,
+            images: spotData.images,
+            latitude: spotData.coordinates.latitude,
+            longitude: spotData.coordinates.longitude,
+            city: spotData.city,
+            state: spotData.state,
+            listingType: spotData.listingType,
+            price: spotData.price,
+            duration: spotData.duration,
+            relist: spotData.relist,
+            relistDuration: spotData.relistDuration,
+            description: spotData.description,
+            active: spotData.active,
+            availability: spotData.availability,
+            distance: spotData.distance,
+            rating: spotData.rating,
+            reviews: spotData.reviews,
+            date: new Date(spotData.date),
+            ends: new Date(spotData.ends),
+            bids: spotData.bids,
+            capacity: spotData.capacity,
+            spotsLeft: spotData.spotsLeft,
+            tags: spotData.tags,
+            amenities: spotData.amenities,
+            sellerId: spotData.seller.id
+          }} 
+          />
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Where you'll be parked
