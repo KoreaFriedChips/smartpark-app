@@ -1,4 +1,4 @@
-import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Button } from 'react-native';
+import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Button, FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import { Text, View, TextInput } from '@/components/Themed';
 import React, { useState } from 'react';
@@ -17,6 +17,21 @@ interface Availability {
   day: string,
   availableHours: string[],
   isAvailable: boolean,
+}
+
+const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColors: any, onPress: () => Promise<void> } )=> {
+  return ( <TouchableOpacity onPress={onPress} style={[styles.spotImage, {justifyContent: "center", alignItems:"center"}]}>
+    {image != "" ?
+      <Image source={{ uri: imageUriFromKey(image)}} style={[styles.spotImage, { borderColor: themeColors.outline }]} /> :
+      <View  style={{ ...styles.spotImage, ...styles.button, borderColor: themeColors.outline }}>
+        <ImagePlus size={100} color={themeColors.primary}
+              strokeWidth={2}
+              style={{
+                marginRight: 4,
+              }}/>
+      </View>}
+  </TouchableOpacity>
+  )
 }
 
 export default function CreateListing() {
@@ -91,8 +106,8 @@ export default function CreateListing() {
   const handleAddressChange = async (coord: LatLng) => {
     setSpotAddress(await mapRef.current?.addressForCoordinate(coord));
   }
-  const [images, setImages] = useState<string[]>([]);
-  const pickImage = async () => {
+  const [images, setImages] = useState<string[]>(["", "", "", ""]);
+  const pickImage = async (index: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -106,30 +121,18 @@ export default function CreateListing() {
       const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
       const fileSize = result.assets[0].fileSize ?? image.size;
       const key = await uploadImage(await getToken() ?? "", filename, fileSize , image);
-      
-      setImages([...images, key]);
+      setImages(images.map((image, i) => i === index ? key : image));
     }
   }
+
+  React.useEffect(() => console.log(images), [images])
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll}>
-        
-      <TouchableOpacity 
-          onPress={pickImage}
-        >
-        {images.length > 0 ? 
-          <Image source={{ uri: imageUriFromKey(images[0])}} style={[styles.thumbnail, { borderColor: themeColors.outline }]} /> :
-          <View  style={{ ...styles.thumbnail, ...styles.button, borderColor: themeColors.outline }}>
-            <ImagePlus size={100} color={themeColors.primary}
-                  strokeWidth={2}
-                  style={{
-                    marginRight: 4,
-                  }}/>
-          </View>
-        }
-        </TouchableOpacity>
-        
+        <View style={styles.spotImageContainer}>
+          {images.flatMap((image, i) => <SpotImage key={i} image={image} themeColors={themeColors} onPress={()=> pickImage(i)}/>)}
+        </View>  
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
           <MapView
           ref={mapRef}
@@ -340,11 +343,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
-  thumbnail: {
-    width: "100%",
-    height: 350,
+  spotImageContainer: {
+    flexDirection:"row", 
+    flexWrap:"wrap", 
+    width:"100%", 
+    justifyContent: "space-evenly"
+  },
+  spotImage: {
+    width: 150,
+    height: 150,
     borderRadius: 8,
     borderWidth: 1,
-    marginTop: 12,
   },
 });
