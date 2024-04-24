@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { StyleSheet, FlatList } from "react-native";
 import { Text, View } from "@/components/Themed";
-import ListingCard, { ListingItem } from "@/components/ListingCard/ListingCard";
+import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
-import { listingData } from "@/components/utils/ListingData";
+import { useAllListings } from "@/hooks/hooks";
 
 export default function HomeScreen() {
-  const [filteredListingData, setFilteredListingData] = useState<ListingItem[]>([]);
-
-  return (
+  const [filteredListingData, setFilteredListingData] = useState<Listing[]>([]);
+  const listingData = useAllListings();
+  return listingData && (
     <View style={styles.container}>
       <TagsContainer listingData={listingData} onFilterChange={setFilteredListingData} search={true} />
       <FlatList

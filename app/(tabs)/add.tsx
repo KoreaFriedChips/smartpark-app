@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
-import { listingData } from '@/components/utils/ListingData';
 import { createListing, readUsers, getUserIdFromClerkId, uploadImage, fetchImageFromUri, imageUriFromKey } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
@@ -121,13 +120,13 @@ export default function CreateListing() {
     return true;
   }, [images]);
 
-  const handleSubmitCreateListing = React.useCallback(async (listingData: any) => {
+  const handleSubmitCreateListing = async (listingData: any) => {
     console.log(listingData);
     if (!listingDataValid) {
       return;
     }
     await createListing(await getToken() ?? "", listingData);
-  }, [ listingData ]);
+  };
 
   return (
     <View style={styles.container}>

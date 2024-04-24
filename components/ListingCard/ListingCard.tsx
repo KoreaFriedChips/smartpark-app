@@ -16,20 +16,6 @@ export interface Availability {
   isAvailable: boolean;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  description: string;
-  rating: number;
-  reviews: number;
-  city: string;
-  state: string;
-  profilePicture: string;
-  activeSince: string;
-  verified: boolean;
-  listings: ListingItem[];
-}
-
 export interface Review {
   id: string;
   rating: number;
@@ -37,46 +23,9 @@ export interface Review {
   date: string;
   // reviewer: User;
 }
-
-export interface ListingItem {
-  id: string;
-  thumbnail: string;
-  images: string[];
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  distance: number;
-  city: string;
-  state: string;
-  listingType: string;
-  price: number;
-  duration: string;
-  relist: boolean,
-  relistDuration: string,
-  description: string,
-  availability: Availability[],
-  active: boolean,
-  rating: number;
-  reviews: number;
-  date: string;
-  ends: string;
-  bids: number;
-  capacity: number,
-  spotsLeft: number,
-  tags: string[];
-  amenities: string[];
-  seller: User;
-  spotReviews: Review[];
-}
-
-interface ListingCardProps {
-  item: ListingItem;
-}
-
 // const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-export default function ListingCard({ item }: ListingCardProps) {
+export default function ListingCard({ item }: {item: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
 

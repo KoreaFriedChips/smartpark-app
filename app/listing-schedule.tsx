@@ -5,14 +5,12 @@ import { useLocalSearchParams } from "expo-router";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { listingData } from "@/components/utils/ListingData";
+import { useListing } from "@/hooks/hooks";
 
 
 export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
-  const params = useLocalSearchParams();
-  const { id, distance } = params;
-  const spotData = listingData.find((item) => item.id === id);
+  const listing = useListing();
 
   return (
     <View style={styles.container}>

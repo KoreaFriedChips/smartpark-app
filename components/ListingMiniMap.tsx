@@ -1,28 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, useColorScheme, Touchable } from "react-native";
+import { StyleSheet, Dimensions, useColorScheme } from "react-native";
 import MapView, { Marker, Region, Callout } from "react-native-maps";
-import * as Location from "expo-location";
-import { Text, View } from "@/components/Themed";
-import { Link } from "expo-router";
+import { View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { Clock, TrendingUp, Sparkles, CalendarSearch, Share, Star, MapPin, MessageCircleMore, BadgeCheck, FolderLock, Car, ShieldCheck, Handshake, Flag } from "lucide-react-native";
-import HeartButton from "@/components/ListingCard/HeartButton";
-import DistanceText from "@/components/ListingCard/DistanceText";
-import RatingsText from "@/components/ListingCard/RatingsText";
-import RatingsQuickView from "@/components/RatingsQuickView";
-import { getTagIcon } from "@/components/TagsContainer";
+import {  MapPin  } from "lucide-react-native";
 import Tag from "@/components/Tag";
-import { listingData } from "@/components/utils/ListingData";
-import { getSpotAvailability, convertToHour } from "@/components/utils/ListingUtils";
-import ListingDetail from "@/components/ListingDetail";
-import { useNavigation } from "@react-navigation/native";
-import moment from "moment";
-import SellerQuickInfo from "@/components/SellerQuickInfo";
-import { getSeller } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
-import ListingBidWidget from "@/components/ListingBidWidget";
-import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
 
 
 export default function ListingMiniMap({listing}: {listing: Listing}) {

@@ -21,3 +21,22 @@ export const useListing = () => {
   }, [id]);
   return listing;
 };
+
+export const useAllListings = () => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [listings, setListings] = useState<Listing[]>();
+  useEffect(() => {
+    const fetchListings = async () => {
+      const listings_ = await readListings(await getToken() ?? "", {});
+      if (!listings_) {
+        console.log("could not load listings");
+        return
+      }
+      setListings(listings_);
+    }
+    if (isLoaded && isSignedIn){
+      fetchListings();
+    }
+  }, [isLoaded, isSignedIn, getToken]);
+  return listings
+}
