@@ -22,6 +22,7 @@ import SellerQuickInfo from "@/components/SellerQuickInfo";
 import { getSeller } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import ListingBidWidget from "@/components/ListingBidWidget";
+import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
 
 export default function Listing() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -160,27 +161,7 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Spot amenities
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.tagContainer,
-              {
-                backgroundColor: "transparent",
-                borderColor: themeColors.outline,
-              },
-            ]}
-          >
-            {spotData.amenities.map((name, index) => {
-              const TagIcon = getTagIcon(name);
-              return TagIcon ? (
-                <TouchableOpacity key={index} style={{ ...styles.amenities, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
-                  <TagIcon size={24} color={themeColors.primary} />
-                  <Text weight="semibold">{name}</Text>
-                </TouchableOpacity>
-              ) : null;
-            })}
-          </ScrollView>
+          {listing && <SlidingAmenitiesWidget listing={listing}/>}
           <Text style={{ marginTop: 16 }}>{spotData.description}</Text>
           <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${new Date(spotData.date).toLocaleDateString()} at ${new Date(spotData.date).toLocaleTimeString()}`}</Text>
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
@@ -323,27 +304,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
-  
-  amenities: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    width: 110,
-    gap: 24,
-    borderRadius: 8,
-    borderWidth: 0.5,
-    marginRight: 10,
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 3.84,
-    // elevation: 5,
-  },
   listingCard: {
     marginTop: 18,
     marginBottom: 8,
@@ -366,12 +326,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
-  },
-  tagContainer: {
-    flexDirection: "row",
-    // paddingBottom: 10, //6
-    paddingTop: 12,
-    marginTop: 8,
   },
   sellerContainer: {
     marginTop: 22,
