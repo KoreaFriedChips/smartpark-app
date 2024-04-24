@@ -1,14 +1,17 @@
 import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Button } from 'react-native';
+import { Image } from 'expo-image';
 import { Text, View, TextInput } from '@/components/Themed';
 import React, { useState } from 'react';
 import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
 import { listingData } from '@/components/utils/ListingData';
-import { createListing, readUsers, getUserIdFromClerkId } from '@/serverconn';
+import { createListing, readUsers, getUserIdFromClerkId, uploadImage, fetchImageFromUri, imageUriFromKey } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import * as ImagePicker from 'expo-image-picker';
+import { ImagePlus } from 'lucide-react-native';
 
 interface Availability {
   day: string,
@@ -88,10 +91,45 @@ export default function CreateListing() {
   const handleAddressChange = async (coord: LatLng) => {
     setSpotAddress(await mapRef.current?.addressForCoordinate(coord));
   }
+  const [images, setImages] = useState<string[]>([]);
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(result);
+
+    if (!result.canceled) {
+      const image = await fetchImageFromUri(result.assets[0].uri);
+      const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
+      const fileSize = result.assets[0].fileSize ?? image.size;
+      const key = await uploadImage(await getToken() ?? "", filename, fileSize , image);
+      
+      setImages([...images, key]);
+    }
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll}>
+        
+      <TouchableOpacity 
+          onPress={pickImage}
+        >
+        {images.length > 0 ? 
+          <Image source={{ uri: imageUriFromKey(images[0])}} style={[styles.thumbnail, { borderColor: themeColors.outline }]} /> :
+          <View  style={{ ...styles.thumbnail, ...styles.button, borderColor: themeColors.outline }}>
+            <ImagePlus size={100} color={themeColors.primary}
+                  strokeWidth={2}
+                  style={{
+                    marginRight: 4,
+                  }}/>
+          </View>
+        }
+        </TouchableOpacity>
+        
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
           <MapView
           ref={mapRef}
@@ -169,7 +207,7 @@ export default function CreateListing() {
             return (
               <TouchableOpacity 
                 key={index} 
-                style={[styles.availabilityButton, 
+                style={[styles.button, 
                 {backgroundColor: themeColors.secondary}]} 
                 onPress={()=>{setAvailIndex(index); setShowTimePicker(1); }}
               >
@@ -180,7 +218,7 @@ export default function CreateListing() {
         </View>
         <TouchableOpacity 
           style={[
-            styles.submitButton,
+            styles.button,
            {
               backgroundColor: Colors['accent'],
               borderColor: Colors['accentAlt'],
@@ -269,7 +307,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 3,
   },
-  submitButton: {
+  button: {
     padding: 10,
     borderRadius: 4,
     marginTop: 12,
@@ -291,18 +329,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     width: '100%',
   },
-  availabilityButton: {
-    padding: 10,
-    borderRadius: 4,
-    marginTop: 12,
-    marginBottom: 4,
-    borderWidth: 1,
-    textAlign: "center",
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   availabilityButtonText: {
    
   },
@@ -313,5 +339,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
-  }
+  },
+  thumbnail: {
+    width: "100%",
+    height: 350,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 12,
+  },
 });
