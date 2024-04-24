@@ -16,6 +16,7 @@ import ListingBidWidget from "@/components/ListingBidWidget";
 import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
 import ListingMiniMap from "@/components/ListingMiniMap";
 import { useListing } from "@/hooks/hooks";
+import ListingGallery from "@/components/ListingGallery";
 
 
 export default function Listing() {
@@ -47,15 +48,7 @@ export default function Listing() {
     <View style={styles.container}>
       {listing && (
         <ScrollView style={styles.scroll}>
-          <Image source={{ uri: listing.thumbnail }} style={[styles.thumbnail, { borderColor: themeColors.outline }]} />
-          <HeartButton
-            id={listing.id}
-            style={{ top: 24, right: 10 }}
-          />
-          <DistanceText
-            distance={Number(distance)}
-            style={{ top: 32, left: 18 }}
-          />
+          <ListingGallery listing={listing}/>
           <View style={{ marginTop: 12 }}>
             <RatingsText rating={listing.rating} reviews={listing.reviews} full={true} style={{ fontSize: 16, color: themeColors.primary }} />
             <Text weight="semibold" style={styles.location}>{`${listing.city}, ${listing.state}`}</Text>
@@ -117,15 +110,15 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginVertical: 20,
   },
+  location: {
+    fontSize: 22,
+    marginTop: 2,
+  },
   thumbnail: {
     width: "100%",
     height: 350,
     borderRadius: 8,
     borderWidth: 1,
     marginTop: 12,
-  },
-  location: {
-    fontSize: 22,
-    marginTop: 2,
   },
 });
