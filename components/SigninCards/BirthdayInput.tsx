@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";

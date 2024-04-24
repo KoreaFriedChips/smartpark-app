@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -22,6 +23,7 @@ type EmailVerificationProps = {
 };
 
 export const EmailVerification = (props: EmailVerificationProps) => {
+    const colorScheme = useColorScheme();
     const [code, setSCode] = useState("");
     const [error, setError] = useState("");
     const [resendT, setResendT] = useState("Resend");
@@ -67,7 +69,7 @@ export const EmailVerification = (props: EmailVerificationProps) => {
                     here.
                 </Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="123456"
                     onChangeText={setSCode}
                     value={code}

@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -21,6 +22,7 @@ type NameInputProps = {
 };
 
 export const NameInput = (props: NameInputProps) => {
+    const colorScheme = useColorScheme()
     const [name, setName] = useState("");
     const [error, setError] = useState("");
 
@@ -43,7 +45,7 @@ export const NameInput = (props: NameInputProps) => {
             <View style={{ ...styles.container, ...styles.modalContainer }}>
                 <Text style={styles.subText}>What's your name?</Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="Joe Smith"
                     onChangeText={setName}
                     value={name}

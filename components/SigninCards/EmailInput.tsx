@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -21,6 +22,7 @@ type EmailInputProps = {
 };
 
 export const EmailInput = (props: EmailInputProps) => {
+    const colorScheme = useColorScheme()
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
 
@@ -43,7 +45,7 @@ export const EmailInput = (props: EmailInputProps) => {
             <View style={{ ...styles.container, ...styles.modalContainer }}>
                 <Text style={styles.subText}>Please enter your email.</Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="joe@trysmartpark.com"
                     onChangeText={setEmail}
                     value={email}

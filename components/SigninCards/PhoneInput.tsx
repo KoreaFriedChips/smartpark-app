@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -17,6 +18,7 @@ type PhoneInputProps = {
   };
 
 export const PhoneInput = (props: PhoneInputProps) => {
+    const colorScheme = useColorScheme()
     const [phone, setSphone] = useState("");
     const [error, setError] = useState("");
     const phoneRegex = /^\(\d\d\d\) \d\d\d-\d\d\d\d$/;
@@ -74,7 +76,7 @@ export const PhoneInput = (props: PhoneInputProps) => {
                     Please enter your phone number.
                 </Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="(123) 456-7890"
                     onChangeText={setPhone}
                     value={phone}
@@ -133,7 +135,7 @@ export const styles = StyleSheet.create({
     textInput: {
         width: "100%",
         fontSize: 20,
-        color: "white",
+        color: "black",
     },
     nextButton: {
         padding: 10,

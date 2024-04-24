@@ -73,14 +73,14 @@ export default function SignInScreen() {
         strategy: "oauth_apple",
     });
 
-    let { signUp: sUp, setActive: sActiveU, isLoaded: il } = useSignUp();
+    let { signUp: sUp, setActive: sActiveU } = useSignUp();
     let { signIn: sIn, setActive: sActiveI } = useSignIn();
     let isSigningIn = false;
-    let csi: string;
-    let phone: string;
+    const [csi, setCSI] = useState("");
+    const [phone, setPhone] = useState("")
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
-    let birthday: Date;
+    const [date, setDate] = useState(new Date())
 
     const handleSignIn = async (provider: string) => {
         try {
@@ -114,15 +114,14 @@ export default function SignInScreen() {
 
     type RSP = (...args: any[]) => Promise<keyof RootStackParamList>;
     const setGlobalPhone: RSP = async (p: string) => {
-        phone = p;
-        console.log(email);
+        setPhone(p);
         try {
             await sIn?.create({ identifier: p, strategy: "phone_code" });
             isSigningIn = true;
         } catch (err: any) {
             console.log(err.errors[0]);
             try {
-                await sUp?.update({ phoneNumber: phone });
+                await sUp?.update({ phoneNumber: p });
                 await sUp?.preparePhoneNumberVerification({
                     strategy: "phone_code",
                 });
@@ -158,7 +157,7 @@ export default function SignInScreen() {
             }
             if (s!.missingFields.indexOf("phone_number") < 0) {
                 if (s?.createdSessionId) {
-                    csi = s.createdSessionId;
+                    setCSI(s.createdSessionId);
                 }
                 return email
                     ? name
@@ -190,7 +189,7 @@ export default function SignInScreen() {
             throw Error(err.errors[0].longMessage);
         }
         if (s?.createdSessionId) {
-            csi = s.createdSessionId;
+            setCSI(s.createdSessionId);
             return name ? "BirthdayInput" : "NameInput";
         } else {
             throw Error("Your code is invalid.");
@@ -201,7 +200,7 @@ export default function SignInScreen() {
         return "BirthdayInput";
     };
     const setGlobalBirthday: RSP = async (b: Date) => {
-        birthday = b;
+        setDate(b);
         completeSignUp(csi, sActiveU!);
         setModalVisible(false);
         return "PhoneInput";
@@ -265,7 +264,7 @@ export default function SignInScreen() {
                             },
                             headerTitle: "Just a couple more steps",
                             headerTitleStyle: {
-                                color: "white",
+                                color: colorScheme === "light" ? "black" : "white",
                                 fontWeight: "bold",
                                 fontFamily: "Soliden-SemiBold",
                             },

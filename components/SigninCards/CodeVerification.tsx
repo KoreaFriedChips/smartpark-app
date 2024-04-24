@@ -4,6 +4,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
+    useColorScheme,
 } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -22,6 +23,7 @@ type CodeVerificationProps = {
 };
 
 export const CodeVerification = (props: CodeVerificationProps) => {
+    const colorScheme = useColorScheme()
     const [code, setSCode] = useState("");
     const [error, setError] = useState("");
     const [resendT, setResendT] = useState("Resend");
@@ -79,7 +81,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
                     here.
                 </Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="123456"
                     onChangeText={setCode}
                     value={code}
