@@ -1,68 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, useColorScheme, Touchable } from "react-native";
-import MapView, { Marker, Region, Callout } from "react-native-maps";
-import * as Location from "expo-location";
+import { StyleSheet, ScrollView, Image, Dimensions, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
-import { Link } from "expo-router";
 import Colors from "@/constants/Colors";
-import { Clock, TrendingUp, Sparkles, CalendarSearch, Share, Star, MapPin, MessageCircleMore, BadgeCheck, FolderLock, Car, ShieldCheck, Handshake, Flag } from "lucide-react-native";
+import { FolderLock, Car, ShieldCheck } from "lucide-react-native";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import RatingsText from "@/components/ListingCard/RatingsText";
 import RatingsQuickView from "@/components/RatingsQuickView";
-import { getTagIcon } from "@/components/TagsContainer";
-import Tag from "@/components/Tag";
-import { listingData } from "@/components/utils/ListingData";
-import { getSpotAvailability, convertToHour } from "@/components/utils/ListingUtils";
 import ListingDetail from "@/components/ListingDetail";
-import { useNavigation } from "@react-navigation/native";
-import moment from "moment";
 import SellerQuickInfo from "@/components/SellerQuickInfo";
-import { getSeller } from "@/serverconn";
+import { getSeller, readListings } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import ListingBidWidget from "@/components/ListingBidWidget";
 import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
+import ListingMiniMap from "@/components/ListingMiniMap";
 
 export default function Listing() {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const themeColors = Colors[useColorScheme() || "light"];
-  const params = useLocalSearchParams();
-  const { id, distance } = params;
-  const spotData = listingData.find((item) => item.id === id);
+  const { id, distance } = useLocalSearchParams();
   const [listing, setListing] = useState<Listing>();
-  // const { width: viewportWidth } = Dimensions.get("window");
-  useEffect(() => {
-    if (!spotData) return;
-    setListing({
-      id: spotData.id,
-      thumbnail: spotData.thumbnail,
-      images: spotData.images,
-      latitude: spotData.coordinates.latitude,
-      longitude: spotData.coordinates.longitude,
-      city: spotData.city,
-      state: spotData.state,
-      listingType: spotData.listingType,
-      price: spotData.price,
-      duration: spotData.duration,
-      relist: spotData.relist,
-      relistDuration: spotData.relistDuration,
-      description: spotData.description,
-      active: spotData.active,
-      availability: spotData.availability,
-      distance: spotData.distance,
-      rating: spotData.rating,
-      reviews: spotData.reviews,
-      date: new Date(spotData.date),
-      ends: new Date(spotData.ends),
-      bids: spotData.bids,
-      capacity: spotData.capacity,
-      spotsLeft: spotData.spotsLeft,
-      tags: spotData.tags,
-      amenities: spotData.amenities,
-      sellerId: spotData.seller.id
-    });
-  }, [spotData]);
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    if (errorMsg) console.log(errorMsg);
+  }, [errorMsg]);
+  useEffect(() => {
+    const fetchListing = async() => {
+      const listings = await readListings(await getToken() ?? "", { id: id });
+      if (!listings) {
+        console.log("could not load listing");
+        setErrorMsg("could not load listing");
+      }
+      setListing(listings[0]);
+    }
+    fetchListing();
+  }, [id]);
+  
   const [seller, setSeller] = useState<User>();
   useEffect(() => {
     if (!listing) return;
@@ -76,59 +51,22 @@ export default function Listing() {
   const handleShare = () => console.log("Share");
   const handleMessageSeller = () => console.log("Message Seller");
 
-  
-
-  // const [currentIndex, setCurrentIndex] = useState(0);
-
-  // const onViewRef = React.useRef(({ viewableItems }) => {
-  //   if (viewableItems.length > 0) {
-  //     setCurrentIndex(viewableItems[0].index);
-  //   }
-  // });
-
-  // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
-
-  // const renderImage = ({ item }) => {
-  //   return (
-  //     <Image
-  //       source={{ uri: item }}
-  //       style={[styles.thumbnail, { borderColor: themeColors.outline }]}
-  //     />
-  //   );
-  // };
-
-  // const renderIndicator = (index: number) => {
-  //   return (
-  //     <View
-  //       key={index}
-  //       style={[
-  //         styles.dot,
-  //         currentIndex === index ? styles.activeDot : styles.inactiveDot,
-  //       ]}
-  //     />
-  //   );
-  // };
-
-
-
   return (
     <View style={styles.container}>
-      {spotData && (
+      {listing && (
         <ScrollView style={styles.scroll}>
-          <Image source={{ uri: spotData.thumbnail }} style={[styles.thumbnail, { borderColor: themeColors.outline }]} />
+          <Image source={{ uri: listing.thumbnail }} style={[styles.thumbnail, { borderColor: themeColors.outline }]} />
           <HeartButton
-            id={spotData.id}
-            // style={{ top: 48, right: 0 }}
+            id={listing.id}
             style={{ top: 24, right: 10 }}
           />
           <DistanceText
             distance={Number(distance)}
             style={{ top: 32, left: 18 }}
-            // style={{ left: 8 }}
           />
           <View style={{ marginTop: 12 }}>
-            <RatingsText rating={spotData.rating} reviews={spotData.reviews} full={true} style={{ fontSize: 16, color: themeColors.primary }} />
-            <Text weight="semibold" style={styles.location}>{`${spotData.city}, ${spotData.state}`}</Text>
+            <RatingsText rating={listing.rating} reviews={listing.reviews} full={true} style={{ fontSize: 16, color: themeColors.primary }} />
+            <Text weight="semibold" style={styles.location}>{`${listing.city}, ${listing.state}`}</Text>
           </View>
           {listing && <ListingBidWidget listing={listing}  />}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
@@ -136,8 +74,8 @@ export default function Listing() {
             Spot amenities
           </Text>
           {listing && <SlidingAmenitiesWidget listing={listing}/>}
-          <Text style={{ marginTop: 16 }}>{spotData.description}</Text>
-          <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${new Date(spotData.date).toLocaleDateString()} at ${new Date(spotData.date).toLocaleTimeString()}`}</Text>
+          <Text style={{ marginTop: 16 }}>{listing.description}</Text>
+          <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${listing.date.toLocaleDateString()} at ${listing.date.toLocaleTimeString()}`}</Text>
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Meet the owner
@@ -187,59 +125,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginVertical: 20,
   },
-  map: {
-    width: Dimensions.get("window").width - 32,
-    height: 300,
-    marginTop: 22,
-    marginBottom: 42,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  pinRadius: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 0.5,
-    opacity: 0.3,
-    backgroundColor: Colors["accent"],
-    position: "absolute",
-    zIndex: -1,
-    elevation: -1,
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-  },
-  listingCard: {
-    marginTop: 18,
-    marginBottom: 8,
-    marginHorizontal: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
   thumbnail: {
     width: "100%",
     height: 350,
@@ -247,71 +132,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 12,
   },
-  sellerContainer: {
-    marginTop: 22,
-    padding: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  profilePicture: {
-    aspectRatio: 1 / 1,
-    width: 40,
-    borderRadius: 40,
-    borderWidth: 1,
-  },
-  distance: {
-    position: "absolute",
-    left: 24,
-    top: 24,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
   location: {
     fontSize: 22,
     marginTop: 2,
-    // marginBottom: -10,
-  },
-  price: {
-    fontSize: 20,
-  },
-  button: {
-    padding: 10,
-    borderRadius: 4,
-    marginTop: 12,
-    marginBottom: 4,
-    borderWidth: 1,
-    textAlign: "center",
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.15,
-    // shadowRadius: 3.84,
-    // elevation: 3,
-  },
-  buttonText: {
-    textAlign: "center",
   },
 });
