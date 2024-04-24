@@ -18,13 +18,57 @@ import { getSpotAvailability, convertToHour } from "@/components/utils/ListingUt
 import ListingDetail from "@/components/ListingDetail";
 import { useNavigation } from "@react-navigation/native";
 import moment from "moment";
+import SellerQuickInfo from "@/components/SellerQuickInfo";
+import { getSeller } from "@/serverconn";
+import { useAuth } from "@clerk/clerk-expo";
 
 export default function Listing() {
   const themeColors = Colors[useColorScheme() || "light"];
   const params = useLocalSearchParams();
   const { id, distance } = params;
   const spotData = listingData.find((item) => item.id === id);
+  const [listing, setListing] = useState<Listing>();
   // const { width: viewportWidth } = Dimensions.get("window");
+  useEffect(() => {
+    if (!spotData) return;
+    setListing({
+      id: spotData.id,
+      thumbnail: spotData.thumbnail,
+      images: spotData.images,
+      latitude: spotData.coordinates.latitude,
+      longitude: spotData.coordinates.longitude,
+      city: spotData.city,
+      state: spotData.state,
+      listingType: spotData.listingType,
+      price: spotData.price,
+      duration: spotData.duration,
+      relist: spotData.relist,
+      relistDuration: spotData.relistDuration,
+      description: spotData.description,
+      active: spotData.active,
+      availability: spotData.availability,
+      distance: spotData.distance,
+      rating: spotData.rating,
+      reviews: spotData.reviews,
+      date: new Date(spotData.date),
+      ends: new Date(spotData.ends),
+      bids: spotData.bids,
+      capacity: spotData.capacity,
+      spotsLeft: spotData.spotsLeft,
+      tags: spotData.tags,
+      amenities: spotData.amenities,
+      sellerId: spotData.seller.id
+    });
+  }, [spotData]);
+  const { getToken } = useAuth();
+  const [seller, setSeller] = useState<User>();
+  useEffect(() => {
+    if (!listing) return;
+    const fetchSeller = async () => {
+      setSeller(await getSeller(await getToken() ?? "", listing));
+    }
+    fetchSeller();
+  }, [listing]);
 
   const handleReport = () => console.log("Report");
   const handleShare = () => console.log("Share");
@@ -133,22 +177,6 @@ export default function Listing() {
     <View style={styles.container}>
       {spotData && (
         <ScrollView style={styles.scroll}>
-          {/* <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.tagContainer,
-              {
-                backgroundColor: "transparent",
-                borderColor: themeColors.outline,
-              },
-            ]}
-          >
-            {spotData.tags.map((tagName, index) => {
-              const TagIcon = getTagIcon(tagName);
-              return TagIcon ? <Tag key={index} name={tagName} Icon={TagIcon} isSelected={false} onPress={() => null} shadow={false} /> : null;
-            })}
-          </ScrollView> */}
           <Image source={{ uri: spotData.thumbnail }} style={[styles.thumbnail, { borderColor: themeColors.outline }]} />
           <HeartButton
             id={spotData.id}
@@ -284,17 +312,6 @@ export default function Listing() {
               </View>
             </View>
           </View>
-          {/* <TouchableOpacity style={[styles.textContainer, { opacity: 0.5 }]} onPress={handleReport}>
-            <Flag
-              size={12}
-              color={themeColors.third}
-              strokeWidth={2}
-              style={{
-                marginRight: 4,
-              }}
-            />
-            <Text italic style={{ color: themeColors.primary, fontSize: 14 }}>Report listing</Text>
-          </TouchableOpacity> */}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Spot amenities
@@ -322,111 +339,11 @@ export default function Listing() {
           </ScrollView>
           <Text style={{ marginTop: 16 }}>{spotData.description}</Text>
           <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${new Date(spotData.date).toLocaleDateString()} at ${new Date(spotData.date).toLocaleTimeString()}`}</Text>
-          {/* <ListingDetail title={"24-hour support"} Icon={Handshake} description={"All SmartPark listings are verified to ensure the security of the platform."} /> */}
-
-          {/* <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "50%" }}>
-              <Text weight="semibold">Spot type</Text>
-              <Text>{spotData.type}</Text>
-              <Text weight="semibold">Spot size</Text>
-              <Text>{spotData.size}</Text>
-              <Text weight="semibold">Spot features</Text>
-              <Text>{spotData.features.join(", ")}</Text>
-            </View>
-            <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "50%" }}>
-              <Text weight="semibold">Spot rules</Text>
-              <Text>{spotData.rules.join(", ")}</Text>
-              <Text weight="semibold">Spot restrictions</Text>
-              <Text>{spotData.restrictions.join(", ")}</Text>
-            </View> */}
-          {/* <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.tagContainer,
-              {
-                backgroundColor: "transparent",
-                borderColor: themeColors.outline,
-                marginTop: 0,
-              },
-            ]}
-          >
-            {spotData.tags.map((tagName, index) => {
-              const TagIcon = getTagIcon(tagName);
-              return TagIcon ? <Tag key={index} style={{ backgroundColor: themeColors.header }} name={tagName} Icon={TagIcon} isSelected={false} onPress={() => null} shadow={false} /> : null;
-            })}
-          </ScrollView> */}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Meet the owner
           </Text>
-          <Link
-            href={{
-              pathname: "/seller-profile",
-              params: { id: spotData.id },
-            }}
-            asChild
-            style={{ ...styles.sellerContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}
-          >
-            <TouchableOpacity>
-              <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
-                <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                  <Image source={{ uri: spotData.seller.profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
-                  <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
-                    <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                      <Text weight="semibold" style={{ fontSize: 16 }}>
-                        {spotData.seller.name}
-                      </Text>
-                      <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
-                    </View>
-                    <Text style={{ marginTop: 2 }}>
-                      {spotData.seller.city}, {spotData.seller.state}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
-                  <RatingsText rating={spotData.seller.rating} reviews={spotData.seller.reviews} full={true} />
-                </View>
-              </View>
-              <Text weight="semibold" style={{ marginTop: 13, textAlign: "left" }}>{`Verified since ${new Date(spotData.seller.activeSince).toLocaleDateString()}`}</Text>
-              <Text style={{ marginTop: 4 }}>{spotData.seller.description}</Text>
-              <Link
-                href={{
-                  pathname: "/messages",
-                  params: { id: spotData.seller.id },
-                }}
-                asChild
-                style={[
-                  styles.button,
-                  {
-                    backgroundColor: Colors["accent"],
-                    borderColor: Colors["accentAlt"],
-                    marginTop: 16,
-                    marginBottom: 0,
-                  },
-                ]}
-              >
-                <TouchableOpacity>
-                  <MessageCircleMore
-                    size={14}
-                    color={Colors["light"].primary}
-                    strokeWidth={3}
-                    style={{
-                      marginRight: 4,
-                    }}
-                  />
-                  <Text
-                    weight="bold"
-                    style={{
-                      ...styles.buttonText,
-                      color: Colors["light"].primary,
-                    }}
-                  >
-                    Message seller
-                  </Text>
-                </TouchableOpacity>
-              </Link>
-            </TouchableOpacity>
-          </Link>
+          {seller && <SellerQuickInfo seller={seller} />}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18, marginBottom: 16 }}>
             What you should know
@@ -442,35 +359,7 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             What people are saying
           </Text>
-          <RatingsQuickView listing={{
-            id: spotData.id,
-            thumbnail: spotData.thumbnail,
-            images: spotData.images,
-            latitude: spotData.coordinates.latitude,
-            longitude: spotData.coordinates.longitude,
-            city: spotData.city,
-            state: spotData.state,
-            listingType: spotData.listingType,
-            price: spotData.price,
-            duration: spotData.duration,
-            relist: spotData.relist,
-            relistDuration: spotData.relistDuration,
-            description: spotData.description,
-            active: spotData.active,
-            availability: spotData.availability,
-            distance: spotData.distance,
-            rating: spotData.rating,
-            reviews: spotData.reviews,
-            date: new Date(spotData.date),
-            ends: new Date(spotData.ends),
-            bids: spotData.bids,
-            capacity: spotData.capacity,
-            spotsLeft: spotData.spotsLeft,
-            tags: spotData.tags,
-            amenities: spotData.amenities,
-            sellerId: spotData.seller.id
-          }} 
-          />
+          {listing && <RatingsQuickView listing={listing}/>}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Where you'll be parked
