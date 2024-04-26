@@ -68,7 +68,7 @@ export default function ListingCard({ item }: {item: Listing}) {
           <Text weight="semibold" style={styles.location}>{`${item.city}, ${item.state}`}</Text>
           <RatingsText rating={item.rating} reviews={item.reviews} />
         </View>
-        <Text weight="bold" style={styles.price}>{`$${item.price} / ${item.duration}`}</Text>
+        <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
         {/* <Text italic>3:00 - 5:00</Text> */}
         <Link
           href={{

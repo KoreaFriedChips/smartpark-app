@@ -94,9 +94,9 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
           case "reviewsHighLow":
             return b.reviews - a.reviews;
           case "priceLowHigh":
-            return a.price - b.price;
+            return a.startingPrice - b.startingPrice;
           case "priceHighLow":
-            return b.price - a.price;
+            return b.startingPrice - a.startingPrice;
           default:
             return 0;
         }

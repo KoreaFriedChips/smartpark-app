@@ -111,11 +111,11 @@ export default function ExploreScreen() {
                 latitude: listing.latitude,
                 longitude: listing.longitude,
               }}
-              title={`$${listing.price}`}
+              title={`$${listing.startingPrice}`}
             >
               <Link
                 href={{
-                  pathname: "/listing",
+                  pathname: "/listing/[id]",
                   params: { id: listing.id, distance: listing.distance },
                 }}
                 asChild
@@ -124,7 +124,7 @@ export default function ExploreScreen() {
                 {TagIcon && (
                   <Tag
                     key={index}
-                    name={`$${listing.price}`}
+                    name={`$${listing.startingPrice}`}
                     Icon={TagIcon}
                     isSelected={false}
                     onPress={() => {

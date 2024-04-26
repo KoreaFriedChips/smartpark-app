@@ -22,7 +22,8 @@ export const ListingModel = z.object({
   city: z.string(),
   state: z.string(),
   listingType: z.string(),
-  price: z.coerce.number(),
+  startingPrice: z.coerce.number(),
+  buyPrice: z.coerce.number(),
   duration: z.string(),
   relist: z.boolean(),
   relistDuration: z.string().nullish(),
@@ -38,5 +39,5 @@ export const ListingModel = z.object({
   spotsLeft: z.coerce.number().int(),
   tags: z.string().array(),
   amenities: z.string().array(),
-  sellerId: z.string(),
+  userId: z.string(),
 })

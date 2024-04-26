@@ -50,7 +50,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
   <View style={{ ...styles.bidContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
       <View style={{ ...styles.bidDetails, backgroundColor: "transparent", alignItems: "flex-start" }}>
         <View style={{ backgroundColor: "transparent" }}>
-          <Text weight="bold" style={styles.price}>{`$${listing.price} / ${listing.duration}`}</Text>
+          <Text weight="bold" style={styles.price}>{`$${listing.startingPrice} / ${listing.duration}`}</Text>
         </View>
         <View style={{ backgroundColor: "transparent" }}>
           {nextAvailableSlot ? (

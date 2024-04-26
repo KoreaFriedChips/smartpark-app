@@ -117,7 +117,7 @@ function RootLayoutNav() {
     try {
       const url = Linking.createURL(`listing/${listing?.id}`);
       const result = await Share.share({
-        message: `Check out this parking spot I found on the SmartPark app. Only $${listing?.price} per ${listing?.duration} in ${listing?.city}! ${url}`,
+        message: `Check out this parking spot I found on the SmartPark app. Only $${listing?.startingPrice} per ${listing?.duration} in ${listing?.city}! ${url}`,
         url: url
       });
 

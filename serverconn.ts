@@ -8,7 +8,7 @@ export const getReviewer = async (token: string, review: Review) => {
 }
 
 export const getSeller = async (token: string, listing: Listing) => {
-    const users = await readUsers(token, { id: listing.sellerId });
+    const users = await readUsers(token, { id: listing.userId });
     return users[0];
 }
 
