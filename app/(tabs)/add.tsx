@@ -7,12 +7,12 @@ import Colors from '@/constants/Colors';
 import { createListing, uploadImage, fetchImageFromUri, imageUriFromKey } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
-import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
 import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
 import LocationInputWidget, { LocationProps } from '@/components/add/LocationInputWidget';
 import AvailabilityWidget, { Availability } from '@/components/add/AvailabilityInputWidget';
+import ImageInputWidget from '@/components/add/ImageInputWidget';
 
 
 
@@ -43,6 +43,8 @@ export default function CreateListing() {
     state: "",
   });
   const [availability, setAvailability] = useState<Availability>([]);
+  const [images, setImages] = useState<string[]>([]);
+
 
   const [listingType, setListingType] = useState("Parking Spot");
   const [startingPrice, setStartingPrice] = useState("");
@@ -50,27 +52,6 @@ export default function CreateListing() {
   const [duration, setDuration] = useState("hour");
   const [description, setDescription] = useState("");
 
-  
-
-  const [images, setImages] = useState<string[]>(["", "", "", ""]);
-  const pickImage = async (index: number) => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const image = await fetchImageFromUri(result.assets[0].uri);
-      const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
-      const fileSize = result.assets[0].fileSize ?? image.size;
-      const key = await uploadImage(await getToken() ?? "", filename, fileSize , image);
-      setImages(images.map((image, i) => i === index ? key : image));
-    }
-  }
-
-  
   const [modalVisible, setModalVisible] = useState(false);
   const [invalidDataMsg, setInvalidDataMsg] = useState("");
 
@@ -133,9 +114,7 @@ export default function CreateListing() {
         </View>
       </Modal>
       <ScrollView style={styles.scroll}>
-        <View style={styles.spotImageContainer}>
-          {images.flatMap((image, i) => <SpotImage key={i} image={image} themeColors={themeColors} onPress={()=> pickImage(i)}/>)}
-        </View>  
+        <ImageInputWidget onChange={setImages}/>
         <LocationInputWidget onChange={setLocation} />
         <Text weight="semibold" style={{ color: themeColors.third }}> Description </Text>
         <TextInput
