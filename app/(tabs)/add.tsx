@@ -144,17 +144,29 @@ export default function CreateListing() {
     }
   }
 
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [invalidDataMsg, setInvalidDataMsg] = useState("");
+
   const listingDataValid = React.useMemo(() => {
     if (images[0] === "") {
+      setInvalidDataMsg("must include thumbnail (top left image)");
       return false;
     }
-    if (startingPrice === "" || buyPrice === "") return false;
-    if (textAddress === "" || textCity === "" || textState === "") return false;
+    if (startingPrice === "" || buyPrice === "") {
+      setInvalidDataMsg("must include both starting price and buy price");
+      return false;
+    }
+    if (textAddress === "" || textCity === "" || textState === "") {
+      setInvalidDataMsg("must input address, city, and state");
+      return false;
+    }
     return true;
-  }, [images, startingPrice, buyPrice]);
+  }, [images, startingPrice, buyPrice, textAddress, textCity, textState]);
 
   const handleSubmitCreateListing = async (listingData: any) => {
     if (!listingDataValid) {
+      setModalVisible(true);
       return;
     }
     const createdListing = await createListing(await getToken() ?? "", listingData);
@@ -208,6 +220,27 @@ export default function CreateListing() {
   }
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={{...styles.modalContainer, backgroundColor: themeColors.background, borderColor: themeColors.outline}}>
+            <Text weight="semibold" style={{textAlign: "center", color: themeColors.third}}>{invalidDataMsg}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(!modalVisible);
+              }}
+            >
+              <Text weight="semibold" style={{ ...styles.modalButtonText, marginBottom: 12 }}>
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <ScrollView style={styles.scroll}>
         <View style={styles.spotImageContainer}>
           {images.flatMap((image, i) => <SpotImage key={i} image={image} themeColors={themeColors} onPress={()=> pickImage(i)}/>)}
@@ -513,5 +546,28 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     borderWidth: 1,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    margin: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 8,
+    shadowColor: "#000",
+    width: "80%",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalButtonText: {
+    textAlign: "center",
+    fontSize: 16,
   },
 });
