@@ -1,4 +1,4 @@
-import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Button, FlatList } from 'react-native';
+import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Switch } from 'react-native';
 import { Image } from 'expo-image';
 import { Text, View, TextInput } from '@/components/Themed';
 import React, { useEffect, useState } from 'react';
@@ -75,23 +75,51 @@ export default function CreateListing() {
     const minutes = date.getMinutes();
     return `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`
   }
-  const handleTimePick = (event: DateTimePickerEvent) => {
+  const handleTimePickStart = (event: DateTimePickerEvent) => {
     if (event.type === 'dismissed') {
       setShowTimePicker(0);
       return;
     }
-    if (showTimePicker === 1) {
-      setStartTime(event.nativeEvent.timestamp);
-    } 
-    else {
-      let newAvailability = availability;
-      const start = timeToStr(startTime);
-      const end = timeToStr(event.nativeEvent.timestamp);
-      newAvailability[availIndex].availableHours.push(`${start}-${end}`);
-      newAvailability[availIndex].isAvailable = true;
-      setAvailability(newAvailability);
+    setStartTime(event.nativeEvent.timestamp);
+    setShowTimePicker(2);
+  }
+
+  const handleTimePickEnd = (event: DateTimePickerEvent) => {
+    if (event.type === "dismissed"){
+      setShowTimePicker(0);
+      return;
     }
-    setShowTimePicker((showTimePicker + 1) % 3);
+    let newAvailability = availability;
+    const start = timeToStr(startTime);
+    const end = timeToStr(event.nativeEvent.timestamp);
+    newAvailability[availIndex].availableHours.push(`${start}-${end}`);
+    newAvailability[availIndex].isAvailable = true;
+    setAvailability(newAvailability);
+    setShowTimePicker(0);
+
+  }
+
+  const handleRemoveAvailability = (index: number, interval: string) => {
+    console.log(index, interval);
+    setAvailability(availability.map((value, i) => {
+      if (i != index) return value;
+      return {
+        day: value.day,
+        isAvailable: value.isAvailable,
+        availableHours: value.availableHours.filter((entry) => entry != interval)
+      }
+    }));
+  }
+
+  const handleToggleAvailability = (index: number) => {
+    console.log("toggle");
+    setAvailability(availability.map((value, i) => {
+      if (i != index) return value;
+      return {
+        ...value,
+        isAvailable: !value.isAvailable,
+      }
+    }))
   }
 
   const mapRef = React.useRef<MapView>(null);
@@ -311,14 +339,30 @@ export default function CreateListing() {
         <View style={styles.availabilityView}>
           {weekDays.flatMap((day, index) => {
             return (
-              <TouchableOpacity 
-                key={index} 
-                style={[styles.button, 
-                {backgroundColor: themeColors.secondary}]} 
-                onPress={()=>{setAvailIndex(index); setShowTimePicker(1); }}
-              >
-                <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.header,}}>{day[0] + day[1]}</Text>
-              </TouchableOpacity>
+              <View style={{flexDirection: "row", justifyContent: "flex-start", marginLeft: 0}}>
+                <Switch
+                  onValueChange={() => handleToggleAvailability(index)}
+                  value={availability[index].isAvailable}
+                />
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.button,
+                  {backgroundColor: themeColors.secondary}]}
+                  onPress={()=>{setAvailIndex(index); setShowTimePicker(1); }}
+                >
+                  <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.header,}}>{day[0] + day[1]}</Text>
+                </TouchableOpacity>
+                {availability[index].availableHours.flatMap((item, subIndex) => 
+                  <TouchableOpacity
+                    key={subIndex}
+                    style={styles.button}
+                    onPress={() => handleRemoveAvailability(index, item)}
+                  >
+                    <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.secondary,}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                
+              </View>
             )
           })}
         </View>
@@ -363,7 +407,7 @@ export default function CreateListing() {
           textColor={Colors['light'].primary}
           accentColor={Colors['accent']}
           mode="time"
-          onChange={handleTimePick}
+          onChange={handleTimePickStart}
         />}
         {showTimePicker === 2 && <RNDateTimePicker 
           key={2}
@@ -371,7 +415,7 @@ export default function CreateListing() {
           textColor={Colors['light'].primary}
           accentColor={Colors['accent']}
           mode="time"
-          onChange={handleTimePick}
+          onChange={handleTimePickEnd}
         />}
         <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       </ScrollView>
@@ -432,8 +476,8 @@ const styles = StyleSheet.create({
   },
   availabilityView: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: "flex-start",
     justifyContent: 'space-evenly',
     width: '100%',
   },
