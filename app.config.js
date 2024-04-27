@@ -42,7 +42,8 @@ export default {
     },
     "extra": {
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
-      serverURL: process.env.SERVER_URL
+      serverURL: process.env.SERVER_URL,
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
     }
   }
 };
