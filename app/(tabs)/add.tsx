@@ -162,10 +162,11 @@ export default function CreateListing() {
   };
 
   useEffect(() => {
+    if (!spotAddress) return;
     console.log(spotAddress);
-    setTextAddress(`${spotAddress?.subThoroughfare} ${spotAddress?.thoroughfare}`);
-    setTextCity(`${spotAddress?.locality}`);
-    setTextState(`${spotAddress?.administrativeArea}`);
+    setTextAddress(`${spotAddress.subThoroughfare} ${spotAddress.thoroughfare}`);
+    setTextCity(`${spotAddress.locality}`);
+    setTextState(`${spotAddress.administrativeArea}`);
   }, [spotAddress]);
 
   const handleFindAddressOnMap = async () => {
