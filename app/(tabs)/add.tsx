@@ -386,7 +386,7 @@ export default function CreateListing() {
           }
           onPress={async () => handleSubmitCreateListing({
             thumbnail: images[0],
-            images: images,
+            images: images.filter((image) => image != ""),
             latitude: spotCoords.latitude,
             longitude: spotCoords.longitude,
             address: textAddress,

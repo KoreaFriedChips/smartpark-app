@@ -9,6 +9,7 @@ import { Star, Sparkles } from "lucide-react-native";
 import HeartButton from "./HeartButton";
 import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
+import { imageUriFromKey } from "@/serverconn";
 
 export interface Availability {
   day: string;
@@ -51,7 +52,7 @@ export default function ListingCard({ item }: {item: Listing}) {
     >
       <TouchableOpacity>
         <Image
-          source={{ uri: item.thumbnail }}
+          source={{ uri: imageUriFromKey(item.thumbnail) }}
           // placeholder={blurhash}
           style={styles.thumbnail}
           cachePolicy={"none"}

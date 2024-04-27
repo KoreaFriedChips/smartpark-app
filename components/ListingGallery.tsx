@@ -6,6 +6,7 @@ import Colors from "@/constants/Colors";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import SideSwipe from 'react-native-sideswipe';
+import { imageUriFromKey } from "@/serverconn";
 
 
 export default function ListingGallery( { listing }: {listing: Listing}) {
@@ -22,7 +23,7 @@ export default function ListingGallery( { listing }: {listing: Listing}) {
         onIndexChange={setIndex}
         renderItem={({itemIndex, currentIndex, item, animatedValue}) => (
           <Image 
-            source={{uri: item}}
+            source={{uri: imageUriFromKey(item)}}
             style={[styles.thumbnail, { width: width, borderColor: themeColors.outline }]}
           />
         )}

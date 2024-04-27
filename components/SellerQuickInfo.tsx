@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors";
 import { MessageCircleMore, BadgeCheck } from "lucide-react-native";
 
 import RatingsText from "@/components/ListingCard/RatingsText";
+import { imageUriFromKey } from "@/serverconn";
 
 export default function SellerQuickInfo({seller }: {seller: User}) {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -23,7 +24,7 @@ export default function SellerQuickInfo({seller }: {seller: User}) {
     <TouchableOpacity>
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
         <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-          <Image source={{ uri: seller.profilePicture ?? "" }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
+          <Image source={{ uri: imageUriFromKey(seller.profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
           <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
             <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
               <Text weight="semibold" style={{ fontSize: 16 }}>

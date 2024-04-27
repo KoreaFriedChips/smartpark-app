@@ -3,7 +3,7 @@ import { StyleSheet, ScrollView, Image, TouchableOpacity, useColorScheme } from 
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { BadgeCheck } from "lucide-react-native";
-import { getReviewer, getSeller, readReviews } from "@/serverconn";
+import { getReviewer, getSeller, imageUriFromKey, readReviews } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMemo } from "react";
 import RatingsText from "@/components/ListingCard/RatingsText";
@@ -47,7 +47,7 @@ return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TouchableOpacity key={index}>
                     <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
                       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                        <Image source={{ uri: reviewers[index].profilePicture ?? "" }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
+                        <Image source={{ uri: imageUriFromKey(reviewers[index].profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
                         <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
                           <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
                             <Text weight="semibold" style={{ fontSize: 16 }}>
