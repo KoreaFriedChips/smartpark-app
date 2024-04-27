@@ -122,7 +122,12 @@ export const deleteUser = async ( token: string, id: string ) => {
 
 export const createListing = async(token: string, data: any): Promise<Listing> => {
     const res = await create(token, "/api/listings", data);
-    return ListingModel.parse(res);
+    try {
+        return ListingModel.parse(res);
+    } catch (err) {
+        console.log(err);
+        return ListingModel.parse(res);
+    }
 }
 
 export const readListings = async( token: string, searchParams: any ): Promise<Listing[]> => {

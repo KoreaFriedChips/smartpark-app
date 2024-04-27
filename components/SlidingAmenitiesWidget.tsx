@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, TouchableOpacity, useColorScheme } from "react-native";
 import { Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { getTagIcon } from "@/components/TagsContainer";
 
-export const SelectableSlidingAmenitiesWidget = ({ amenities, onAmenityPress }: {amenities: string[], onAmenityPress: (amenity: string)=>void}) => {
+export const SelectableSlidingAmenitiesWidget = ({ onChange }: { onChange: (amenities: string[])=>void}) => {
   const themeColors = Colors[useColorScheme() || "light"];
+  const [amenities, setAmenities] = useState<string[]>([]);
+  useEffect(() => {
+    onChange(amenities)
+  }, [amenities]);
+
+  const handleAmenityPress = (amenity: string) => {
+    const index = amenities.indexOf(amenity);
+    if (index > -1) {
+      setAmenities(amenities.filter((_, i) => i != index));
+    } else {
+      setAmenities([...amenities, amenity]);
+    }
+  }
   const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized Vehicles","Gated","Lighting","Electric Charging",]
   return (
     <ScrollView
@@ -26,7 +39,7 @@ export const SelectableSlidingAmenitiesWidget = ({ amenities, onAmenityPress }: 
           <TouchableOpacity 
             key={index} 
             style={{ ...styles.amenities, backgroundColor: color, borderColor: themeColors.outline }}
-            onPress={()=>onAmenityPress(name)}  
+            onPress={()=>handleAmenityPress(name)}  
           >
             <TagIcon size={24} color={themeColors.primary} />
             <Text weight="semibold">{name}</Text>

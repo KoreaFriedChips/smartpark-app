@@ -20,9 +20,7 @@ const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColor
       <View  style={{ ...styles.spotImage, ...styles.button, borderColor: themeColors.outline }}>
         <ImagePlus size={100} color={themeColors.primary}
               strokeWidth={2}
-              style={{
-                marginRight: 4,
-              }}/>
+              />
       </View>}
   </TouchableOpacity>
   )
@@ -59,12 +57,27 @@ return (<View style={styles.spotImageContainer}>
 
 const styles = StyleSheet.create({
   spotImageContainer: {
-
+    flexDirection:"row", 
+    flexWrap:"wrap", 
+    width:"100%", 
+    justifyContent: "space-evenly"
   },
   spotImage: {
-
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 2,
+    marginVertical: 5
   },
   button: {
-
-  }
+    padding: 10,
+    margin: 10,
+    borderWidth: 1,
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 })
