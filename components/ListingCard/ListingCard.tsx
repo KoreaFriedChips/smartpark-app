@@ -9,25 +9,12 @@ import { Star, Sparkles } from "lucide-react-native";
 import HeartButton from "./HeartButton";
 import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
+import { imageUriFromKey } from "@/serverconn";
 
 export interface Availability {
   day: string;
   availableHours: string[];
   isAvailable: boolean;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  description: string;
-  rating: number;
-  reviews: number;
-  city: string;
-  state: string;
-  profilePicture: string;
-  activeSince: string;
-  verified: boolean;
-  listings: ListingItem[];
 }
 
 export interface Review {
@@ -37,46 +24,9 @@ export interface Review {
   date: string;
   // reviewer: User;
 }
-
-export interface ListingItem {
-  id: string;
-  thumbnail: string;
-  images: string[];
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  distance: number;
-  city: string;
-  state: string;
-  listingType: string;
-  price: number;
-  duration: string;
-  relist: boolean,
-  relistDuration: string,
-  description: string,
-  availability: Availability[],
-  active: boolean,
-  rating: number;
-  reviews: number;
-  date: string;
-  ends: string;
-  bids: number;
-  capacity: number,
-  spotsLeft: number,
-  tags: string[];
-  amenities: string[];
-  seller: User;
-  spotReviews: Review[];
-}
-
-interface ListingCardProps {
-  item: ListingItem;
-}
-
 // const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-export default function ListingCard({ item }: ListingCardProps) {
+export default function ListingCard({ item }: {item: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
 
@@ -87,8 +37,8 @@ export default function ListingCard({ item }: ListingCardProps) {
   return (
     <Link
 			href={{
-				pathname: "/listing",
-				params: { id: item.id, distance: item.distance },
+				pathname: `/listing/${item.id}`,
+				params: { distance: item.distance },
 			}}
       asChild
       style={[
@@ -102,7 +52,7 @@ export default function ListingCard({ item }: ListingCardProps) {
     >
       <TouchableOpacity>
         <Image
-          source={{ uri: item.thumbnail }}
+          source={{ uri: imageUriFromKey(item.thumbnail) }}
           // placeholder={blurhash}
           style={styles.thumbnail}
           cachePolicy={"none"}
@@ -119,7 +69,7 @@ export default function ListingCard({ item }: ListingCardProps) {
           <Text weight="semibold" style={styles.location}>{`${item.city}, ${item.state}`}</Text>
           <RatingsText rating={item.rating} reviews={item.reviews} />
         </View>
-        <Text weight="bold" style={styles.price}>{`$${item.price} / ${item.duration}`}</Text>
+        <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
         {/* <Text italic>3:00 - 5:00</Text> */}
         <Link
           href={{

@@ -6,7 +6,6 @@ import Colors from "@/constants/Colors";
 import { PartyPopper, Music, Trophy, FerrisWheel, SlidersHorizontal, Theater, CalendarClock, Cctv, Truck, LockOpen, LampDesk, PlugZap } from "lucide-react-native";
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
-import { ListingItem } from "./ListingCard/ListingCard";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm, convertKmToMiles } from "@/components/utils/utils";
 
@@ -17,9 +16,9 @@ interface TagItem {
 }
 
 interface TagsContainerProps {
-  listingData: ListingItem[];
+  listingData: Listing[];
 	search: boolean,
-  onFilterChange: (filteredData: ListingItem[]) => void;
+  onFilterChange: (filteredData: Listing[]) => void;
 }
 
 const categories: TagItem[] = [
@@ -75,7 +74,7 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
     return listingData
       .filter((listing) => selectedCategories.length === 0 || selectedCategories.some((category) => listing.tags.includes(category)))
       .map((listing) => {
-        const distanceInKm = getDistanceFromLatLonInKm(location.coords.latitude, location.coords.longitude, listing.coordinates.latitude, listing.coordinates.longitude);
+        const distanceInKm = getDistanceFromLatLonInKm(location.coords.latitude, location.coords.longitude, listing.latitude, listing.longitude);
         const distanceInMiles = convertKmToMiles(distanceInKm);
         return { ...listing, distance: parseFloat(distanceInMiles.toFixed(1)) };
       })
@@ -95,9 +94,9 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
           case "reviewsHighLow":
             return b.reviews - a.reviews;
           case "priceLowHigh":
-            return a.price - b.price;
+            return a.startingPrice - b.startingPrice;
           case "priceHighLow":
-            return b.price - a.price;
+            return b.startingPrice - a.startingPrice;
           default:
             return 0;
         }

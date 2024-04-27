@@ -4,17 +4,16 @@ import * as Location from "expo-location";
 import MapView, { Marker, Region, Callout } from "react-native-maps";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { ListingItem } from "@/components/ListingCard/ListingCard";
 import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link } from "expo-router";
-import { listingData } from "@/components/utils/ListingData";
 import { MapPin, Navigation } from "lucide-react-native";
+import { useAllListings } from "@/hooks/hooks";
 
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
-  const [filteredListingData, setFilteredListingData] = useState<ListingItem[]>([]);
+  const [filteredListingData, setFilteredListingData] = useState<Listing[]>([]);
 
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [region, setRegion] = useState<Region>({
@@ -65,10 +64,10 @@ export default function ExploreScreen() {
       ],
     },
   ];
-
+  const listingData = useAllListings();
   return (
     <View style={styles.container}>
-      <TagsContainer listingData={listingData} onFilterChange={setFilteredListingData} search={true} />
+      <TagsContainer listingData={listingData || []} onFilterChange={setFilteredListingData} search={true} />
       <MapView ref={mapRef} style={styles.map} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
         {location && <TouchableOpacity
           onPress={() => {
@@ -109,14 +108,14 @@ export default function ExploreScreen() {
             <Marker
               key={listing.id}
               coordinate={{
-                latitude: listing.coordinates.latitude,
-                longitude: listing.coordinates.longitude,
+                latitude: listing.latitude,
+                longitude: listing.longitude,
               }}
-              title={`$${listing.price}`}
+              title={`$${listing.startingPrice}`}
             >
               <Link
                 href={{
-                  pathname: "/listing",
+                  pathname: "/listing/[id]",
                   params: { id: listing.id, distance: listing.distance },
                 }}
                 asChild
@@ -125,7 +124,7 @@ export default function ExploreScreen() {
                 {TagIcon && (
                   <Tag
                     key={index}
-                    name={`$${listing.price}`}
+                    name={`$${listing.startingPrice}`}
                     Icon={TagIcon}
                     isSelected={false}
                     onPress={() => {

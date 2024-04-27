@@ -1,7 +1,64 @@
 import Constants from "expo-constants";
 import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
+import { useAuth } from "@clerk/clerk-expo";
+
+export const getReviewer = async (token: string, review: Review) => {
+    const users = await readUsers(token, { id: review.userId });
+    return users[0];
+}
+
+export const getSeller = async (token: string, listing: Listing) => {
+    const users = await readUsers(token, { id: listing.userId });
+    return users[0];
+}
+
+export const getUserIdFromClerkId = async (token: string, clerkId: string) => {
+    const users: any = await readUsers(token, { clerkId: clerkId || "" });
+    if (!users) throw new Error("clerkId not found");
+    return users[0].id;
+}
 
 export const signin = async (t: string) => { return await sendToServer(t, "/api/signin", "POST", {}, {}) };
+
+export const uploadImage = async (token: string, filename: string, filesize: number, data: Blob): Promise<string> => {
+    const env = Constants.expoConfig?.extra;
+    const serverUrl = env?.serverURL;
+    let headers = new Headers();
+    headers.set('token', token);
+    headers.set('Content-Length', String(filesize));
+    const res = await fetch(serverUrl + `/api/images/${filename}`, {
+        method: "PUT",
+        headers: headers,
+        body: data
+    });
+    const resData = await res.json();
+    return resData.data.key;
+}
+
+export const deleteImage = async (token: string, key: string) => {
+    return await serverDelete(token, `/api/images/${key}`);
+}
+
+export const fileExists = async (key: string) => {
+    const res = await fetch(imageUriFromKey(key), {method: "HEAD"});
+    return res.status == 200;
+}
+
+export const userFileExists = async (token: string, filename: string) => {
+    const res = await fetch(imageUriFromKey(filename), {method: "HEAD", headers: {token: token}});
+    return res.status == 200;
+}
+export const imageUriFromKey = (key: string) => {
+    const env = Constants.expoConfig?.extra;
+    const serverUrl = env?.serverURL;
+    return `${serverUrl}/api/images/${key}`; 
+}
+
+export const fetchImageFromUri = async (uri: string): Promise<Blob> => {
+    const res = await fetch(uri);
+    const blob = await res.blob();
+    return blob;
+}
 
 const sendToServer = async (token: string, path: string, method: string, data: any, params: any) => {
     const env = Constants.expoConfig?.extra;
@@ -16,7 +73,7 @@ const sendToServer = async (token: string, path: string, method: string, data: a
     return res;
 }
 
-const buildSearchParams = (params: any) => {
+export const buildSearchParams = (params: any) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => searchParams.append(key, String(val)));
     return searchParams;
@@ -65,7 +122,12 @@ export const deleteUser = async ( token: string, id: string ) => {
 
 export const createListing = async(token: string, data: any): Promise<Listing> => {
     const res = await create(token, "/api/listings", data);
-    return ListingModel.parse(res);
+    try {
+        return ListingModel.parse(res);
+    } catch (err) {
+        console.log(err);
+        return ListingModel.parse(res);
+    }
 }
 
 export const readListings = async( token: string, searchParams: any ): Promise<Listing[]> => {

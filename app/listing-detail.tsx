@@ -1,22 +1,19 @@
 import React from "react";
 import { StyleSheet, useColorScheme, FlatList } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import ListingCard, { ListingItem } from "@/components/ListingCard/ListingCard";
-import { listingData } from "@/components/utils/ListingData";
+import ListingCard from "@/components/ListingCard/ListingCard";
+import { useListing } from "@/hooks/hooks";
 
 
 export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
-  const params = useLocalSearchParams();
-  const { id } = params;
-  const spotData = listingData.find((item) => item.id === id);
+  const listing = useListing();
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={spotData ? [spotData] : []}
+        data={listing ? [listing] : []}
         renderItem={({ item }) => <ListingCard item={item} />}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}

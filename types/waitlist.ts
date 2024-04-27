@@ -5,7 +5,6 @@ export const WaitlistModel = z.object({
   name: z.string(),
   email: z.string(),
   use: z.string().nullish(),
-  place: z.coerce.number().int().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })

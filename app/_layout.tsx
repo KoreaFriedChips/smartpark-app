@@ -14,9 +14,10 @@ import SignInScreen from "@/components/SignInScreen";
 import ModalScreen from "@/components/ModalScreen";
 import Colors from "@/constants/Colors";
 import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-react-native";
-import { listingData } from "@/components/utils/ListingData";
+import * as Linking from 'expo-linking';
 
 import { useColorScheme } from "@/components/useColorScheme";
+import { useListing } from "@/hooks/hooks";
 // import { TouchableOpacity } from "@gorhom/bottom-sheet";
 
 export { ErrorBoundary, Router } from "expo-router";
@@ -112,15 +113,12 @@ function RootLayoutNav() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
 
-  const params = useLocalSearchParams();
-  const { id } = params;
-  const spotData = listingData.find((item) => item.id === id);
-
-  const handleShare = async () => {
+  const handleShare = async (listing: Listing | undefined) => {
     try {
+      const url = Linking.createURL(`listing/${listing?.id}`);
       const result = await Share.share({
-        message: `Check out this parking spot I found on the SmartPark app. Only $${spotData?.price} per ${spotData?.duration} in ${spotData?.city}!`,
-        url: `https://www.trysmartpark.com/listing/${spotData?.id}`,
+        message: `Check out this parking spot I found on the SmartPark app. Only $${listing?.startingPrice} per ${listing?.duration} in ${listing?.city}! ${url}`,
+        url: url
       });
 
       if (result.action === Share.sharedAction) {
@@ -193,9 +191,10 @@ function RootLayoutNav() {
   };
 
   const headerRight = () => {
+    const listing = useListing();
     return (
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity onPress={handleShare}>
+        <TouchableOpacity onPress={() => handleShare(listing)}>
           <ShareIcon
             size={22}
             color={themeColors.primary}
@@ -252,7 +251,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="listing"
+          name="listing/[id]"
           options={{
             title: "",
             // headerTitle: () => headerTitle("Listing"),
