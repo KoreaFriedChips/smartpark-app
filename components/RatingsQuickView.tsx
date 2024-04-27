@@ -40,11 +40,11 @@ export default function RatingsQuickView({ listing }: { listing: Listing}) {
 
 
 return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ ...styles.sellerContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
+          <View style={{ ...styles.sellerContainer }}>
             <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
               {reviews.length === reviewers.length && reviews.map((review, index) => {
                 return (
-                  <TouchableOpacity key={index}>
+                  <TouchableOpacity key={index} style={{...styles.reviewContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline, marginHorizontal: 5}}>
                     <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
                       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
                         <Image source={{ uri: imageUriFromKey(reviewers[index].profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
@@ -78,14 +78,11 @@ return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
 const styles = StyleSheet.create({
   sellerContainer: {
     marginTop: 22,
+  },
+  reviewContainer: {
     padding: 14,
     borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
+    borderWidth: 1
   },
   profilePicture: {
     aspectRatio: 1 / 1,
