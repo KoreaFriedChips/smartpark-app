@@ -12,6 +12,7 @@ import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/d
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
 import Constants from "expo-constants";
+import SlidingAmenitiesWidget, { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
 
 interface Availability {
   day: string,
@@ -100,7 +101,6 @@ export default function CreateListing() {
   }
 
   const handleRemoveAvailability = (index: number, interval: string) => {
-    console.log(index, interval);
     setAvailability(availability.map((value, i) => {
       if (i != index) return value;
       return {
@@ -112,7 +112,6 @@ export default function CreateListing() {
   }
 
   const handleToggleAvailability = (index: number) => {
-    console.log("toggle");
     setAvailability(availability.map((value, i) => {
       if (i != index) return value;
       return {
@@ -135,7 +134,6 @@ export default function CreateListing() {
       aspect: [4, 3],
       quality: 1,
     });
-    console.log(result);
 
     if (!result.canceled) {
       const image = await fetchImageFromUri(result.assets[0].uri);
@@ -150,20 +148,21 @@ export default function CreateListing() {
     if (images[0] === "") {
       return false;
     }
+    if (startingPrice === "" || buyPrice === "") return false;
+    if (textAddress === "" || textCity === "" || textState === "") return false;
     return true;
-  }, [images]);
+  }, [images, startingPrice, buyPrice]);
 
   const handleSubmitCreateListing = async (listingData: any) => {
-    console.log(listingData);
     if (!listingDataValid) {
       return;
     }
-    await createListing(await getToken() ?? "", listingData);
+    const createdListing = await createListing(await getToken() ?? "", listingData);
+    console.log(createdListing);
   };
 
   useEffect(() => {
     if (!spotAddress) return;
-    console.log(spotAddress);
     setTextAddress(`${spotAddress.subThoroughfare} ${spotAddress.thoroughfare}`);
     setTextCity(`${spotAddress.locality}`);
     setTextState(`${spotAddress.administrativeArea}`);
@@ -183,7 +182,6 @@ export default function CreateListing() {
       if (res.status != 200) return;
       const data: any = await res.json();
       const googleCoords = data.candidates[0].geometry.location;
-      console.log(googleCoords);
       const coords = {
         latitude: googleCoords.lat,
         longitude: googleCoords.lng
@@ -199,6 +197,15 @@ export default function CreateListing() {
     }
   }
 
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const handleAmenityPress = (amenity: string) => {
+    const index = amenities.indexOf(amenity);
+    if (index > -1) {
+      setAmenities(amenities.filter((_, i) => i != index));
+    } else {
+      setAmenities([...amenities, amenity]);
+    }
+  }
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll}>
@@ -367,6 +374,7 @@ export default function CreateListing() {
             )
           })}
         </View>
+        <SelectableSlidingAmenitiesWidget amenities={amenities} onAmenityPress={handleAmenityPress}/>
         <TouchableOpacity 
           style={[
             styles.button,
@@ -391,6 +399,7 @@ export default function CreateListing() {
             description: description,
             availability: availability,
             date: new Date(),
+            amenities: amenities,
           })}
         >
           <Text

@@ -58,7 +58,7 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Spot amenities
           </Text>
-          {listing && <SlidingAmenitiesWidget listing={listing}/>}
+          {listing && <SlidingAmenitiesWidget amenities={listing.amenities}/>}
           <Text style={{ marginTop: 16 }}>{listing.description}</Text>
           <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${listing.date.toLocaleDateString()} at ${listing.date.toLocaleTimeString()}`}</Text>
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>

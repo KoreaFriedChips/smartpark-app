@@ -4,7 +4,40 @@ import { Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { getTagIcon } from "@/components/TagsContainer";
 
-export default function SlidingAmenitiesWidget( { listing }: { listing: Listing }) {
+export const SelectableSlidingAmenitiesWidget = ({ amenities, onAmenityPress }: {amenities: string[], onAmenityPress: (amenity: string)=>void}) => {
+  const themeColors = Colors[useColorScheme() || "light"];
+  const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized Vehicles","Gated","Lighting","Electric Charging",]
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={[
+        styles.tagContainer,
+        {
+          backgroundColor: "transparent",
+          borderColor: themeColors.outline,
+        },
+      ]}
+    >
+      {allAmenities.map((name: any, index: any) => {
+        const TagIcon = getTagIcon(name);
+        const color = amenities.includes(name) ? Colors['accent'] : themeColors.header;
+        return TagIcon ? (
+          <TouchableOpacity 
+            key={index} 
+            style={{ ...styles.amenities, backgroundColor: color, borderColor: themeColors.outline }}
+            onPress={()=>onAmenityPress(name)}  
+          >
+            <TagIcon size={24} color={themeColors.primary} />
+            <Text weight="semibold">{name}</Text>
+          </TouchableOpacity>
+        ) : null;
+      })}
+    </ScrollView>
+  );
+}
+
+export default function SlidingAmenitiesWidget( { amenities }: { amenities: string[] }) {
   const themeColors = Colors[useColorScheme() || "light"];
   return (
   <ScrollView
@@ -18,7 +51,7 @@ export default function SlidingAmenitiesWidget( { listing }: { listing: Listing 
       },
     ]}
   >
-    {listing.amenities.map((name: any, index: any) => {
+    {amenities.map((name: any, index: any) => {
       const TagIcon = getTagIcon(name);
       return TagIcon ? (
         <TouchableOpacity key={index} style={{ ...styles.amenities, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
