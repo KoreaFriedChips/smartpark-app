@@ -1,18 +1,17 @@
 import { Modal, ScrollView, StyleSheet, useColorScheme, TouchableOpacity, Switch } from 'react-native';
 import { Image } from 'expo-image';
 import { Text, View, TextInput } from '@/components/Themed';
-import React, { useEffect, useState } from 'react';
-import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
+import React, { useState } from 'react';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
-import { createListing, readUsers, getUserIdFromClerkId, uploadImage, fetchImageFromUri, imageUriFromKey, buildSearchParams } from '@/serverconn';
+import { createListing, uploadImage, fetchImageFromUri, imageUriFromKey } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
-import Constants from "expo-constants";
-import SlidingAmenitiesWidget, { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
+import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
+import LocationInputWidget, { LocationProps } from '@/components/add/LocationInputWidget';
 
 interface Availability {
   day: string,
@@ -37,23 +36,15 @@ const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColor
 
 export default function CreateListing() {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [region, setRegion] = useState<Region>({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.00922,
-    longitudeDelta: 0.00421,
-  });
-
-  const [spotCoords, setSpotCoords] = useState<LatLng>({
-    latitude: 37.78825,
-    longitude: -122.4324
-  });
-  const [spotAddress, setSpotAddress] = useState<Address>();
-  const [textAddress, setTextAddress] = useState("");
-  const [textCity, setTextCity] = useState("");
-  const [textState, setTextState] = useState("");
+  
   const { isLoaded, isSignedIn, userId, signOut, getToken } = useAuth();
-
+  const [location, setLocation] = useState<LocationProps>({
+    latitude: 37,
+    longitude: -122,
+    address: "",
+    city: "",
+    state: "",
+  })
 
   const [listingType, setListingType] = useState("Parking Spot");
   const [startingPrice, setStartingPrice] = useState("");
@@ -121,11 +112,6 @@ export default function CreateListing() {
     }))
   }
 
-  const mapRef = React.useRef<MapView>(null);
-  const handlePinChange = async (coord: LatLng) => {
-    setSpotAddress(await mapRef.current?.addressForCoordinate(coord));
-  }
-
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
   const pickImage = async (index: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -157,14 +143,15 @@ export default function CreateListing() {
       setInvalidDataMsg("must include both starting price and buy price");
       return false;
     }
-    if (textAddress === "" || textCity === "" || textState === "") {
+    if (location.address === "" || location.city === "" || location.state === "") {
       setInvalidDataMsg("must input address, city, and state");
       return false;
     }
     return true;
-  }, [images, startingPrice, buyPrice, textAddress, textCity, textState]);
+  }, [images, startingPrice, buyPrice, location]);
 
   const handleSubmitCreateListing = async (listingData: any) => {
+    console.log(listingData);
     if (!listingDataValid) {
       setModalVisible(true);
       return;
@@ -172,42 +159,6 @@ export default function CreateListing() {
     const createdListing = await createListing(await getToken() ?? "", listingData);
     console.log(createdListing);
   };
-
-  useEffect(() => {
-    if (!spotAddress) return;
-    setTextAddress(`${spotAddress.subThoroughfare} ${spotAddress.thoroughfare}`);
-    setTextCity(`${spotAddress.locality}`);
-    setTextState(`${spotAddress.administrativeArea}`);
-  }, [spotAddress]);
-
-  const handleFindAddressOnMap = async () => {
-    try {
-      const params = {
-        fields: "geometry",
-        input: `${textAddress} ${textCity}, ${textState}`,
-        inputtype: "textquery",
-        key: Constants.expoConfig?.extra?.googleMapsApiKey,
-      }
-      const searchParams = buildSearchParams(params).toString();
-      const googleUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
-      const res = await fetch(googleUrl + "?" + searchParams);
-      if (res.status != 200) return;
-      const data: any = await res.json();
-      const googleCoords = data.candidates[0].geometry.location;
-      const coords = {
-        latitude: googleCoords.lat,
-        longitude: googleCoords.lng
-      }
-      setSpotCoords(coords);
-      handlePinChange(coords);
-      setRegion({
-        ...region,
-        ...coords
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
 
   const [amenities, setAmenities] = useState<string[]>([]);
   const handleAmenityPress = (amenity: string) => {
@@ -245,73 +196,7 @@ export default function CreateListing() {
         <View style={styles.spotImageContainer}>
           {images.flatMap((image, i) => <SpotImage key={i} image={image} themeColors={themeColors} onPress={()=> pickImage(i)}/>)}
         </View>  
-        <Text weight="semibold" style={{ color: themeColors.third, marginTop: 15 }}> Address </Text>
-        <TextInput
-          style={[styles.input, {borderColor: themeColors.outline}]}
-          placeholder="Address"
-          onChangeText={setTextAddress}
-          value={textAddress}
-          keyboardType="default"
-          returnKeyType="next"
-          clearButtonMode="always"
-        />
-        <Text weight="semibold" style={{ color: themeColors.third }}> City </Text>
-        <TextInput
-          style={[styles.input, {borderColor: themeColors.outline}]}
-          placeholder="City"
-          onChangeText={setTextCity}
-          value={textCity}
-          keyboardType="default"
-          returnKeyType="next"
-          clearButtonMode="always"
-        />
-        <Text weight="semibold" style={{ color: themeColors.third }}> State </Text>
-        <TextInput
-          style={[styles.input, {borderColor: themeColors.outline}]}
-          placeholder="State"
-          onChangeText={setTextState}
-          value={spotAddress?.administrativeArea}
-          keyboardType="default"
-          returnKeyType="next"
-          clearButtonMode="always"
-        />
-        <TouchableOpacity 
-          style={[
-            styles.button,
-           {
-              backgroundColor: Colors['accent'],
-              borderColor: Colors['accentAlt'],
-              marginTop: 16
-            }]
-          }
-          onPress={handleFindAddressOnMap}
-        >
-          <Text
-            weight="bold"
-            style={{
-              ...styles.buttonText,
-              color: Colors["light"].primary,
-            }}>
-            Find address on map
-          </Text>
-        </TouchableOpacity>
-        <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-          <MapView
-          ref={mapRef}
-            style={[styles.map, { borderColor: themeColors.outline }]}
-            zoomEnabled={false}
-            region={region}
-            onRegionChangeComplete={setRegion}
-            onPress={(event) => {
-              setSpotCoords(event.nativeEvent.coordinate);
-              handlePinChange(event.nativeEvent.coordinate);
-            }}
-            showsCompass={false}>
-            <Marker coordinate={spotCoords}>
-
-            </Marker>
-          </MapView>
-        </View>
+        <LocationInputWidget onChange={setLocation} />
         <Text weight="semibold" style={{ color: themeColors.third }}> Description </Text>
         <TextInput
           style={[styles.input, {borderColor: themeColors.outline}]}
@@ -380,13 +265,12 @@ export default function CreateListing() {
         <View style={styles.availabilityView}>
           {weekDays.flatMap((day, index) => {
             return (
-              <View style={{flexDirection: "row", justifyContent: "flex-start", marginLeft: 0}}>
+              <View key={index} style={{flexDirection: "row", justifyContent: "flex-start", marginLeft: 0}}>
                 <Switch
                   onValueChange={() => handleToggleAvailability(index)}
                   value={availability[index].isAvailable}
                 />
                 <TouchableOpacity
-                  key={index}
                   style={[styles.button,
                   {backgroundColor: themeColors.secondary}]}
                   onPress={()=>{setAvailIndex(index); setShowTimePicker(1); }}
@@ -420,11 +304,7 @@ export default function CreateListing() {
           onPress={async () => handleSubmitCreateListing({
             thumbnail: images[0],
             images: images.filter((image) => image != ""),
-            latitude: spotCoords.latitude,
-            longitude: spotCoords.longitude,
-            address: textAddress,
-            city: textCity,
-            state: textState,
+            ...location,
             listingType: listingType,
             startingPrice: Number(startingPrice),
             buyPrice: Number(buyPrice),
@@ -485,22 +365,6 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     paddingTop: 12,
     padding: 16,
-  },
-  map: {
-    width: Dimensions.get("window").width - 32,
-    height: 300,
-    marginTop: 22,
-    marginBottom: 42,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
   },
   button: {
     padding: 10,
