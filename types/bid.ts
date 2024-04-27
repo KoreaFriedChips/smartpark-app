@@ -5,6 +5,8 @@ export const BidModel = z.object({
   amount: z.coerce.number(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  starts: z.coerce.date(),
+  ends: z.coerce.date(),
   userId: z.string(),
   listingId: z.string(),
 })

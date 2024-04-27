@@ -1,6 +1,13 @@
 import Constants from "expo-constants";
 import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
 import { useAuth } from "@clerk/clerk-expo";
+import {GetToken} from '@clerk/types';
+
+
+export const getHighestBid = async (getToken: GetToken, listingId: string, starts: Date, ends: Date) => {
+    const bids = readBids(await getToken() ?? "", { listingId, starts, ends});
+    return bids
+}
 import { z } from "zod";
 
 export const getReviewer = async (token: string, review: Review) => {
@@ -205,8 +212,8 @@ export const deleteWaitlist = async ( token: string, id: string ) => {
     return await serverDelete(token, `/api/waitlists/${id}`);
 }
 
-export const createBid = async(token: string, data: any): Promise<Bid> => {
-    const res = await create(token, "/api/bids", data);
+export const createBid = async(getToken: GetToken, data: any): Promise<Bid> => {
+    const res = await create(await getToken() ?? "", "/api/bids", data);
     return BidModel.parse(res);
 }
 
