@@ -42,6 +42,7 @@ export default function CreateListing() {
     city: "",
     state: "",
     availability: [],
+    intervals: [],
     thumbnail: "",
     images: [""],
     listingType: "Parking Spot",
