@@ -26,6 +26,7 @@ export default function CreateListing() {
     city: string;
     state: string;
     availability: Availability;
+    intervals: Interval[],
     thumbnail: string;
     images: string[];
     listingType: string;
@@ -42,6 +43,7 @@ export default function CreateListing() {
     city: "",
     state: "",
     availability: [],
+    intervals: [],
     thumbnail: "",
     images: [""],
     listingType: "Parking Spot",
@@ -98,7 +100,7 @@ export default function CreateListing() {
           options={["minute", "hour", "day", "week", "month"]} 
           name={"Duration"}
         />
-        <AvailabilityWidget onChange={(availability) => listingData.current.availability = availability}/>
+        <AvailabilityWidget onChange={(availability) => listingData.current.availability = availability} onIntervalChange={(intervals) => listingData.current.intervals=intervals}/>
         <SelectableSlidingAmenitiesWidget onChange={(amenities) => listingData.current.amenities = amenities}/>
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmitCreateListing} >
           <Text weight="bold" style={styles.submitButtonText}> Create Listing </Text>

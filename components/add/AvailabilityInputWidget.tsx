@@ -3,7 +3,8 @@ import { Text, View } from '@/components/Themed';
 import React, { useEffect, useState } from 'react';
 import Colors from '@/constants/Colors';
 import RNDateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-
+import { intervalToStr } from '@/components/utils/ListingUtils';
+import { interval } from 'date-fns';
 
 interface AvailabilityItem {
   day: string,
@@ -13,26 +14,21 @@ interface AvailabilityItem {
 
 export type Availability = AvailabilityItem[]
 
-export default function AvailabilityWidget({onChange}: {onChange: (props: Availability)=>void}) {
+export default function AvailabilityWidget({onChange: onAvailabilityChange, onIntervalChange}: 
+  {onChange: (props: Availability)=>void, onIntervalChange: (props: Interval[])=>void}) 
+  {
   const themeColors = Colors[useColorScheme() || "light"];
   const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  const [availability, setAvailability] = useState<Array<AvailabilityItem>>(weekDays.map((value, index) => { return {
-    day: value,
-    availableHours: [],
-    isAvailable: false
-  }}));
+  const  weekStart = new Date(new Date().setDate(new Date().getDate() - new Date().getDay()));
+  const [intervals, setIntervals] = useState<Array<Interval>>([]);
+
   useEffect(() => {
-    onChange(availability);
-  }, [availability]);
+    onIntervalChange(intervals);
+  }, [intervals]);
+
   const [showTimePicker, setShowTimePicker] = useState(0);
   const [startTime, setStartTime] = useState(0);
   const [availIndex, setAvailIndex] = useState(0);
-  const timeToStr = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    return `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`
-  }
   const handleTimePickStart = (event: DateTimePickerEvent) => {
     if (event.type === 'dismissed') {
       setShowTimePicker(0);
@@ -47,35 +43,28 @@ export default function AvailabilityWidget({onChange}: {onChange: (props: Availa
       setShowTimePicker(0);
       return;
     }
-    let newAvailability = availability;
-    const start = timeToStr(startTime);
-    const end = timeToStr(event.nativeEvent.timestamp);
-    newAvailability[availIndex].availableHours.push(`${start}-${end}`);
-    newAvailability[availIndex].isAvailable = true;
-    setAvailability(newAvailability);
+    const newInterval = interval(startTime, event.nativeEvent.timestamp);
+    setIntervals([...intervals, newInterval]);
     setShowTimePicker(0);
 
   }
 
-  const handleRemoveAvailability = (index: number, interval: string) => {
-    setAvailability(availability.map((value, i) => {
-      if (i != index) return value;
-      return {
-        day: value.day,
-        isAvailable: value.isAvailable,
-        availableHours: value.availableHours.filter((entry) => entry != interval)
-      }
-    }));
+  const handleRemoveAvailability = (interval: Interval) => {
+    setIntervals(intervals.filter((value, i) => value != interval));
+  }
+
+  const getIntervalStr = (interval: Interval) => {
+    
   }
 
   const handleToggleAvailability = (index: number) => {
-    setAvailability(availability.map((value, i) => {
-      if (i != index) return value;
-      return {
-        ...value,
-        isAvailable: !value.isAvailable,
-      }
-    }))
+    // setAvailability(availability.map((value, i) => {
+    //   if (i != index) return value;
+    //   return {
+    //     ...value,
+    //     isAvailable: !value.isAvailable,
+    //   }
+    // }))
   }
 
 return (<View>
@@ -84,10 +73,6 @@ return (<View>
           {weekDays.flatMap((day, index) => {
             return (
               <View key={index} style={{flexDirection: "row", justifyContent: "flex-start", marginLeft: 0}}>
-                <Switch
-                  onValueChange={() => handleToggleAvailability(index)}
-                  value={availability[index].isAvailable}
-                />
                 <TouchableOpacity
                   style={[styles.button,
                   {backgroundColor: themeColors.secondary}]}
@@ -95,13 +80,13 @@ return (<View>
                 >
                   <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.header,}}>{day[0] + day[1]}</Text>
                 </TouchableOpacity>
-                {availability[index].availableHours.flatMap((item, subIndex) => 
+                {intervals.filter((interval) => interval.start.getDay() == index).flatMap((interval, subIndex) => 
                   <TouchableOpacity
                     key={subIndex}
                     style={styles.button}
-                    onPress={() => handleRemoveAvailability(index, item)}
+                    onPress={() => handleRemoveAvailability(interval)}
                   >
-                    <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.secondary,}}>{item}</Text>
+                    <Text style={{ ...styles.buttonText, ...styles.availabilityButtonText, color: themeColors.secondary,}}>{intervalToStr(interval)}</Text>
                   </TouchableOpacity>
                 )}
                 
@@ -111,7 +96,7 @@ return (<View>
         </View>
         {showTimePicker === 1 && <RNDateTimePicker
           key={1} 
-          value={new Date(0)} 
+          value={new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + availIndex)} 
           textColor={Colors['light'].primary}
           accentColor={Colors['accent']}
           mode="time"

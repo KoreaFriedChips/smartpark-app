@@ -12,6 +12,11 @@ const AvailabilityModel = z.object({
   isAvailable: z.boolean()
 })
 
+export const IntervalModel = z.object({
+  start: z.coerce.date(),
+  end: z.coerce.date(),
+})
+
 export const ListingModel = z.object({
   id: z.string(),
   thumbnail: z.string(),
@@ -29,6 +34,7 @@ export const ListingModel = z.object({
   relistDuration: z.string().nullish(),
   description: z.string().nullish(),
   availability: z.array(AvailabilityModel),
+  intervals: z.array(IntervalModel),
   active: z.boolean(),
   rating: z.coerce.number(),
   reviews: z.coerce.number().int(),
