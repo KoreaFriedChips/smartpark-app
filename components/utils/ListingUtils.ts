@@ -1,54 +1,54 @@
 import moment from "moment";
 import { Availability } from "../ListingCard/ListingCard";
+import * as datefns from "date-fns";
 
-export const getSpotAvailability = (availability: Availability[]) => {
-  const today = moment().format("dddd");
-  const currentTime = moment();
-  let nextAvailable;
-
-  for (let dayInfo of availability) {
-    if (dayInfo.day === today && dayInfo.isAvailable) {
-      for (let hours of dayInfo.availableHours) {
-        const [start, end] = hours.split("-");
-        const startTime = moment(start, "HH:mm");
-        const endTime = moment(end, "HH:mm");
-
-        if (currentTime.isBetween(startTime, endTime) || currentTime.isBefore(startTime)) {
-          nextAvailable = { day: today, time: hours };
-          break;
-        }
-      }
+export const getAvailabilityFromIntervals = (intervals: Interval[]): Interval | undefined => {
+  for (const interval of intervals) {
+    if (datefns.isWithinInterval(Date.now(), interval)) {
+      return datefns.interval(Date.now(), interval.end);
     }
-    if (nextAvailable) break;
-  }
-
-  if (!nextAvailable) {
-    for (let i = 1; i <= 7; i++) {
-      const nextDay = moment().add(i, "days").format("dddd");
-      const nextDayInfo = availability.find((dayInfo) => dayInfo.day === nextDay && dayInfo.isAvailable);
-      if (nextDayInfo) {
-        nextAvailable = { day: nextDay, time: nextDayInfo.availableHours[0] };
-        break;
-      }
+    if (datefns.isBefore(Date.now(), interval.start)) {
+      return interval;
     }
   }
-
-  return nextAvailable;
-};
+}
 
 export const convertToHour = (timeRange: string) => {
-  const [startTime, endTime] = timeRange.split("-");
-
-  const convertTime = (time: string) => {
-    const [hours, minutes] = time.split(":");
-    const hour = parseInt(hours, 10);
+  const [[startHours, startMinutes], [endHours, endMinutes]] = timeRangeStrToNumbers(timeRange);
+  const getAmPmString = (hour: number, minutes: number) => {
     const isPM = hour >= 12;
     const adjustedHour = isPM ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${adjustedHour}:${minutes} ${isPM ? "PM" : "AM"}`;
-  };
-
-  const convertedStartTime = convertTime(startTime);
-  const convertedEndTime = convertTime(endTime);
+    const adjustedMinutes = minutes < 10 ? `0${minutes}` : String(minutes);
+    return `${adjustedHour}:${adjustedMinutes} ${isPM ? "PM" : "AM"}`;
+  }
+  const convertedStartTime = getAmPmString(startHours, startMinutes);
+  const convertedEndTime = getAmPmString(endHours, endMinutes);
   
   return `${convertedStartTime} - ${convertedEndTime}`;
 };
+
+export const timeRangeStrToNumbers = (timeRange: string) => {
+  const [startTime, endTime] = timeRange.split("-");
+  const convertTime = (time: string) => {
+    const [hourStr, minuteStr] = time.split(":");
+    const hours = Number(hourStr);
+    const minutes = Number(minuteStr);
+    return [hours, minutes]
+  };
+
+  return [convertTime(startTime), convertTime(endTime)]
+}
+
+export const timeStampToStr = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  return `${hours < 10 ? "0" : ""}${hours}:${minutes < 10 ? "0" : ""}${minutes}`
+}
+
+export const intervalToStr = (interval: Interval) => {
+  const start = timeStampToStr(interval.start.getTime());
+  const end = timeStampToStr(interval.end.getTime());
+  const timeRange = `${start}-${end}`;
+  return convertToHour(timeRange);
+}

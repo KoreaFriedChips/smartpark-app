@@ -5,8 +5,9 @@ import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import Colors from "@/constants/Colors";
 import { Clock, TrendingUp, Sparkles, ShoppingCart} from "lucide-react-native";
-import { getSpotAvailability, convertToHour } from "@/components/utils/ListingUtils";
+import { getAvailabilityFromIntervals, intervalToStr } from "@/components/utils/ListingUtils";
 import moment from "moment";
+import { isToday } from "date-fns";
 
 
 export default function ListingBidWidget({listing}: {listing: Listing}) {
@@ -34,16 +35,13 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
     return () => clearInterval(intervalId);
   }, [listing]);
 
-  const [nextAvailableSlot, setNextAvailableSlot] = useState<{ day: string; time: string } | undefined>(undefined);
+  const [nextAvailableSlot, setNextAvailableSlot] = useState<Interval | undefined>(undefined);
   useEffect(() => {
     if (!listing) return;
-    const availableSlot = getSpotAvailability(listing.availability);
+    const availableSlot = getAvailabilityFromIntervals(listing.intervals);
     
     if (!availableSlot) return;
-    setNextAvailableSlot({
-      ...availableSlot,
-      time: convertToHour(availableSlot.time),
-    });
+    setNextAvailableSlot(availableSlot);
     
   }, [listing]);
   return (
@@ -55,9 +53,9 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
         <View style={{ backgroundColor: "transparent" }}>
           {nextAvailableSlot ? (
             <View style={{ backgroundColor: "transparent" }}>
-              <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Available {nextAvailableSlot.day === moment().format("dddd") ? "today" : nextAvailableSlot.day}</Text>
+              <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Available {isToday(nextAvailableSlot.start) ? "today" : moment(nextAvailableSlot.start).format("dddd")}</Text>
               <Text weight="semibold" style={{ fontSize: 18 }}>
-                {nextAvailableSlot.time}
+                {intervalToStr(nextAvailableSlot)}
               </Text>
             </View>
           ) : (
