@@ -1,8 +1,18 @@
 import Constants from "expo-constants";
-import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
+import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReservationModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
 import { useAuth } from "@clerk/clerk-expo";
 import {GetToken} from '@clerk/types';
 
+
+export const createReservation = async (getToken: GetToken, listingId: string, interval: Interval) => {
+    const reservationData = {
+        starts: interval.start,
+        ends: interval.end,
+        listingId
+    }
+    const res = await create(await getToken() ?? "", "/api/reservations", reservationData);
+    return ReservationModel.parse(res);
+}
 
 export const getHighestBid = async (getToken: GetToken, listingId: string, starts: Date, ends: Date) => {
     const bids = readBids(await getToken() ?? "", { listingId, starts, ends});

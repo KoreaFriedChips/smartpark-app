@@ -4,9 +4,6 @@ import * as datefns from "date-fns";
 
 export const getAvailabilityFromIntervals = (intervals: Interval[]): Interval | undefined => {
   for (const interval of intervals) {
-    if (datefns.isWithinInterval(Date.now(), interval)) {
-      return datefns.interval(Date.now(), interval.end);
-    }
     if (datefns.isBefore(Date.now(), interval.start)) {
       return interval;
     }
