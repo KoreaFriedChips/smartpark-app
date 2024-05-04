@@ -10,6 +10,8 @@ import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesW
 import LocationInputWidget from '@/components/add/LocationInputWidget';
 import AvailabilityWidget, { Availability } from '@/components/add/AvailabilityInputWidget';
 import ImageInputWidget from '@/components/add/ImageInputWidget';
+import ModalScreen from '@/components/ModalScreen';
+import { showErrorPage } from '@/components/utils/utils';
 
 
 
@@ -42,7 +44,6 @@ export default function CreateListing() {
     city: "",
     state: "",
     availability: [],
-    intervals: [],
     thumbnail: "",
     images: [""],
     listingType: "Parking Spot",
@@ -56,15 +57,15 @@ export default function CreateListing() {
 
   const listingDataValid = () => {
     if (listingData.current.images[0] === "") {
-      setInvalidDataMsg("must include thumbnail (top left image)");
+      showErrorPage("must include thumbnail (top left image)");
       return false;
     }
     if (Number(listingData.current.startingPrice) === 0 || Number(listingData.current.buyPrice) === 0) {
-      setInvalidDataMsg("must include both starting price and buy price");
+      showErrorPage("must include both starting price and buy price");
       return false;
     }
     if (listingData.current.address === "" || listingData.current.city === "" || listingData.current.state === "") {
-      setInvalidDataMsg("must input address, city, and state");
+      showErrorPage("must input address, city, and state");
       return false;
     }
     return true;
@@ -86,7 +87,6 @@ export default function CreateListing() {
   
   return (
     <View style={styles.container}>
-      <ErrorModal visible={modalVisible} message={invalidDataMsg} onRequestClose={()=>setModalVisible(!modalVisible)}/>
       <ScrollView style={styles.scroll}>
         <ImageInputWidget onChange={(images) => {listingData.current.images = images;}}/>
         <LocationInputWidget onChange={(location) => listingData.current = {...listingData.current, ...location}} />

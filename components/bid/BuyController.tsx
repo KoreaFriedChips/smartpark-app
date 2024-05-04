@@ -5,6 +5,7 @@ import { useListing } from '@/hooks/hooks';
 import { useEffect, useRef } from 'react';
 import { createReservation } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
+import { showErrorPage } from '@/components/utils/utils';
 
 export default function BuyController() {
   const { getToken } = useAuth();
@@ -21,7 +22,14 @@ export default function BuyController() {
   
   const handleSubmitBuy = async() => {
     if (!listing) return;
-    if (!desiredInterval.current) return;
+    if (listing.availability.length === 0) {
+      showErrorPage("listing has no availability");
+      return;
+    }
+    if (!desiredInterval.current) {
+      showErrorPage("you must select a timeslot");
+      return;
+    }
 
     try {
       const reservation = await createReservation(getToken, listing.id, desiredInterval.current);

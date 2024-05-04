@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { minutesToMilliseconds } from "date-fns";
+import { showErrorPage } from "@/components/utils/utils";
 
 export default function BidController(){
   const {getToken} = useAuth();
@@ -36,28 +37,19 @@ export default function BidController(){
   const [highestBid, setHighestBid] = useState<Bid>();
   setInterval(async ()=>  setHighestBid(await fetchHighestBid()), minutesToMilliseconds(1))
 
-  const [errMsg, setErrMsg] = useState("");
-  useEffect(() => {
-    console.log(errMsg);
-  }, [errMsg]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-
   const handleSubmitBid = async () => {
 
     if (!desiredSlot.current) {
-      setErrMsg("must select a timeslot");
-      setModalVisible(true);
-      return;
-    }
-    if (!highestBid) {
-      setHighestBid(await fetchHighestBid());
+      showErrorPage("must select a timeslot");
       return;
     }
 
-    if (amount.current < highestBid.amount) {
-      setErrMsg("bid must be higher than current highest");
-      setModalVisible(true);
+    if (!highestBid) {
+      await setHighestBid(await fetchHighestBid());
+    }
+
+    if (highestBid && amount.current < highestBid.amount) {
+      showErrorPage("bid must be higher than current highest");
       return;
     }
 

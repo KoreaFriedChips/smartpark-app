@@ -278,6 +278,15 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen 
+          name="error" 
+          options={{
+            presentation: "modal", 
+            title: "",
+            headerTitle: () => headerTitle("Error"),
+            headerTitleAlign: "center",
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );
