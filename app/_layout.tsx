@@ -241,6 +241,21 @@ function RootLayoutNav() {
         />
         <Stack.Screen name="bid/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
+          name="buy/buy-now"
+          options={{
+            presentation: "modal",
+            title: "",
+            headerTitle: () => headerTitle("Buy Now"),
+            headerStyle: {
+              backgroundColor: themeColors.background,
+            },
+            headerLeft: () => null,
+            headerRight: () => headerRightClose(),
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen name="buy/success" options={{presentation: "modal", title: ""}}/>
+        <Stack.Screen
           name="listing-detail"
           options={{
             presentation: "modal",

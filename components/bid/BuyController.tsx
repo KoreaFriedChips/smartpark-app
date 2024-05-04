@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { createReservation } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';
 import { showErrorPage } from '@/components/utils/utils';
+import { router } from 'expo-router';
 
 export default function BuyController() {
   const { getToken } = useAuth();
@@ -35,8 +36,11 @@ export default function BuyController() {
       const reservation = await createReservation(getToken, listing.id, desiredInterval.current);
       console.log("reservation created");
       console.log(reservation);
-    } catch (err) {
+      router.push("/buy/success");
+      desiredInterval.current = undefined;
+    } catch (err: any) {
       console.log(err);
+      showErrorPage(err.message);
     }
 
   }
