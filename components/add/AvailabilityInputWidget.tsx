@@ -14,8 +14,8 @@ interface AvailabilityItem {
 
 export type Availability = AvailabilityItem[]
 
-export default function AvailabilityWidget({onChange: onAvailabilityChange, onIntervalChange}: 
-  {onChange: (props: Availability)=>void, onIntervalChange: (props: Interval[])=>void}) 
+export default function AvailabilityWidget({onChange}: 
+  {onChange: (props: Interval[])=>void}) 
   {
   const themeColors = Colors[useColorScheme() || "light"];
   const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -23,7 +23,7 @@ export default function AvailabilityWidget({onChange: onAvailabilityChange, onIn
   const [intervals, setIntervals] = useState<Array<Interval>>([]);
 
   useEffect(() => {
-    onIntervalChange(intervals);
+    onChange(intervals);
   }, [intervals]);
 
   const [showTimePicker, setShowTimePicker] = useState(0);

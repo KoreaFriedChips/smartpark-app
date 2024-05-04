@@ -38,7 +38,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
   const [nextAvailableSlot, setNextAvailableSlot] = useState<Interval | undefined>(undefined);
   useEffect(() => {
     if (!listing) return;
-    const availableSlot = getAvailabilityFromIntervals(listing.intervals);
+    const availableSlot = getAvailabilityFromIntervals(listing.availability);
     
     if (!availableSlot) return;
     setNextAvailableSlot(availableSlot);
