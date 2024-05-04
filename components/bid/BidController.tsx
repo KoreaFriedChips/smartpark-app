@@ -11,56 +11,58 @@ export default function BidController(){
   const {getToken} = useAuth();
 
   const listing = useListing();
-  let bidData = useRef({
-    amount: 0,
-    starts: new Date("2024-05-08T14:23:00.000+00:00"),
-    ends: new Date("2024-05-12T14:23:00.000+00:00"), 
-    listingId: listing?.id,
-  });
+  const amount = useRef(0);
+  const desiredSlot = useRef<Interval | undefined>(undefined);
+
   useEffect(() => {
     if (!listing) return;
-    bidData.current.listingId = listing.id;
+    if (listing.availability.length === 0) return;
+    desiredSlot.current = listing.availability[0];
+
   }, [listing]);
 
-  const highestBid = useRef<Bid>();
-  useEffect(() => {
-    const fetchHighestBid = async () => {
+
+  const fetchHighestBid = async () => {
+    try {
       if (!listing) return;
-      const bids = await getHighestBid(getToken, listing.id, bidData.current.starts, bidData.current.ends);
-      highestBid.current = bids[0];
-    }  
-    fetchHighestBid();
-  }, [getToken, listing, bidData]);
-
-  useEffect(() => {
-    console.log(highestBid);
-  }, [highestBid]);
-
+      if (!desiredSlot.current) return;
+      const bids = await getHighestBid(getToken, listing.id, desiredSlot.current.start, desiredSlot.current.end);
+      return bids[0];
+    } catch (err) {
+      return;
+    }
+  }  
 
   const [errMsg, setErrMsg] = useState("");
+  useEffect(() => {
+    console.log(errMsg);
+  }, [errMsg]);
+
   const [modalVisible, setModalVisible] = useState(false);
-  const isBidValid = () => {
-    if (highestBid.current && bidData.current.amount <= highestBid.current.amount) {
-      setErrMsg("bid must be greater than the current highest bid");
-      return false;
-    }
-    return true;
-  }
 
   const handleSubmitBid = async () => {
-    if (!isBidValid()) {
+
+    if (!desiredSlot.current) {
+      setErrMsg("must select a timeslot");
       setModalVisible(true);
       return;
     }
+    const highestBid = await fetchHighestBid();
+    if (highestBid && amount.current < highestBid.amount) {
+      setErrMsg("bid must be higher than current highest");
+      setModalVisible(true);
+      return;
+    }
+
     try {
-      const bid = await createBid(getToken, bidData);
+      const bid = await createBid(getToken, {
+        amount: amount.current,
+        starts: desiredSlot.current?.start,
+        ends: desiredSlot.current?.end,
+        listingId: listing?.id
+      });
+
       console.log(bid);
-      bidData.current = {
-        ...bidData.current,
-        amount: 0,
-        starts: new Date(Date.now()),
-        ends: new Date(Date.now() + 1),
-      }
     } catch (err) {
       console.log(err);
     }
