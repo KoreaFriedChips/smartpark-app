@@ -226,7 +226,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
         <Stack.Screen
-          name="add-bid"
+          name="bid/add-bid"
           options={{
             presentation: "modal",
             title: "",
@@ -239,6 +239,7 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen name="bid/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
           name="listing-detail"
           options={{

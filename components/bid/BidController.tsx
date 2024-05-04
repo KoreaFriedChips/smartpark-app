@@ -7,6 +7,7 @@ import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { minutesToMilliseconds } from "date-fns";
 import { showErrorPage } from "@/components/utils/utils";
+import { router } from "expo-router";
 
 export default function BidController(){
   const {getToken} = useAuth();
@@ -60,10 +61,14 @@ export default function BidController(){
         ends: desiredSlot.current?.end,
         listingId: listing?.id
       });
-
+      router.push("/bid/success");
       console.log(bid);
-    } catch (err) {
+
+      amount.current = 0;
+      desiredSlot.current = undefined;
+    } catch (err: any) {
       console.log(err);
+      showErrorPage(err.message);
     }
   }
 

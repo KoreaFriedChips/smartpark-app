@@ -73,7 +73,7 @@ function ListingCard({ item }: {item: Listing}) {
         {/* <Text italic>3:00 - 5:00</Text> */}
         <Link
           href={{
-						pathname: "/add-bid",
+						pathname: "/bid/add-bid",
 						params: { id: item.id },
 					}}
           asChild
