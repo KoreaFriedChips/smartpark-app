@@ -37,7 +37,7 @@ export default function Reservation() {
   const handleRereserve = async () => {
     if (!listing) return;
     router.push({
-      pathname: `/listing/${listing.id}`
+      pathname: `/listing/${listing.id}/detail`
     })
   }
 

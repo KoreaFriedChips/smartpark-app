@@ -269,7 +269,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="listing/[id]"
+          name="listing/[id]/detail"
           options={{
             title: "",
             // headerTitle: () => headerTitle("Listing"),
