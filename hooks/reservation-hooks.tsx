@@ -1,25 +1,27 @@
 import { readUserReservations, getListingFromReservation, readReservation } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useState, useEffect } from "react";
-import { useUser } from "./user-hooks";
+import { useUserContext } from "./user-hooks";
 
 
 export const useReservations = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
-  const user = useUser();
+  const user = useUserContext();
   const [reservations, setReservations] = useState<Reservation[]>();
   const [listings, setListings] = useState<Listing[]>();
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!isLoaded || !isSignedIn || !user) return;
-      const reservations = await readUserReservations(getToken, user.id);
-      setReservations(reservations);
-    };
+
+  const fetchReservations = async () => {
     try {
-      fetchReservations();
+      if (!isLoaded || !isSignedIn || !user) return;
+      const reservations = await readUserReservations(getToken, user.id)
+      setReservations(reservations);
     } catch (err) {
       console.log(err);
+      setReservations([]);
     }
+  };
+  useEffect(() => {
+    fetchReservations();
   }, [isLoaded, isSignedIn, getToken, user]);
 
   useEffect(() => {
@@ -35,7 +37,11 @@ export const useReservations = () => {
     }
   }, [reservations]);
 
-  return { reservations, listings };
+  const refreshReservations = () => {
+    fetchReservations();
+  }
+
+  return { reservations, listings, refreshReservations };
 };
 
 export const useReservation = (id: string) => {

@@ -17,7 +17,7 @@ import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-reac
 import * as Linking from 'expo-linking';
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { useListing } from "@/hooks";
+import { useListing, UserContext, useUser } from "@/hooks";
 // import { TouchableOpacity } from "@gorhom/bottom-sheet";
 
 export { ErrorBoundary, Router } from "expo-router";
@@ -112,6 +112,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
+  const user = useUser();
 
   const handleShare = async (listing: Listing | undefined) => {
     try {
@@ -221,6 +222,7 @@ function RootLayoutNav() {
   };
 
   return (
+    <UserContext.Provider value={user}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -305,5 +307,6 @@ function RootLayoutNav() {
         />
       </Stack>
     </ThemeProvider>
+    </UserContext.Provider>
   );
 }

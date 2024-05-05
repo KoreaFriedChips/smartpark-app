@@ -4,12 +4,16 @@ import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { useReservations, useUserListings } from '@/hooks';
 import { TouchableOpacity } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function ActivityScreen() {
   const userListings = useUserListings();
-  const { reservations } = useReservations();
-
+  const { reservations, refreshReservations } = useReservations();
+  useFocusEffect(
+    useCallback(() => {refreshReservations()}, [])
+  );
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Activities</Text>

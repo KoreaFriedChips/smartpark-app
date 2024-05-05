@@ -2,7 +2,7 @@ import { readListings } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
-import { useUser } from "./user-hooks";
+import { useUserContext } from "./user-hooks";
 import { createContext, useContext, useMemo, useCallback } from "react";
 import { readListingsPaginated } from "@/serverconn";
 
@@ -110,7 +110,7 @@ export const useListings = () => {
 
 export const useUserListings = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
-  const user = useUser();
+  const user = useUserContext();
   const [listings, setListings] = useState<Listing[]>();
   useEffect(() => {
     const fetchListings = async () => {

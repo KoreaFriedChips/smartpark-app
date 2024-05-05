@@ -4,16 +4,32 @@ import { Platform, StyleSheet } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { useLocalSearchParams } from "expo-router";
 import { useReservation } from "@/hooks";
-
+import { deleteReservation } from "@/serverconn";
+import { useAuth } from "@clerk/clerk-expo";
+import { showErrorPage } from "@/components/utils/utils";
+import { router } from "expo-router";
+import { TouchableOpacity } from "react-native";
 
 export default function Reservation() {
+  const { getToken } = useAuth();
   const { id } = useLocalSearchParams();
   if (id instanceof Array) throw new Error("id should be string, not array");
   const { reservation, listing } = useReservation(id);
-
+  const handleEndReservation = async () => {
+    if (!reservation) return;
+    try {
+      await deleteReservation(getToken, reservation.id);
+      router.replace("/reservation/end-success");
+    } catch (err: any) {
+      showErrorPage(err.message);
+    }
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reservation</Text>
+      <TouchableOpacity onPress={handleEndReservation}>
+        <Text style={styles.title}>End Reservation</Text>
+      </TouchableOpacity>
       {reservation && <Text style={styles.title}>{JSON.stringify(reservation)}</Text>}
       {listing && <Text style={styles.title}>{JSON.stringify(listing)}</Text>}
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />

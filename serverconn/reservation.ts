@@ -1,6 +1,6 @@
 import { ReservationModel } from "@/types";
 import { GetToken } from "@clerk/types";
-import { create, read } from "./crud";
+import { create, read, serverDelete } from "./crud";
 
 
 export const createReservation = async (getToken: GetToken, listingId: string, interval: Interval) => {
@@ -26,4 +26,8 @@ export const readReservation = async (getToken: GetToken, id: string) => {
     const reservations = await readReservations(getToken, { id: id });
     if (reservations.length !== 1) throw new Error("reservation id not unique");
     return reservations[0];
+}
+
+export const deleteReservation = async (getToken: GetToken, id: string) => {
+    return await serverDelete(await getToken() ?? "", `/api/reservations/${id}`);
 }
