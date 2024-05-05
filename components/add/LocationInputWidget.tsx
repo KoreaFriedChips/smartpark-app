@@ -7,6 +7,8 @@ import Colors from '@/constants/Colors';
 import { buildSearchParams } from '@/serverconn';
 
 import Constants from "expo-constants";
+import { readMapsCoordinates } from '@/serverconn/maps';
+import { useAuth } from '@clerk/clerk-expo';
 
 export interface LocationProps {
   latitude: number,
@@ -18,6 +20,7 @@ export interface LocationProps {
 
 export default function LocationInputWidget({onChange, init}: {onChange: (props: LocationProps)=> void, init: LocationProps}){
   const themeColors = Colors[useColorScheme() || "light"];
+  const { getToken } = useAuth();
   const [coordinates, setCoordinates] = useState<LatLng>({
     latitude: init.latitude,
     longitude: init.longitude
@@ -58,22 +61,7 @@ export default function LocationInputWidget({onChange, init}: {onChange: (props:
 
   const handleFindAddressOnMap = async () => {
     try {
-      const params = {
-        fields: "geometry",
-        input: `${address} ${city}, ${state}`,
-        inputtype: "textquery",
-        key: Constants.expoConfig?.extra?.googleMapsApiKey,
-      }
-      const searchParams = buildSearchParams(params).toString();
-      const googleUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
-      const res = await fetch(googleUrl + "?" + searchParams);
-      if (res.status != 200) return;
-      const data: any = await res.json();
-      const googleCoords = data.candidates[0].geometry.location;
-      const coords = {
-        latitude: googleCoords.lat,
-        longitude: googleCoords.lng
-      }
+      const coords = await readMapsCoordinates(getToken, address, city, state);
       setCoordinates(coords);
       handlePinChange(coords);
       setRegion({
