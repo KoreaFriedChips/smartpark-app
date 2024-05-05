@@ -2,11 +2,21 @@ import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useUserListings } from '@/hooks/hooks';
+import { TouchableOpacity } from 'react-native';
+import { Link } from 'expo-router';
 
-export default function TabTwoScreen() {
+export default function ActivityScreen() {
+  const userListings = useUserListings();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
+      <Text style={styles.title}>Activities</Text>
+      {userListings && userListings.length > 0 && <Link href={`/edit-listing/${userListings[0].id}`} asChild >
+        <TouchableOpacity>
+          <Text style={styles.title}>Edit listing</Text>
+        </TouchableOpacity>
+      </Link>}
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/two.tsx" />
     </View>

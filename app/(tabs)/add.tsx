@@ -8,23 +8,32 @@ import ListingInput, { ListingInputRef } from '@/components/ListingInput';
 export default function CreateListing() {
   const { getToken } = useAuth();
 
-  const listingData = useRef<ListingInputRef>({
+  const initialListingData = {
     latitude: 37,
     longitude: -122,
+    distance: 0,
     address: "",
     city: "",
     state: "",
     availability: [],
     thumbnail: "",
-    images: [""],
+    images: ["", "", "", ""],
     listingType: "Parking Spot",
     startingPrice: "",
     buyPrice: "",
     duration: "hour",
+    relist: false,
+    relistDuration: "",
     description: "",
+    active: true,
     date: new Date(),
+    ends: undefined,
+    capacity: 1,
+    spotsLeft: 1,
+    tags: [],
     amenities: [],
-  });
+  }
+  const listingData = useRef<ListingInputRef>(initialListingData);
 
   const listingDataValid = () => {
     if (listingData.current.images[0] === "") {
@@ -55,5 +64,5 @@ export default function CreateListing() {
     console.log(createdListing);
   };
   
-  return ListingInput(listingData, handleSubmitCreateListing);
+  return ListingInput(listingData, handleSubmitCreateListing, initialListingData);
 }

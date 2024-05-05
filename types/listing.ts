@@ -18,6 +18,7 @@ export const ListingModel = z.object({
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
   distance: z.coerce.number(),
+  address: z.string(),
   city: z.string(),
   state: z.string(),
   listingType: z.string(),

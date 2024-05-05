@@ -1,8 +1,8 @@
-import { readListings, readListingsPaginated } from "@/serverconn";
+import { getUserFromClerkId, readListings, readUsers, readListingsPaginated } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { LocationObject } from "expo-location";
 import { useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useContext, createContext, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useContext, createContext, useMemo, useCallback } from "react";
 import { SortOption, SortOptions } from "@/components/utils/utils";
 
 export const useListing = () => {
@@ -136,4 +136,42 @@ export const useSearchContext = () => {
     searchQuery, setSearchQuery,
     prevSearches, setPrevSearches
   }
+}
+
+export const useUser = () => {
+  const { isLoaded, isSignedIn, getToken, signOut, userId: clerkId } = useAuth();
+  const [user, setUser] = useState<User>();
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!isLoaded || !isSignedIn) return;
+      const user = await getUserFromClerkId(getToken, clerkId);
+      setUser(user);
+    }
+    try {
+      fetchUser();
+    } catch (err) {
+      console.log(err);
+      signOut();
+    }
+  }, [isLoaded, isSignedIn, getToken, clerkId]);
+  return user;
+}
+
+export const useUserListings = () => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const user = useUser();
+  const [listings, setListings] = useState<Listing[]>();
+  useEffect(() => {
+    const fetchListings = async () => {
+      if (!isLoaded || !isSignedIn || !user) return;
+      const listings = await readListings(await getToken() ?? "", { userId: user.id });
+      setListings(listings);
+    }
+    try {
+      fetchListings();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [isLoaded, isSignedIn, getToken, user]);
+  return listings;
 }

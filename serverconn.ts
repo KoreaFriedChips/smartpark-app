@@ -30,10 +30,14 @@ export const getSeller = async (token: string, listing: Listing) => {
     return users[0];
 }
 
-export const getUserIdFromClerkId = async (token: string, clerkId: string) => {
-    const users: any = await readUsers(token, { clerkId: clerkId || "" });
-    if (!users) throw new Error("clerkId not found");
-    return users[0].id;
+export const getUserFromClerkId = async (getToken: GetToken, clerkId: string) => {
+    const users: User[] = await readUsers(await getToken() ?? "", { clerkId: clerkId });
+    if (users.length === 0) throw new Error("clerkId not found");
+    return users[0];
+}
+
+export const getUserIdFromClerkId = async (getToken: GetToken, clerkId: string) => {
+    return (await getUserFromClerkId(getToken, clerkId)).id;
 }
 
 export const signin = async (t: string) => { return await sendToServer(t, "/api/signin", "POST", {}, {}) };

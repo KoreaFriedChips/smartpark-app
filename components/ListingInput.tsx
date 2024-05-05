@@ -11,7 +11,8 @@ import ImageInputWidget from '@/components/add/ImageInputWidget';
 
 export interface ListingInputRef{ 
   latitude: number; 
-  longitude: number; 
+  longitude: number;
+  distance: number; 
   address: string; 
   city: string; state: 
   string; 
@@ -22,18 +23,26 @@ export interface ListingInputRef{
   startingPrice: string; 
   buyPrice: string; 
   duration: string; 
-  description: string; 
+  relist: boolean;
+  relistDuration: string | null | undefined;
+  description: string | null | undefined; 
+  active: boolean;
   date: Date; 
+  ends: Date | null | undefined;
+  capacity: number;
+  spotsLeft: number;
+  tags: string[];
   amenities: string[]; 
 }
 
 export default function ListingInput(
   listingData: React.MutableRefObject<ListingInputRef>, 
-  handleSubmitCreateListing: () => Promise<void>
+  handleSubmitCreateListing: () => Promise<void>,
+  init: ListingInputRef
 ) {
   return <View style={styles.container}>
     <ScrollView style={styles.scroll}>
-      <ImageInputWidget onChange={(images) => { listingData.current.images = images; } } />
+      <ImageInputWidget onChange={(images) => { listingData.current.images = images; } } init={init.images} />
       <LocationInputWidget onChange={(location) => listingData.current = { ...listingData.current, ...location }} />
       <DescriptionInput onChange={(desc) => listingData.current.description = desc} />
       <PriceInput onChange={(price) => listingData.current.startingPrice = price} name={"Starting Price"} />
