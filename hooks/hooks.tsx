@@ -1,4 +1,4 @@
-import { getUserFromClerkId, readListings, readUsers, readListingsPaginated } from "@/serverconn";
+import { getListingFromReservation, getUserFromClerkId, readListings, readUserReservations, readUsers, readListingsPaginated } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { LocationObject } from "expo-location";
 import { useLocalSearchParams } from "expo-router";
@@ -7,19 +7,24 @@ import { SortOption, SortOptions } from "@/components/utils/utils";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
+  if (id instanceof Array) throw new Error("id should be string, not array");
+  return useListingWithId(id);
+};
+
+export const useListingWithId = (listingId: string) => {
   const { getToken } = useAuth();
   const [listing, setListing] = useState<Listing>();
   useEffect(() => {
     const fetchListing = async () => {
-      const listings = await readListings(await getToken() ?? "", { id: id });
+      const listings = await readListings(await getToken() ?? "", { id: listingId });
       if (!listings) {
-        console.log(`could not load listingId ${id}`);
+        console.log(`could not load listingId ${listingId}`);
         return;
       }
       setListing(listings[0]);
     };
     fetchListing();
-  }, [id]);
+  }, [listingId]);
   return listing;
 };
 
@@ -174,4 +179,38 @@ export const useUserListings = () => {
     }
   }, [isLoaded, isSignedIn, getToken, user]);
   return listings;
+}
+
+export const useReservations = () => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const user = useUser();
+  const [reservations, setReservations] = useState<Reservation[]>();
+  const [listings, setListings] = useState<Listing[]>();
+  useEffect(() => {
+    const fetchReservations = async () => {
+      if (!isLoaded || !isSignedIn || !user) return;
+      const reservations = await readUserReservations(getToken, user.id);
+      setReservations(reservations);
+    }
+    try {
+      fetchReservations();
+    } catch(err) {
+      console.log(err);
+    }
+  }, [isLoaded, isSignedIn, getToken, user]);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      if (!reservations) return;
+      const listings = await Promise.all(reservations.map(async (reservation) => getListingFromReservation(getToken, reservation)));
+      setListings(listings);
+    }
+    try {
+      fetchListings();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [reservations]);
+
+  return { reservations, listings }
 }

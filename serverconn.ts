@@ -14,6 +14,21 @@ export const createReservation = async (getToken: GetToken, listingId: string, i
     return ReservationModel.parse(res);
 }
 
+export const readUserReservations = async (getToken: GetToken, userId: string) => {
+    return await readReservations(getToken, { userId: userId });
+}
+
+export const readReservations = async (getToken: GetToken, searchParams: any): Promise<Reservation[]> => {
+    const res = await read(await getToken() ?? "", "/api/reservations", searchParams);
+    return res.map(ReservationModel.parse);
+}
+
+export const getListingFromReservation = async (getToken: GetToken, reservation: Reservation) => {
+    const listings = await readListings(await getToken() ?? "", { id: reservation.listingId } );
+    if (listings.length !== 1) throw new Error("there should only be one listing associated with reservation");
+    return listings[0];
+}
+
 export const getHighestBid = async (getToken: GetToken, listingId: string, starts: Date, ends: Date) => {
     const bids = readBids(await getToken() ?? "", { listingId, starts, ends});
     return bids

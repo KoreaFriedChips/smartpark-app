@@ -2,12 +2,13 @@ import { StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import { useUserListings } from '@/hooks/hooks';
+import { useReservations, useUserListings } from '@/hooks';
 import { TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 
 export default function ActivityScreen() {
   const userListings = useUserListings();
+  const { reservations } = useReservations();
 
   return (
     <View style={styles.container}>
@@ -15,6 +16,11 @@ export default function ActivityScreen() {
       {userListings && userListings.length > 0 && <Link href={`/edit-listing/${userListings[0].id}`} asChild >
         <TouchableOpacity>
           <Text style={styles.title}>Edit listing</Text>
+        </TouchableOpacity>
+      </Link>}
+      {reservations && reservations.length > 0 && <Link href={`/reservation/${reservations[0].id}`} asChild >
+        <TouchableOpacity>
+          <Text style={styles.title}>View Reservation</Text>
         </TouchableOpacity>
       </Link>}
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />

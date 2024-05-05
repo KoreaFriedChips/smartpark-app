@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors";
 import { View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-import { ListingContext, SearchContext } from "@/hooks/hooks";
+import { ListingContext, SearchContext } from "@/hooks";
 import * as Location from "expo-location";
 import { SortOption, SortOptions } from "@/components/utils/utils";
 
