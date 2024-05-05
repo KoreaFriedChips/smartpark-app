@@ -8,7 +8,7 @@ import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link, router } from "expo-router";
 import { MapPin, Navigation } from "lucide-react-native";
-import { useListings, useSearchContext } from "@/hooks/hooks";
+import { useListings, useSearchContext } from "@/hooks";
 
 
 

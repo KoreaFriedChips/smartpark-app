@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { showErrorPage } from '@/components/utils/utils';
 import ListingInput, { ListingInputRef } from '@/components/ListingInput';
 import { useLocalSearchParams } from 'expo-router';
-import { useListing } from '@/hooks/hooks';
+import { useListing } from "@/hooks";
 import { useRouter } from 'expo-router';
 import { View } from '@/components/Themed';
 

@@ -17,7 +17,7 @@ import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-reac
 import * as Linking from 'expo-linking';
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { useListing } from "@/hooks/hooks";
+import { useListing } from "@/hooks";
 // import { TouchableOpacity } from "@gorhom/bottom-sheet";
 
 export { ErrorBoundary, Router } from "expo-router";

@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { useListing } from '@/hooks/hooks';
+import { useListing } from "@/hooks";
 import { useEffect, useRef } from 'react';
 import { createReservation } from '@/serverconn';
 import { useAuth } from '@clerk/clerk-expo';

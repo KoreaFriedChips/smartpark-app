@@ -15,7 +15,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import ListingBidWidget from "@/components/ListingBidWidget";
 import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
 import ListingMiniMap from "@/components/ListingMiniMap";
-import { useListing } from "@/hooks/hooks";
+import { useListing } from "@/hooks";
 import ListingGallery from "@/components/ListingGallery";
 
 

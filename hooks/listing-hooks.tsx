@@ -1,9 +1,10 @@
-import { getListingFromReservation, getUserFromClerkId, readListings, readUserReservations, readUsers, readListingsPaginated } from "@/serverconn";
+import { readListings } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
-import { LocationObject } from "expo-location";
 import { useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useRef, useContext, createContext, useMemo, useCallback } from "react";
-import { SortOption, SortOptions } from "@/components/utils/utils";
+import { useState, useEffect } from "react";
+import { useUser } from "./user-hooks";
+import { createContext, useContext, useMemo, useCallback } from "react";
+import { readListingsPaginated } from "@/serverconn";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
@@ -107,61 +108,6 @@ export const useListings = () => {
   return { listings, fetchListings, fetchNextPage, isRefreshing }
 }
 
-export interface SearchContextProps {
-  location: LocationObject | null,
-  setLocation: React.Dispatch<React.SetStateAction<LocationObject | null>>,
-  selectedCategories: string[],
-  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>,
-  sortOption: SortOption,
-  setSortOption: React.Dispatch<React.SetStateAction<SortOption>>,
-  searchQuery: string | undefined,
-  setSearchQuery: React.Dispatch<React.SetStateAction<string | undefined>>,
-  prevSearches: string[],
-  setPrevSearches: React.Dispatch<React.SetStateAction<string[]>>
-}
-
-export const SearchContext = createContext<SearchContextProps | undefined>(undefined);
-
-export const useSearchContext = () => {
-  const context = useContext(SearchContext);
-  const location = useMemo(() => context ? context.location : null, [context]);
-  const setLocation = useCallback((loc: LocationObject) => {if (context) context.setLocation(loc)}, [context]);
-  const selectedCategories = useMemo(() => context ? context.selectedCategories : [], [context]);
-  const setSelectedCategories = useCallback((cat: string[]) => {if (context) context.setSelectedCategories(cat)}, [context]);
-  const sortOption = useMemo(() => context ? context.sortOption : SortOptions.distanceLowHigh, [context]);
-  const setSortOption = useCallback((option: SortOption) => {if (context) context.setSortOption(option)}, [context]);
-  const searchQuery = useMemo(() => context ? context.searchQuery : undefined, [context]);
-  const setSearchQuery = useCallback((query: string) => {if (context) context.setSearchQuery(query)}, [context]);
-  const prevSearches = useMemo(() => context ? context.prevSearches : [], [context]);
-  const setPrevSearches = useCallback((s: string[]) => {if (context) context.setPrevSearches(s)}, [context]);
-  return {
-    location, setLocation,
-    selectedCategories, setSelectedCategories,
-    sortOption, setSortOption,
-    searchQuery, setSearchQuery,
-    prevSearches, setPrevSearches
-  }
-}
-
-export const useUser = () => {
-  const { isLoaded, isSignedIn, getToken, signOut, userId: clerkId } = useAuth();
-  const [user, setUser] = useState<User>();
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!isLoaded || !isSignedIn) return;
-      const user = await getUserFromClerkId(getToken, clerkId);
-      setUser(user);
-    }
-    try {
-      fetchUser();
-    } catch (err) {
-      console.log(err);
-      signOut();
-    }
-  }, [isLoaded, isSignedIn, getToken, clerkId]);
-  return user;
-}
-
 export const useUserListings = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const user = useUser();
@@ -171,7 +117,7 @@ export const useUserListings = () => {
       if (!isLoaded || !isSignedIn || !user) return;
       const listings = await readListings(await getToken() ?? "", { userId: user.id });
       setListings(listings);
-    }
+    };
     try {
       fetchListings();
     } catch (err) {
@@ -179,38 +125,5 @@ export const useUserListings = () => {
     }
   }, [isLoaded, isSignedIn, getToken, user]);
   return listings;
-}
+};
 
-export const useReservations = () => {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
-  const user = useUser();
-  const [reservations, setReservations] = useState<Reservation[]>();
-  const [listings, setListings] = useState<Listing[]>();
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!isLoaded || !isSignedIn || !user) return;
-      const reservations = await readUserReservations(getToken, user.id);
-      setReservations(reservations);
-    }
-    try {
-      fetchReservations();
-    } catch(err) {
-      console.log(err);
-    }
-  }, [isLoaded, isSignedIn, getToken, user]);
-
-  useEffect(() => {
-    const fetchListings = async () => {
-      if (!reservations) return;
-      const listings = await Promise.all(reservations.map(async (reservation) => getListingFromReservation(getToken, reservation)));
-      setListings(listings);
-    }
-    try {
-      fetchListings();
-    } catch (err) {
-      console.log(err);
-    }
-  }, [reservations]);
-
-  return { reservations, listings }
-}

@@ -1,4 +1,4 @@
-import { useListing } from "@/hooks/hooks";
+import { useListing } from "@/hooks";
 import { getHighestBid, createBid } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useEffect, useRef, useState } from "react";

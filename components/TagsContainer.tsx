@@ -6,7 +6,7 @@ import Colors from "@/constants/Colors";
 import { PartyPopper, Music, Trophy, FerrisWheel, SlidersHorizontal, Theater, CalendarClock, Cctv, Truck, LockOpen, LampDesk, PlugZap } from "lucide-react-native";
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
-import { ListingSearchOptions, useSearchContext } from "@/hooks/hooks";
+import { ListingSearchOptions, useSearchContext } from "@/hooks";
 import { SortOptions } from "@/components/utils/utils";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
