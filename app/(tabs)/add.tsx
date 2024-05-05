@@ -64,5 +64,5 @@ export default function CreateListing() {
     console.log(createdListing);
   };
   
-  return ListingInput(listingData, handleSubmitCreateListing, initialListingData);
+  return ListingInput(listingData, handleSubmitCreateListing);
 }

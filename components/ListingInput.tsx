@@ -37,23 +37,33 @@ export interface ListingInputRef{
 
 export default function ListingInput(
   listingData: React.MutableRefObject<ListingInputRef>, 
-  handleSubmitCreateListing: () => Promise<void>,
-  init: ListingInputRef
+  handleSubmitCreateListing: () => Promise<void>
 ) {
   return <View style={styles.container}>
     <ScrollView style={styles.scroll}>
-      <ImageInputWidget onChange={(images) => { listingData.current.images = images; } } init={init.images} />
-      <LocationInputWidget onChange={(location) => listingData.current = { ...listingData.current, ...location }} />
-      <DescriptionInput onChange={(desc) => listingData.current.description = desc} />
-      <PriceInput onChange={(price) => listingData.current.startingPrice = price} name={"Starting Price"} />
-      <PriceInput onChange={(price) => listingData.current.buyPrice = price} name={"Buy Price"} />
-      <ListPicker onChange={(listingType) => listingData.current.listingType = listingType} options={["Parking Spot"]} name={"Listing Type"} />
+      <ImageInputWidget onChange={(images) => { listingData.current.images = images; } } init={listingData.current.images} />
+      <LocationInputWidget 
+        onChange={(location) => listingData.current = { ...listingData.current, ...location }} 
+        init={{
+          latitude: listingData.current.latitude, 
+          longitude: listingData.current.longitude, 
+          address: listingData.current.address, 
+          city: listingData.current.city, 
+          state: listingData.current.state
+        }} 
+      />
+      <DescriptionInput onChange={(desc) => listingData.current.description = desc} init={listingData.current.description ?? ""}/>
+      <PriceInput onChange={(price) => listingData.current.startingPrice = price} name={"Starting Price"} init={listingData.current.startingPrice}/>
+      <PriceInput onChange={(price) => listingData.current.buyPrice = price} name={"Buy Price"} init={listingData.current.buyPrice}/>
+      <ListPicker onChange={(listingType) => listingData.current.listingType = listingType} options={["Parking Spot"]} name={"Listing Type"} init={listingData.current.listingType}/>
       <ListPicker
         onChange={(duration) => listingData.current.duration = duration}
         options={["minute", "hour", "day", "week", "month"]}
-        name={"Duration"} />
-      <AvailabilityWidget onChange={(availability) => listingData.current.availability = availability} />
-      <SelectableSlidingAmenitiesWidget onChange={(amenities) => listingData.current.amenities = amenities} />
+        name={"Duration"} 
+        init={listingData.current.duration}
+      />
+      <AvailabilityWidget onChange={(availability) => listingData.current.availability = availability} init={listingData.current.availability}/>
+      <SelectableSlidingAmenitiesWidget onChange={(amenities) => listingData.current.amenities = amenities} init={listingData.current.amenities}/>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmitCreateListing}>
         <Text weight="bold" style={styles.submitButtonText}> Create Listing </Text>
       </TouchableOpacity>
@@ -63,9 +73,9 @@ export default function ListingInput(
 }
 
 
-const DescriptionInput = ({onChange}: {onChange: (desc: string)=>void}) => {
+const DescriptionInput = ({onChange, init}: {onChange: (desc: string)=>void, init: string}) => {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [desc, setDesc] = useState("");
+  const [desc, setDesc] = useState(init);
   useEffect(() => {
     onChange(desc);
   }, [desc]);
@@ -85,9 +95,9 @@ return (
 );
 }
 
-const ListPicker = ({onChange, options, name}: {onChange: (listingType: string) => void, options: string[], name: string}) => {
+const ListPicker = ({onChange, options, name, init}: {onChange: (listingType: string) => void, options: string[], name: string, init: string}) => {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [selection, setSelection] = useState("Parking Spot");
+  const [selection, setSelection] = useState(init);
   useEffect(() => {
     onChange(selection)
   }, [selection]);
@@ -112,9 +122,9 @@ return (
   </View>
 );}
 
-const PriceInput = ({onChange, name}: {onChange: (price: string) => void, name: string}) => {
+const PriceInput = ({onChange, name, init}: {onChange: (price: string) => void, name: string, init: string}) => {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState(init);
   useEffect(() => {
     onChange(price);
   }, [price]);

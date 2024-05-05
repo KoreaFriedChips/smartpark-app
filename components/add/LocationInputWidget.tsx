@@ -16,15 +16,15 @@ export interface LocationProps {
   state: string,
 }
 
-export default function LocationInputWidget({onChange}: {onChange: (props: LocationProps)=> void}){
+export default function LocationInputWidget({onChange, init}: {onChange: (props: LocationProps)=> void, init: LocationProps}){
   const themeColors = Colors[useColorScheme() || "light"];
   const [coordinates, setCoordinates] = useState<LatLng>({
-    latitude: 37.78825,
-    longitude: -122.4324
+    latitude: init.latitude,
+    longitude: init.longitude
   });
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState(""); 
+  const [address, setAddress] = useState(init.address);
+  const [city, setCity] = useState(init.city);
+  const [state, setState] = useState(init.state); 
 
   useEffect(()=>{
     onChange({
@@ -36,8 +36,8 @@ export default function LocationInputWidget({onChange}: {onChange: (props: Locat
   },[coordinates, address, city, state]);
 
   const [region, setRegion] = useState<Region>({
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: init.latitude,
+    longitude: init.longitude,
     latitudeDelta: 0.00922,
     longitudeDelta: 0.00421,
   });

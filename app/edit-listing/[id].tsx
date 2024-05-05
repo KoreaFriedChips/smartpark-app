@@ -79,5 +79,5 @@ const EditListingController = ({listing}: {listing: Listing}): React.JSX.Element
   };
 
 
-  return ListingInput(listingData, handleSubmitUpdateListing, initialListingData);
+  return ListingInput(listingData, handleSubmitUpdateListing);
 }
