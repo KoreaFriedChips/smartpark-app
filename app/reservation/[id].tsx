@@ -24,11 +24,24 @@ export default function Reservation() {
       showErrorPage(err.message);
     }
   }
+
+  const handleExtendReservation = async () => {
+    if (!listing) return;
+    if (listing.availability.length === 0) return;
+    router.push({
+      pathname: "/buy/buy-now",
+      params: { id: listing.id },
+    })
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reservation</Text>
       <TouchableOpacity onPress={handleEndReservation}>
         <Text style={styles.title}>End Reservation</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleExtendReservation}>
+        <Text style={styles.title}>Extend Reservation</Text>
       </TouchableOpacity>
       {reservation && <Text style={styles.title}>{JSON.stringify(reservation)}</Text>}
       {listing && <Text style={styles.title}>{JSON.stringify(listing)}</Text>}
