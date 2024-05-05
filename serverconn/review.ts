@@ -1,8 +1,20 @@
 import { ReviewModel } from "@/types";
 import { create, read, update, serverDelete } from "./crud";
+import { GetToken } from "@clerk/types";
 
 
-export const createReview = async (token: string, data: any): Promise<Review> => {
+export const createReview = async (
+    getToken: GetToken, 
+    listingId: string, 
+    reviewData: { 
+        rating: number, 
+        review: string, 
+        date: Date}
+): Promise<Review> => {
+    return await createReviewGeneric(await getToken() ?? "", { listingId, ...reviewData });
+}
+
+export const createReviewGeneric = async (token: string, data: any): Promise<Review> => {
     const res = await create(token, "/api/reviews", data);
     return ReviewModel.parse(res);
 };

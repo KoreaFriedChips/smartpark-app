@@ -41,6 +41,11 @@ export default function Reservation() {
     })
   }
 
+  const handleCreateReview = async () => {
+    if (!listing) return;
+    router.push(`/listing/${listing.id}/create-review`);
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reservation</Text>
@@ -52,6 +57,9 @@ export default function Reservation() {
       </TouchableOpacity>
       <TouchableOpacity onPress={handleRereserve}>
         <Text style={styles.title}>Re-Reserve</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleCreateReview}>
+        <Text style={styles.title}>Create Review</Text>
       </TouchableOpacity>
       {reservation && <Text style={styles.title}>{JSON.stringify(reservation)}</Text>}
       {listing && <Text style={styles.title}>{JSON.stringify(listing)}</Text>}
