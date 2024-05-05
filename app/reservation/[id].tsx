@@ -34,6 +34,13 @@ export default function Reservation() {
     })
   }
 
+  const handleRereserve = async () => {
+    if (!listing) return;
+    router.push({
+      pathname: `/listing/${listing.id}`
+    })
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reservation</Text>
@@ -42,6 +49,9 @@ export default function Reservation() {
       </TouchableOpacity>
       <TouchableOpacity onPress={handleExtendReservation}>
         <Text style={styles.title}>Extend Reservation</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleRereserve}>
+        <Text style={styles.title}>Re-Reserve</Text>
       </TouchableOpacity>
       {reservation && <Text style={styles.title}>{JSON.stringify(reservation)}</Text>}
       {listing && <Text style={styles.title}>{JSON.stringify(listing)}</Text>}
