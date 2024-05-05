@@ -21,3 +21,9 @@ export const readReservations = async (getToken: GetToken, searchParams: any): P
     const res = await read(await getToken() ?? "", "/api/reservations", searchParams);
     return res.map(ReservationModel.parse);
 };
+
+export const readReservation = async (getToken: GetToken, id: string) => {
+    const reservations = await readReservations(getToken, { id: id });
+    if (reservations.length !== 1) throw new Error("reservation id not unique");
+    return reservations[0];
+}

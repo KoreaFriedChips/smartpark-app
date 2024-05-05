@@ -1,4 +1,4 @@
-import { readUserReservations, getListingFromReservation } from "@/serverconn";
+import { readUserReservations, getListingFromReservation, readReservation } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useState, useEffect } from "react";
 import { useUser } from "./user-hooks";
@@ -37,3 +37,33 @@ export const useReservations = () => {
 
   return { reservations, listings };
 };
+
+export const useReservation = (id: string) => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [reservation, setReservation] = useState<Reservation>();
+  const [listing, setListing] = useState<Listing>();
+  useEffect(() => {
+    const fetchReservation = async () => {
+      setReservation(await readReservation(getToken, id));
+    }
+    try {
+      fetchReservation();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [isLoaded, isSignedIn, getToken]);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!reservation) return;
+      setListing(await getListingFromReservation(getToken, reservation));
+    }
+    try {
+      fetchListing();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [reservation]);
+
+  return { reservation, listing };
+}
