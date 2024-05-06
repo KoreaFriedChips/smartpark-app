@@ -2,6 +2,9 @@ import { ReviewModel } from "@/types";
 import { create, read, update, serverDelete } from "./crud";
 import { GetToken } from "@clerk/types";
 
+export const readListingReviews = async (getToken: GetToken, listingId: string) => {
+    return await readReviews(await getToken() ?? "", { listingId: listingId } );
+}
 
 export const createReview = async (
     getToken: GetToken, 
