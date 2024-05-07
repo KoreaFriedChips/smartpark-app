@@ -9,9 +9,6 @@ import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
-import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
-import LocationInputWidget, { LocationProps } from '@/components/add/LocationInputWidget';
-import AvailabilityWidget, { Availability } from '@/components/add/AvailabilityInputWidget';
 
 const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColors: any, onPress: () => Promise<void> } )=> {
   return ( <TouchableOpacity onPress={onPress} style={[styles.spotImage, {justifyContent: "center", alignItems:"center"}]}>
@@ -26,7 +23,7 @@ const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColor
   )
 }
 
-export default function ImageInputWidget( { onChange, init }: { onChange: (images: string[]) => void, init: string[] }) {
+export function ImageInputWidget( { onChange, init }: { onChange: (images: string[]) => void, init: string[] }) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [images, setImages] = useState<string[]>(init);
   useEffect(() => {
