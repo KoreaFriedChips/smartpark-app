@@ -11,7 +11,7 @@ export const useGivenReviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       if (!isLoaded || !isSignedIn || !user) return;
-      setReviews(await readReviews(await getToken() ?? "", { userId: user.id }));
+      setReviews(await readReviews(getToken, { userId: user.id }));
     }
     try {
       fetchReviews();

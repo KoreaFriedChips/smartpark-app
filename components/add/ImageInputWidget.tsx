@@ -45,7 +45,7 @@ export default function ImageInputWidget( { onChange, init }: { onChange: (image
       const image = await fetchImageFromUri(result.assets[0].uri);
       const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
       const fileSize = result.assets[0].fileSize ?? image.size;
-      const key = await uploadImage(await getToken() ?? "", filename, fileSize , image);
+      const key = await uploadImage(getToken, filename, fileSize , image);
       setImages(images.map((image, i) => i === index ? key : image));
     }
   }

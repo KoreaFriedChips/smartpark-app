@@ -18,12 +18,10 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
   const [ userId, setUserId ] = React.useState("");
   const { getToken } = useAuth();
 
-  const token = React.useCallback(async () => { return await getToken() ?? ""; }, [getToken]);
-
   React.useEffect(() => {
     const initIsLiked = async () => {
       try {
-        const favorites = await readFavorites(await token(), { listingId: listingId });
+        const favorites = await readFavorites(getToken, { listingId: listingId });
         if (favorites.length > 0) {
           setFavoriteId(favorites[0].id);
           setIsLiked(true);
@@ -39,11 +37,11 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
   const handleLike = async () => {
     if (isLiked) {
       setIsLiked(false);
-      favoriteId && await deleteFavorite(await token(), favoriteId);
+      favoriteId && await deleteFavorite(getToken, favoriteId);
       setFavoriteId(undefined);
     } else {
       setIsLiked(true);
-      const favorite = await createFavorite(await token(), { listingId: listingId });
+      const favorite = await createFavorite(getToken, { listingId: listingId });
       setFavoriteId(favorite.id);
     }
   };

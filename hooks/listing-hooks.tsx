@@ -17,7 +17,7 @@ export const useListingWithId = (listingId: string) => {
   const [listing, setListing] = useState<Listing>();
   useEffect(() => {
     const fetchListing = async () => {
-      const listings = await readListings(await getToken() ?? "", { id: listingId });
+      const listings = await readListings(getToken, { id: listingId });
       if (!listings) {
         console.log(`could not load listingId ${listingId}`);
         return;
@@ -67,7 +67,7 @@ export const useListings = () => {
     let params: any = { amenities };
     if (searchQuery) params.search = searchQuery;
     if (sortOption) params.sort = sortOption;
-    const listings_ = await readListings(await getToken() ?? "", params);
+    const listings_ = await readListings(getToken, params);
     setPage(1);
     if (!listings_) {
       console.log("could not load listings");
@@ -92,7 +92,7 @@ export const useListings = () => {
     let params: any = { amenities, page: page + 1 };
     if (searchQuery) params.search = searchQuery;
     if (sortOption) params.sort = sortOption;
-    const { data: nextListings, metadata } = await readListingsPaginated(await getToken() ?? "", params);
+    const { data: nextListings, metadata } = await readListingsPaginated(getToken, params);
     console.log(metadata);
     setPage(metadata.page);
     setEndReached(metadata.isLastPage);
@@ -115,7 +115,7 @@ export const useUserListings = () => {
   useEffect(() => {
     const fetchListings = async () => {
       if (!isLoaded || !isSignedIn || !user) return;
-      const listings = await readListings(await getToken() ?? "", { userId: user.id });
+      const listings = await readListings(getToken, { userId: user.id });
       setListings(listings);
     };
     try {

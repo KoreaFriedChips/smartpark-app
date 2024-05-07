@@ -66,7 +66,7 @@ const EditListingController = ({listing}: {listing: Listing}): React.JSX.Element
       return;
     }
     try {
-      await updateListing(await getToken() ?? "", listing.id, {
+      await updateListing(getToken, listing.id, {
         ...listingData.current,
         startingPrice: Number(listingData.current.startingPrice),
         buyPrice: Number(listingData.current.buyPrice)

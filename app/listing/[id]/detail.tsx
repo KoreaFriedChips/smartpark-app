@@ -35,7 +35,7 @@ export default function Listing() {
   useEffect(() => {
     if (!listing) return;
     const fetchSeller = async () => {
-      setSeller(await getSeller(await getToken() ?? "", listing));
+      setSeller(await getSeller(getToken, listing));
     }
     fetchSeller();
   }, [listing]);

@@ -1,3 +1,3 @@
 import { sendToServer } from "./crud";
-
-export const signin = async (t: string) => { return await sendToServer(t, "/api/signin", "POST", {}, {}) };
+import { GetToken } from "@clerk/types";
+export const signin = async (getToken: GetToken) => { return await sendToServer(getToken, "/api/signin", "POST", {}, {}) };
