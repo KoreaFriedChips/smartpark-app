@@ -50,7 +50,7 @@ export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange:
   );
 }
 
-export default function SlidingAmenitiesWidget( { amenities }: { amenities: string[] }) {
+export function SlidingAmenitiesWidget( { amenities }: { amenities: string[] }) {
   const themeColors = Colors[useColorScheme() || "light"];
   return (
   <ScrollView

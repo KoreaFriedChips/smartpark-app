@@ -8,7 +8,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { useMemo } from "react";
 import RatingsText from "@/components/ListingCard/RatingsText";
 
-export default function RatingsQuickView({ listing }: { listing: Listing}) {
+export function RatingsQuickView({ listing }: { listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const { getToken } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);

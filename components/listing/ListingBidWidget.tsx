@@ -10,7 +10,7 @@ import moment from "moment";
 import { isToday } from "date-fns";
 
 
-export default function ListingBidWidget({listing}: {listing: Listing}) {
+export function ListingBidWidget({listing}: {listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [timeRemaining, setTimeRemaining] = useState("");
   useEffect(() => {

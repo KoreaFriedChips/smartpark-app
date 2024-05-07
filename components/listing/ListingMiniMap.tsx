@@ -7,7 +7,7 @@ import {  MapPin  } from "lucide-react-native";
 import Tag from "@/components/Tag";
 
 
-export default function ListingMiniMap({listing}: {listing: Listing}) {
+export function ListingMiniMap({listing}: {listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [region, setRegion] = useState<Region>({
     latitude: 37.78825,

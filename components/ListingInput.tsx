@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
 import { Picker } from '@react-native-picker/picker';
-import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
+import { SelectableSlidingAmenitiesWidget } from '@/components/listing';
 import LocationInputWidget from '@/components/add/LocationInputWidget';
 import AvailabilityWidget from '@/components/add/AvailabilityInputWidget';
 import ImageInputWidget from '@/components/add/ImageInputWidget';
