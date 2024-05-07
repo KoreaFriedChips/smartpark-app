@@ -75,7 +75,13 @@ const sendToServer = async (token: string, path: string, method: string, data: a
 
 export const buildSearchParams = (params: any) => {
     const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, val]) => searchParams.append(key, String(val)));
+    Object.entries(params).forEach(([key, val]) => {
+        if (val instanceof Array) {
+            val.forEach((val) => searchParams.append(key, String(val)));
+        } else {
+            searchParams.append(key, String(val))
+        }
+    });
     return searchParams;
 }
 

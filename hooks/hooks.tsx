@@ -40,3 +40,22 @@ export const useAllListings = () => {
   }, [isLoaded, isSignedIn, getToken]);
   return listings
 }
+
+export const useFilteredListings = (amenities: string[], search: string | undefined) => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const [listings, setListings] = useState<Listing[]>();
+  const fetchListings = async () => {
+    if (!isLoaded || !isSignedIn) return;
+    const params = search ? { amenities, search } : { amenities } 
+    const listings_ = await readListings(await getToken() ?? "", params);
+    if (!listings_) {
+      console.log("could not load listings");
+      return
+    }
+    setListings(listings_);
+  }
+  useEffect(() => {
+    fetchListings();
+  }, [isLoaded, isSignedIn, getToken]);
+  return { listings, fetchListings }
+}

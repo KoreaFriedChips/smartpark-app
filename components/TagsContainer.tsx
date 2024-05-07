@@ -8,6 +8,7 @@ import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm, convertKmToMiles } from "@/components/utils/utils";
+import { useFilteredListings } from "@/hooks/hooks";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
 interface TagItem {
@@ -16,7 +17,6 @@ interface TagItem {
 }
 
 interface TagsContainerProps {
-  listingData: Listing[];
 	search: boolean,
   onFilterChange: (filteredData: Listing[]) => void;
 }
@@ -41,7 +41,7 @@ export const getTagIcon = (tagName: string) => {
   return category ? category.icon : null;
 };
 
-export default function TagsContainer({ listingData, onFilterChange, search }: TagsContainerProps) {
+export default function TagsContainer({ onFilterChange, search }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
@@ -50,10 +50,17 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("distanceLowHigh");
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>();
+
+  const { listings, fetchListings } = useFilteredListings(selectedCategories, searchQuery);
 
   const handlePressCategory = (category: string) => {
     setSelectedCategories((prevCategories) => (prevCategories.includes(category) ? prevCategories.filter((c) => c !== category) : [...prevCategories, category]));
   };
+
+  useEffect(() => {
+    fetchListings();
+  }, [selectedCategories]);
 
   useEffect(() => {
     (async () => {
@@ -70,9 +77,8 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
     })();
   }, []);
 
-  const processListingData = (location: Location.LocationObject) => {
-    return listingData
-      .filter((listing) => selectedCategories.length === 0 || selectedCategories.some((category) => listing.tags.includes(category)))
+  const sortListingData = (location: Location.LocationObject) => {
+    return !listings ? [] : listings
       .map((listing) => {
         const distanceInKm = getDistanceFromLatLonInKm(location.coords.latitude, location.coords.longitude, listing.latitude, listing.longitude);
         const distanceInMiles = convertKmToMiles(distanceInKm);
@@ -105,10 +111,10 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
 
   useEffect(() => {
     if (location) {
-      const updatedListings = processListingData(location);
+      const updatedListings = sortListingData(location);
       onFilterChange(updatedListings);
     }
-  }, [location, selectedCategories, sortOption]);
+  }, [location, selectedCategories, sortOption, listings]);
 
   const formatSortOption = (sortOption: string) => {
     if (!sortOption || sortOption === "distanceLowHigh") return "Filter: Default";
@@ -189,7 +195,7 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
           backgroundColor: themeColors.header,
         }}
       >
-        {search && <SearchBar />}
+        {search && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSubmitEditing={fetchListings} />}
         <View
           style={{
             backgroundColor: "transparent",

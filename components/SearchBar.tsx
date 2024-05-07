@@ -1,12 +1,17 @@
-import React from "react";
-import { StyleSheet, useColorScheme, Dimensions } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, useColorScheme, Dimensions, NativeSyntheticEvent, TextInputSubmitEditingEventData } from "react-native";
 import { View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Search } from "lucide-react-native";
 
-export default function SearchBar() {
+interface SearchBarProps {
+  searchQuery: string | undefined,
+  setSearchQuery: React.Dispatch<React.SetStateAction<string | undefined>>,
+  onSubmitEditing: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void
+}
+
+export default function SearchBar({searchQuery, setSearchQuery, onSubmitEditing}: SearchBarProps) {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [searchQuery, setSearchQuery] = React.useState("");
 
   return (
     <View style={[styles.searchContainer, { backgroundColor: themeColors.background, borderColor: themeColors.outline }]}>
@@ -14,7 +19,8 @@ export default function SearchBar() {
       <TextInput
         style={{...styles.searchBar}}
         placeholder="Search SmartPark.."
-        onChangeText={(text) => setSearchQuery(text)}
+        onChangeText={setSearchQuery}
+        onSubmitEditing={onSubmitEditing}
         value={searchQuery}
         keyboardType="default"
         returnKeyType="search"

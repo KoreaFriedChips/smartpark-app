@@ -6,13 +6,15 @@ import TagsContainer from "@/components/TagsContainer";
 import { useAllListings } from "@/hooks/hooks";
 
 export default function HomeScreen() {
-  const [filteredListingData, setFilteredListingData] = useState<Listing[]>([]);
-  const listingData = useAllListings();
-  return listingData && (
+  const [sortedListings, setSortedListings] = useState<Listing[]>([]);
+  return (
     <View style={styles.container}>
-      <TagsContainer listingData={listingData} onFilterChange={setFilteredListingData} search={true} />
+      <TagsContainer 
+        onFilterChange={setSortedListings} 
+        search={true} 
+      />
       <FlatList
-        data={filteredListingData}
+        data={sortedListings}
         renderItem={({ item }) => <ListingCard item={item} />}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
