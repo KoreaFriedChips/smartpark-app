@@ -1,6 +1,10 @@
 import { TransactionModel } from "@/types";
 import { create, read, update, serverDelete } from "./crud";
+import { GetToken } from "@clerk/types";
 
+export const readUserTransactions = async (getToken: GetToken, userId: string) => {
+    return await readTransactions(await getToken() ?? "", { userId: userId });
+}
 
 export const createTransaction = async (token: string, data: any): Promise<Transaction> => {
     const res = await create(token, "/api/transactions", data);

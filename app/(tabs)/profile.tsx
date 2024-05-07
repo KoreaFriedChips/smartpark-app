@@ -6,13 +6,14 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useUserContext } from '@/hooks';
 import { useGivenReviews, useReceivedReviews } from '@/hooks/review-hooks';
 import { useEffect } from 'react';
+import { useTransactions } from '@/hooks/transaction-hooks';
 
 
 export default function TabTwoScreen() {
   const { signOut } = useAuth();
-  const user = useUserContext();
   const givenReviews = useGivenReviews();
   const receivedReviews = useReceivedReviews();
+  const transactions = useTransactions();
 
   useEffect(() => {
     if (!givenReviews) return;
@@ -23,7 +24,12 @@ export default function TabTwoScreen() {
     if (!receivedReviews) return;
     console.log(receivedReviews);
   }, [receivedReviews]);
-  
+
+  useEffect(() => {
+    if (!transactions) return;
+    console.log(transactions);
+  }, [transactions]);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => signOut()}><Text style={styles.title}>Tab Two</Text></TouchableOpacity>
