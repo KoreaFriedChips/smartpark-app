@@ -228,7 +228,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
         <Stack.Screen
-          name="bid/add-bid"
+          name="listing/[id]/bid/index"
           options={{
             presentation: "modal",
             title: "",
@@ -241,9 +241,9 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
-        <Stack.Screen name="bid/success" options={{presentation: "modal", title: ""}}/>
+        <Stack.Screen name="listing/[id]/bid/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
-          name="buy/buy-now"
+          name="listing/[id]/buy/index"
           options={{
             presentation: "modal",
             title: "",
@@ -256,7 +256,7 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
-        <Stack.Screen name="buy/success" options={{presentation: "modal", title: ""}}/>
+        <Stack.Screen name="listing/[id]/buy/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
           name="listing-detail"
           options={{
@@ -269,7 +269,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="listing/[id]/detail"
+          name="listing/[id]/index"
           options={{
             title: "",
             // headerTitle: () => headerTitle("Listing"),

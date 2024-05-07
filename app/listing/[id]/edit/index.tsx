@@ -71,7 +71,7 @@ const EditListingController = ({listing}: {listing: Listing}): React.JSX.Element
         startingPrice: Number(listingData.current.startingPrice),
         buyPrice: Number(listingData.current.buyPrice)
       });
-      router.replace("/edit-listing/success");
+      router.replace(`/listing/${listing.id}/edit/success`);
     } catch (err: any) {
       console.log(err);
       showErrorPage(err.message);
