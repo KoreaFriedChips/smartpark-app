@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import { StyleSheet, FlatList, Modal, ScrollView, TouchableOpacity, useColorScheme } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Text, View } from "@/components/Themed";
@@ -89,7 +89,7 @@ export const getTagIcon = (tagName: string) => {
   return category ? category.icon : null;
 };
 
-export default function TagsContainer({ search, fetchListings }: TagsContainerProps) {
+function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
@@ -279,3 +279,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default memo(TagsContainer);

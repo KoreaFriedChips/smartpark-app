@@ -1,25 +1,38 @@
-import React, { useState } from "react";
-import { StyleSheet, FlatList } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, FlatList, ScrollViewComponent } from "react-native";
 import { Text, View } from "@/components/Themed";
 import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
-import { useFilteredListings } from "@/hooks/hooks";
+import { ListingSearchOptions, useFilteredListings } from "@/hooks/hooks";
 
 export default function HomeScreen() {
-  const { listings, fetchListings } = useFilteredListings();
+  const { listings, fetchListings, fetchNextPage, isRefreshing } = useFilteredListings();
+  useEffect(() => {
+    if (!listings) return;
+    const ids = listings.map((listing) => listing.id);
+    console.log(ids);
+  }, [listings]);
+
+  const listRef = useRef<FlatList>(null);
+  const handleSubmit = (options: ListingSearchOptions) => {
+    fetchListings(options);
+    if (listRef.current && listings && listings.length > 0) listRef.current.scrollToIndex({index: 0});
+  }
   return (
     <View style={styles.container}>
       <TagsContainer 
         search={true}
-        fetchListings={fetchListings} 
+        fetchListings={handleSubmit} 
       />
       <FlatList
+        ref={listRef}
         data={listings}
+        refreshing={isRefreshing}
         renderItem={({ item }) => <ListingCard item={item} />}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
-        // onEndReached={loadMoreListings}
-        // onEndReachedThreshold={0.5}
+        onEndReached={fetchNextPage}
+        onEndReachedThreshold={0.5}
         // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No spots found.</Text> : null}
       />
     </View>

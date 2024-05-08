@@ -1,4 +1,4 @@
-import { readListings } from "@/serverconn";
+import { readListings, readListingsPaginated } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
@@ -50,20 +50,62 @@ export interface ListingSearchOptions {
 export const useFilteredListings = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const [listings, setListings] = useState<Listing[]>();
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const [sortOption, setSortOption] = useState<string | undefined>();
+  
+  const [page, setPage] = useState(1);
+  const [endReached, setEndReached] = useState(false);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const fetchListings = async ({ amenities, searchQuery, sortOption }: ListingSearchOptions) => {
     if (!isLoaded || !isSignedIn) return;
+    setIsRefreshing(true);
+    setAmenities(amenities);
+    setSearchQuery(searchQuery);
+    setSortOption(sortOption);
+
     let params: any = { amenities };
     if (searchQuery) params.search = searchQuery;
     if (sortOption) params.sort = sortOption;
     const listings_ = await readListings(await getToken() ?? "", params);
+    setPage(1);
     if (!listings_) {
       console.log("could not load listings");
       return
     }
     setListings(listings_);
   }
+
+  useEffect(() => {
+    if (!listings) return;
+    setIsRefreshing(false);
+  }, [listings]);
+
+  const fetchNextPage = async () => {
+    if (!isLoaded || !isSignedIn) return;
+    if (endReached) {
+      console.log("endreached");
+      return;
+    };
+    setIsRefreshing(true);
+
+    let params: any = { amenities, page: page + 1 };
+    if (searchQuery) params.search = searchQuery;
+    if (sortOption) params.sort = sortOption;
+    const { data: nextListings, metadata } = await readListingsPaginated(await getToken() ?? "", params);
+    console.log(metadata);
+    setPage(metadata.page);
+    setEndReached(metadata.isLastPage);
+    if (listings)
+      setListings([...listings, ...nextListings])
+    else
+      setListings(nextListings);
+  }
+
   useEffect(() => {
     fetchListings({ amenities: [], searchQuery: undefined, sortOption: undefined });
   }, [isLoaded, isSignedIn, getToken]);
-  return { listings, fetchListings }
+  return { listings, fetchListings, fetchNextPage, isRefreshing }
 }

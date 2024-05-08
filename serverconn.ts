@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
 import { useAuth } from "@clerk/clerk-expo";
+import { z } from "zod";
 
 export const getReviewer = async (token: string, review: Review) => {
     const users = await readUsers(token, { id: review.userId });
@@ -97,6 +98,12 @@ const read = async (token: string, path: string, searchParams: any) => {
     return resData.data;
 }
 
+const readPaginated = async (token: string, path: string, searchParams: any) => {
+    const res =  await sendToServer(token, path, "GET", undefined, searchParams);
+    const resData = await res.json();
+    return resData;
+}
+
 const update = async (token: string, path: string, data: any) => {
     const res = await sendToServer(token, path, "PUT", data, {});
     return await res.json();
@@ -140,6 +147,19 @@ export const readListings = async( token: string, searchParams: any ): Promise<L
     const res = await read(token, "/api/listings", searchParams);
     return res.map(ListingModel.parse);
 } 
+
+const ListingPagesModel = z.object({
+    data: ListingModel.array(),
+    metadata: z.object({
+        page: z.coerce.number().int(),
+        isLastPage: z.coerce.boolean()
+    })
+})
+
+export const readListingsPaginated = async (token: string, searchParams: any) : Promise<z.infer<typeof ListingPagesModel>> => {
+    const res = await readPaginated(token, "/api/listings", searchParams);
+    return ListingPagesModel.parse(res);
+}
 
 export const updateListing = async( token: string, id: string, data: any ) => {
     return await update(token, `/api/listings/${id}`, data);
