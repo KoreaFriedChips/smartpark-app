@@ -8,7 +8,7 @@ import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm, convertKmToMiles } from "@/components/utils/utils";
-import { useFilteredListings } from "@/hooks/hooks";
+import { useFilteredListings, ListingSearchOptions } from "@/hooks/hooks";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
 interface TagItem {
@@ -18,7 +18,7 @@ interface TagItem {
 
 interface TagsContainerProps {
 	search: boolean,
-  onFilterChange: (filteredData: Listing[]) => void;
+  fetchListings: (props: ListingSearchOptions) => any
 }
 
 const categories: TagItem[] = [
@@ -36,30 +36,81 @@ const categories: TagItem[] = [
   { name: "Electric Charging", icon: PlugZap },
 ];
 
+interface SortOption {
+  value: string,
+  label: string
+}
+
+const SortOptions = {
+  reviewsLowHigh: {
+    value: "reviewsLowHigh",
+    label: "Reviews: Low to High"
+  },
+  reviewsHighLow: {
+    value: "reviewsHighLow",
+    label: "Reviews: High to Low"
+  },
+  distanceLowHigh: {
+    value: "distanceLowHigh",
+    label: "Distance: Low to High"
+  },
+  distanceHighLow: {
+    value: "distanceHighLow",
+    label: "Distance: High to Low"
+  }, 
+  ratingLowHigh: {
+    value: "ratingLowHigh",
+    label: "Rating: Low to High"
+  },
+  ratingHighLow: {
+    value: "ratingHighLow",
+    label: "Rating: High to Low"
+  },
+  startingPriceLowHigh: {
+    value: "startingPriceLowHigh",
+    label: "Starting Price: Low to High"
+  }, 
+  startingPriceHighLow: {
+    value: "startingPriceHighLow",
+    label: "Starting Price: High to Low"
+  },
+  buyPriceLowHigh: {
+    value: "buyPriceLowHigh",
+    label: "Buy Price: Low to High"
+  }, 
+  buyPriceHighLow: {
+    value: "buyPriceHighLow",
+    label: "Buy Price: High to Low"
+  }
+}
+
 export const getTagIcon = (tagName: string) => {
   const category = categories.find((c) => c.name === tagName);
   return category ? category.icon : null;
 };
 
-export default function TagsContainer({ onFilterChange, search }: TagsContainerProps) {
+export default function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState("distanceLowHigh");
+  const [sortOption, setSortOption] = useState<SortOption>(SortOptions.distanceLowHigh);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>();
 
-  const { listings, fetchListings } = useFilteredListings(selectedCategories, searchQuery);
 
   const handlePressCategory = (category: string) => {
     setSelectedCategories((prevCategories) => (prevCategories.includes(category) ? prevCategories.filter((c) => c !== category) : [...prevCategories, category]));
   };
 
+  const submitSearch = () => {
+    fetchListings({amenities: selectedCategories, searchQuery, sortOption: sortOption.value});
+  }
+
   useEffect(() => {
-    fetchListings();
+    submitSearch();
   }, [selectedCategories]);
 
   useEffect(() => {
@@ -76,58 +127,6 @@ export default function TagsContainer({ onFilterChange, search }: TagsContainerP
       setIsLocationFetched(true);
     })();
   }, []);
-
-  const sortListingData = (location: Location.LocationObject) => {
-    return !listings ? [] : listings
-      .map((listing) => {
-        const distanceInKm = getDistanceFromLatLonInKm(location.coords.latitude, location.coords.longitude, listing.latitude, listing.longitude);
-        const distanceInMiles = convertKmToMiles(distanceInKm);
-        return { ...listing, distance: parseFloat(distanceInMiles.toFixed(1)) };
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .sort((a, b) => {
-        switch (sortOption) {
-          case "distanceLowHigh":
-            return a.distance - b.distance;
-          case "distanceHighLow":
-            return b.distance - a.distance;
-          case "ratingLowHigh":
-            return a.rating - b.rating;
-          case "ratingHighLow":
-            return b.rating - a.rating;
-          case "reviewsLowHigh":
-            return a.reviews - b.reviews;
-          case "reviewsHighLow":
-            return b.reviews - a.reviews;
-          case "priceLowHigh":
-            return a.startingPrice - b.startingPrice;
-          case "priceHighLow":
-            return b.startingPrice - a.startingPrice;
-          default:
-            return 0;
-        }
-      });
-  };
-
-  useEffect(() => {
-    if (location) {
-      const updatedListings = sortListingData(location);
-      onFilterChange(updatedListings);
-    }
-  }, [location, selectedCategories, sortOption, listings]);
-
-  const formatSortOption = (sortOption: string) => {
-    if (!sortOption || sortOption === "distanceLowHigh") return "Filter: Default";
-
-    const attributeEndIndex = sortOption.indexOf("LowHigh") !== -1 ? sortOption.indexOf("LowHigh") : sortOption.indexOf("HighLow");
-    const newAttribute = sortOption.substring(0, attributeEndIndex);
-    const direction = sortOption.substring(attributeEndIndex);
-
-    const formattedAttribute = newAttribute ? `${newAttribute.charAt(0).toUpperCase()}${newAttribute.slice(1).toLowerCase()}` : "";
-    const formattedDirection = direction === "LowHigh" ? "Low to High" : "High to Low";
-
-    return `Filter: ${formattedAttribute} - ${formattedDirection}`;
-  };
 
   return (
     <View>
@@ -155,18 +154,14 @@ export default function TagsContainer({ onFilterChange, search }: TagsContainerP
               selectedValue={sortOption}
               onValueChange={(itemValue) => setSortOption(itemValue)}
             >
-              <Picker.Item label="Reviews: Low to High" value="reviewsLowHigh" />
-              <Picker.Item label="Reviews: High to Low" value="reviewsHighLow" />
-              <Picker.Item label="Distance: Low to High" value="distanceLowHigh" />
-              <Picker.Item label="Distance: High to Low" value="distanceHighLow" />
-              <Picker.Item label="Rating: Low to High" value="ratingLowHigh" />
-              <Picker.Item label="Rating: High to Low" value="ratingHighLow" />
-              <Picker.Item label="Price: Low to High" value="priceLowHigh" />
-              <Picker.Item label="Price: High to Low" value="priceHighLow" />
+              {Object.values(SortOptions).flatMap((option, index) => (
+                <Picker.Item label={option.label} value={option} key={index}/>
+              ))}
             </Picker>
             <TouchableOpacity
               onPress={() => {
                 setSortOption(sortOption);
+                submitSearch();
                 setModalVisible(!modalVisible);
               }}
             >
@@ -176,7 +171,7 @@ export default function TagsContainer({ onFilterChange, search }: TagsContainerP
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setSortOption("distanceLowHigh");
+                setSortOption(SortOptions.distanceLowHigh);
                 setSelectedCategories([]);
                 setModalVisible(!modalVisible);
               }}
@@ -195,7 +190,7 @@ export default function TagsContainer({ onFilterChange, search }: TagsContainerP
           backgroundColor: themeColors.header,
         }}
       >
-        {search && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSubmitEditing={fetchListings} />}
+        {search && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSubmitEditing={submitSearch} />}
         <View
           style={{
             backgroundColor: "transparent",
@@ -214,7 +209,7 @@ export default function TagsContainer({ onFilterChange, search }: TagsContainerP
             ]}
           >
             <Tag
-              name={formatSortOption(sortOption)}
+              name={sortOption.label}
               // style={{ backgroundColor: themeColors.background }}
               Icon={SlidersHorizontal}
               isSelected={selectedCategories.includes("Filter")}

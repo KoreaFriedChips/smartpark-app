@@ -67,7 +67,7 @@ export default function ExploreScreen() {
   const listingData = useAllListings();
   return (
     <View style={styles.container}>
-      <TagsContainer listingData={listingData || []} onFilterChange={setFilteredListingData} search={true} />
+      <TagsContainer listingData={listingData || []} onSubmitSearch={setFilteredListingData} search={true} />
       <MapView ref={mapRef} style={styles.map} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
         {location && <TouchableOpacity
           onPress={() => {

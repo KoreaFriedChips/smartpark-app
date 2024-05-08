@@ -41,12 +41,20 @@ export const useAllListings = () => {
   return listings
 }
 
-export const useFilteredListings = (amenities: string[], search: string | undefined) => {
+export interface ListingSearchOptions {
+  amenities: string[],
+  searchQuery: string | undefined,
+  sortOption: string | undefined
+}
+
+export const useFilteredListings = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const [listings, setListings] = useState<Listing[]>();
-  const fetchListings = async () => {
+  const fetchListings = async ({ amenities, searchQuery, sortOption }: ListingSearchOptions) => {
     if (!isLoaded || !isSignedIn) return;
-    const params = search ? { amenities, search } : { amenities } 
+    let params: any = { amenities };
+    if (searchQuery) params.search = searchQuery;
+    if (sortOption) params.sort = sortOption;
     const listings_ = await readListings(await getToken() ?? "", params);
     if (!listings_) {
       console.log("could not load listings");
@@ -55,7 +63,7 @@ export const useFilteredListings = (amenities: string[], search: string | undefi
     setListings(listings_);
   }
   useEffect(() => {
-    fetchListings();
+    fetchListings({ amenities: [], searchQuery: undefined, sortOption: undefined });
   }, [isLoaded, isSignedIn, getToken]);
   return { listings, fetchListings }
 }

@@ -3,18 +3,18 @@ import { StyleSheet, FlatList } from "react-native";
 import { Text, View } from "@/components/Themed";
 import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
-import { useAllListings } from "@/hooks/hooks";
+import { useFilteredListings } from "@/hooks/hooks";
 
 export default function HomeScreen() {
-  const [sortedListings, setSortedListings] = useState<Listing[]>([]);
+  const { listings, fetchListings } = useFilteredListings();
   return (
     <View style={styles.container}>
       <TagsContainer 
-        onFilterChange={setSortedListings} 
-        search={true} 
+        search={true}
+        fetchListings={fetchListings} 
       />
       <FlatList
-        data={sortedListings}
+        data={listings}
         renderItem={({ item }) => <ListingCard item={item} />}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
