@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from "react";
+import React, { useState, useEffect, useMemo, memo, createContext, useContext, useCallback } from "react";
 import { StyleSheet, FlatList, Modal, ScrollView, TouchableOpacity, useColorScheme } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Text, View } from "@/components/Themed";
@@ -6,9 +6,8 @@ import Colors from "@/constants/Colors";
 import { PartyPopper, Music, Trophy, FerrisWheel, SlidersHorizontal, Theater, CalendarClock, Cctv, Truck, LockOpen, LampDesk, PlugZap } from "lucide-react-native";
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
-import * as Location from "expo-location";
-import { getDistanceFromLatLonInKm, convertKmToMiles } from "@/components/utils/utils";
-import { useFilteredListings, ListingSearchOptions } from "@/hooks/hooks";
+import { ListingSearchOptions, useSearchContext } from "@/hooks/hooks";
+import { SortOptions } from "@/components/utils/utils";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
 interface TagItem {
@@ -36,54 +35,6 @@ const categories: TagItem[] = [
   { name: "Electric Charging", icon: PlugZap },
 ];
 
-interface SortOption {
-  value: string,
-  label: string
-}
-
-const SortOptions = {
-  reviewsLowHigh: {
-    value: "reviewsLowHigh",
-    label: "Reviews: Low to High"
-  },
-  reviewsHighLow: {
-    value: "reviewsHighLow",
-    label: "Reviews: High to Low"
-  },
-  distanceLowHigh: {
-    value: "distanceLowHigh",
-    label: "Distance: Low to High"
-  },
-  distanceHighLow: {
-    value: "distanceHighLow",
-    label: "Distance: High to Low"
-  }, 
-  ratingLowHigh: {
-    value: "ratingLowHigh",
-    label: "Rating: Low to High"
-  },
-  ratingHighLow: {
-    value: "ratingHighLow",
-    label: "Rating: High to Low"
-  },
-  startingPriceLowHigh: {
-    value: "startingPriceLowHigh",
-    label: "Starting Price: Low to High"
-  }, 
-  startingPriceHighLow: {
-    value: "startingPriceHighLow",
-    label: "Starting Price: High to Low"
-  },
-  buyPriceLowHigh: {
-    value: "buyPriceLowHigh",
-    label: "Buy Price: Low to High"
-  }, 
-  buyPriceHighLow: {
-    value: "buyPriceHighLow",
-    label: "Buy Price: High to Low"
-  }
-}
-
 export const getTagIcon = (tagName: string) => {
   const category = categories.find((c) => c.name === tagName);
   return category ? category.icon : null;
@@ -93,16 +44,18 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [isLocationFetched, setIsLocationFetched] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState<SortOption>(SortOptions.distanceLowHigh);
+  const {
+    location, setLocation,
+    selectedCategories, setSelectedCategories,
+    sortOption, setSortOption,
+    searchQuery, setSearchQuery,
+  } = useSearchContext();
+
   const [modalVisible, setModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string>();
 
 
   const handlePressCategory = (category: string) => {
-    setSelectedCategories((prevCategories) => (prevCategories.includes(category) ? prevCategories.filter((c) => c !== category) : [...prevCategories, category]));
+    setSelectedCategories(selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category]);
   };
 
   const submitSearch = () => {
@@ -112,21 +65,6 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   useEffect(() => {
     submitSearch();
   }, [selectedCategories]);
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
-        setIsLocationFetched(false);
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setIsLocationFetched(true);
-    })();
-  }, []);
 
   return (
     <View>

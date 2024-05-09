@@ -11,3 +11,53 @@ export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: numb
 };
 
 export const deg2rad = (deg: number) => deg * (Math.PI / 180);
+
+
+
+export interface SortOption {
+  value: string,
+  label: string
+}
+
+export const SortOptions = {
+  reviewsLowHigh: {
+    value: "reviewsLowHigh",
+    label: "Reviews: Low to High"
+  },
+  reviewsHighLow: {
+    value: "reviewsHighLow",
+    label: "Reviews: High to Low"
+  },
+  distanceLowHigh: {
+    value: "distanceLowHigh",
+    label: "Distance: Low to High"
+  },
+  distanceHighLow: {
+    value: "distanceHighLow",
+    label: "Distance: High to Low"
+  }, 
+  ratingLowHigh: {
+    value: "ratingLowHigh",
+    label: "Rating: Low to High"
+  },
+  ratingHighLow: {
+    value: "ratingHighLow",
+    label: "Rating: High to Low"
+  },
+  startingPriceLowHigh: {
+    value: "startingPriceLowHigh",
+    label: "Starting Price: Low to High"
+  }, 
+  startingPriceHighLow: {
+    value: "startingPriceHighLow",
+    label: "Starting Price: High to Low"
+  },
+  buyPriceLowHigh: {
+    value: "buyPriceLowHigh",
+    label: "Buy Price: Low to High"
+  }, 
+  buyPriceHighLow: {
+    value: "buyPriceHighLow",
+    label: "Buy Price: High to Low"
+  }
+}

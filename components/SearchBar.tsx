@@ -3,17 +3,18 @@ import { StyleSheet, useColorScheme, Dimensions, NativeSyntheticEvent, TextInput
 import { View, TextInput, Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Search } from "lucide-react-native";
+import { useSearchContext } from "@/hooks/hooks";
 
 interface SearchBarProps {
   searchQuery: string | undefined,
-  setSearchQuery: React.Dispatch<React.SetStateAction<string | undefined>>,
+  setSearchQuery: (s: string)=>void,
   onSubmitEditing: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void
 }
 
 export default function SearchBar({searchQuery, setSearchQuery, onSubmitEditing}: SearchBarProps) {
   const themeColors = Colors[useColorScheme() || "light"];
   const maxPrevSearches = 5;
-  const [prevSearches, setPrevSearches] = useState<string[]>([]);
+  const { prevSearches, setPrevSearches } = useSearchContext();
   const [showPrevSearches, setShowPrevSearches] = useState(false);
 
   const addPrevSearch = (text: string) => {
