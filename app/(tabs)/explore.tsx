@@ -135,7 +135,7 @@ const ListingMarkers = ({listings, onMarkerPress}: {listings: Listing[], onMarke
           longitude: listing.longitude,
         }}
         title={`$${listing.startingPrice}`}
-        onPress={() => router.push({pathname: "/listing/[id]", params: {id: listing.id, distance: listing.distance}})}
+        onPress={() => router.push({pathname: "/listing/[id]/detail", params: {id: listing.id, distance: listing.distance}})}
       >
         {TagIcon && <Tag
             name={`$${listing.startingPrice}`}
