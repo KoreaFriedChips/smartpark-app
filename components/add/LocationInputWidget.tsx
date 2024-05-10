@@ -99,7 +99,7 @@ return (<View>
           style={[styles.input, {borderColor: themeColors.outline}]}
           placeholder="State"
           onChangeText={setState}
-          value={spotAddress?.administrativeArea}
+          value={state}
           keyboardType="default"
           returnKeyType="next"
           clearButtonMode="always"
