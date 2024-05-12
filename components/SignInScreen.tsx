@@ -10,7 +10,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useOAuth, useAuth, useSignUp, useSignIn } from "@clerk/clerk-expo";
 import type { SignUpResource, SignInResource, SetActive } from "@clerk/types";
 import { Text, View } from "@/components/Themed";
-import { signin } from "@/serverconn";
+import { signin, signup } from "@/serverconn";
 import Colors from "@/constants/Colors";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PhoneInput } from "./SigninCards/PhoneInput";
@@ -77,10 +77,10 @@ export default function SignInScreen() {
     let { signIn: sIn, setActive: sActiveI } = useSignIn();
     let isSigningIn = false;
     const [csi, setCSI] = useState("");
-    const [phone, setPhone] = useState("")
+    const [phoneNumber, setPhone] = useState("")
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
-    const [date, setDate] = useState(new Date())
+    const [birthday, setDate] = useState(new Date())
 
     const handleSignIn = async (provider: string) => {
         try {
@@ -93,7 +93,7 @@ export default function SignInScreen() {
 
             const { createdSessionId, signUp, setActive } = await startFlow();
             if (createdSessionId) {
-                await completeSignUp(createdSessionId, setActive!);
+                await completeSignIn(createdSessionId, setActive!);
             } else {
                 if (signUp) {
                     sUp = signUp;
@@ -143,7 +143,9 @@ export default function SignInScreen() {
                 throw Error(err.errors[0].longMessage);
             }
             if (s?.createdSessionId) {
-                completeSignUp(s.createdSessionId, sActiveI!);
+                if (!completeSignIn(s.createdSessionId, sActiveI!)) {
+                    return "EmailInput"
+                }
                 return "CodeVerification";
             } else {
                 throw Error("Your code is invalid.");
@@ -210,7 +212,7 @@ export default function SignInScreen() {
         try {
             if (isSigningIn) {
                 await sIn?.create({
-                    identifier: phone,
+                    identifier: phoneNumber,
                     strategy: "phone_code",
                 });
             } else {
@@ -236,14 +238,25 @@ export default function SignInScreen() {
         setModalVisible(true);
     };
 
-    const completeSignUp = async (csi: string, setA: SetActive) => {
+    const completeSignIn = async (csi: string, setA: SetActive) => {
         try {
             await setA({ session: csi });
             await signin(getToken);
         } catch (err) {
             console.error(err);
+            return false;
+        }
+    };
+
+    const completeSignUp = async (csi: string, setA: SetActive) => {
+        try {
+            await setA({ session: csi });
+            await signup(getToken, email, birthday, phoneNumber, name);
+        } catch (err) {
+            console.error(err);
             signOut();
         }
+
     };
 
     return (
