@@ -25,7 +25,7 @@ export default function CreateListing() {
     address: string;
     city: string;
     state: string;
-    availability: Availability;
+    availability: Interval[],
     thumbnail: string;
     images: string[];
     listingType: string;
@@ -98,7 +98,7 @@ export default function CreateListing() {
           options={["minute", "hour", "day", "week", "month"]} 
           name={"Duration"}
         />
-        <AvailabilityWidget onChange={(availability) => listingData.current.availability = availability}/>
+        <AvailabilityWidget onChange={(availability) => listingData.current.availability=availability}/>
         <SelectableSlidingAmenitiesWidget onChange={(amenities) => listingData.current.amenities = amenities}/>
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmitCreateListing} >
           <Text weight="bold" style={styles.submitButtonText}> Create Listing </Text>

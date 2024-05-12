@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel } from "@/types";
+import { BidModel, ConfirmationModel, FavoriteModel, ListingModel, ReviewModel, TransactionModel, UserModel, WaitlistModel, IntervalModel } from "@/types";
 
 export {};
 
@@ -12,4 +12,5 @@ declare global {
   type Transaction = z.infer<typeof TransactionModel>;
   type User = z.infer<typeof UserModel>;
   type Waitlist = z.infer<typeof WaitlistModel>;
+  type Interval = z.infer<typeof IntervalModel>;
 }
