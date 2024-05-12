@@ -3,7 +3,7 @@ import { StyleSheet, useColorScheme, FlatList } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ListingCard from "@/components/ListingCard/ListingCard";
-import { useListing } from "@/hooks/hooks";
+import { useListing } from "@/hooks";
 
 
 export default function MessagesScreen() {

@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 export const convertKmToMiles = (km: number) => km * 0.621371;
 
 export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -12,6 +13,9 @@ export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: numb
 
 export const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
+export const showErrorPage = (errorMsg: string) => {
+  router.push({pathname: "/error", params: {errorMsg}});
+}
 
 
 export interface SortOption {

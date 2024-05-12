@@ -5,7 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { useListing } from "@/hooks/hooks";
+import { useListing } from "@/hooks";
 
 
 export default function MessagesScreen() {

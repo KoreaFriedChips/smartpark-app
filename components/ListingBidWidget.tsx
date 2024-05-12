@@ -65,7 +65,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
       </View>
       <Link
         href={{
-          pathname: "/add-bid",
+          pathname: "/bid/add-bid",
           params: { id: listing.id },
         }}
         asChild
@@ -100,7 +100,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
       </Link>
       <Link
         href={{
-          pathname: "/buy-now",
+          pathname: "/buy/buy-now",
           params: { id: listing.id },
         }}
         asChild

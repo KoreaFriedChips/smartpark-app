@@ -37,7 +37,7 @@ function ListingCard({ item }: {item: Listing}) {
   return (
     <Link
 			href={{
-				pathname: `/listing/${item.id}`,
+				pathname: `/listing/${item.id}/detail`,
 				params: { distance: item.distance },
 			}}
       asChild
@@ -73,7 +73,7 @@ function ListingCard({ item }: {item: Listing}) {
         {/* <Text italic>3:00 - 5:00</Text> */}
         <Link
           href={{
-						pathname: "/add-bid",
+						pathname: "/bid/add-bid",
 						params: { id: item.id },
 					}}
           asChild

@@ -17,7 +17,7 @@ import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-reac
 import * as Linking from 'expo-linking';
 
 import { useColorScheme } from "@/components/useColorScheme";
-import { useListing } from "@/hooks/hooks";
+import { useListing, UserContext, useUser } from "@/hooks";
 // import { TouchableOpacity } from "@gorhom/bottom-sheet";
 
 export { ErrorBoundary, Router } from "expo-router";
@@ -112,6 +112,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
+  const user = useUser();
 
   const handleShare = async (listing: Listing | undefined) => {
     try {
@@ -221,12 +222,13 @@ function RootLayoutNav() {
   };
 
   return (
+    <UserContext.Provider value={user}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
         <Stack.Screen
-          name="add-bid"
+          name="bid/add-bid"
           options={{
             presentation: "modal",
             title: "",
@@ -239,6 +241,22 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen name="bid/success" options={{presentation: "modal", title: ""}}/>
+        <Stack.Screen
+          name="buy/buy-now"
+          options={{
+            presentation: "modal",
+            title: "",
+            headerTitle: () => headerTitle("Buy Now"),
+            headerStyle: {
+              backgroundColor: themeColors.background,
+            },
+            headerLeft: () => null,
+            headerRight: () => headerRightClose(),
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen name="buy/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
           name="listing-detail"
           options={{
@@ -251,7 +269,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="listing/[id]"
+          name="listing/[id]/detail"
           options={{
             title: "",
             // headerTitle: () => headerTitle("Listing"),
@@ -278,7 +296,17 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen 
+          name="error" 
+          options={{
+            presentation: "modal", 
+            title: "",
+            headerTitle: () => headerTitle("Error"),
+            headerTitleAlign: "center",
+          }}
+        />
       </Stack>
     </ThemeProvider>
+    </UserContext.Provider>
   );
 }

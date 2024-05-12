@@ -4,9 +4,9 @@ import { Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { getTagIcon } from "@/components/TagsContainer";
 
-export const SelectableSlidingAmenitiesWidget = ({ onChange }: { onChange: (amenities: string[])=>void}) => {
+export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange: (amenities: string[])=>void, init: string[]}) => {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [amenities, setAmenities] = useState<string[]>([]);
+  const [amenities, setAmenities] = useState<string[]>(init);
   useEffect(() => {
     onChange(amenities)
   }, [amenities]);

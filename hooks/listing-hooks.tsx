@@ -1,25 +1,31 @@
-import { readListings, readListingsPaginated } from "@/serverconn";
+import { readListings } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
-import { LocationObject } from "expo-location";
 import { useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useContext, createContext, useMemo, useCallback } from "react";
-import { SortOption, SortOptions } from "@/components/utils/utils";
+import { useState, useEffect } from "react";
+import { useUserContext } from "./user-hooks";
+import { createContext, useContext, useMemo, useCallback } from "react";
+import { readListingsPaginated } from "@/serverconn";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
+  if (id instanceof Array) throw new Error("id should be string, not array");
+  return useListingWithId(id);
+};
+
+export const useListingWithId = (listingId: string) => {
   const { getToken } = useAuth();
   const [listing, setListing] = useState<Listing>();
   useEffect(() => {
     const fetchListing = async () => {
-      const listings = await readListings(await getToken() ?? "", { id: id });
+      const listings = await readListings(await getToken() ?? "", { id: listingId });
       if (!listings) {
-        console.log(`could not load listingId ${id}`);
+        console.log(`could not load listingId ${listingId}`);
         return;
       }
       setListing(listings[0]);
     };
     fetchListing();
-  }, [id]);
+  }, [listingId]);
   return listing;
 };
 
@@ -102,38 +108,22 @@ export const useListings = () => {
   return { listings, fetchListings, fetchNextPage, isRefreshing }
 }
 
-export interface SearchContextProps {
-  location: LocationObject | null,
-  setLocation: React.Dispatch<React.SetStateAction<LocationObject | null>>,
-  selectedCategories: string[],
-  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>,
-  sortOption: SortOption,
-  setSortOption: React.Dispatch<React.SetStateAction<SortOption>>,
-  searchQuery: string | undefined,
-  setSearchQuery: React.Dispatch<React.SetStateAction<string | undefined>>,
-  prevSearches: string[],
-  setPrevSearches: React.Dispatch<React.SetStateAction<string[]>>
-}
+export const useUserListings = () => {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const user = useUserContext();
+  const [listings, setListings] = useState<Listing[]>();
+  useEffect(() => {
+    const fetchListings = async () => {
+      if (!isLoaded || !isSignedIn || !user) return;
+      const listings = await readListings(await getToken() ?? "", { userId: user.id });
+      setListings(listings);
+    };
+    try {
+      fetchListings();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [isLoaded, isSignedIn, getToken, user]);
+  return listings;
+};
 
-export const SearchContext = createContext<SearchContextProps | undefined>(undefined);
-
-export const useSearchContext = () => {
-  const context = useContext(SearchContext);
-  const location = useMemo(() => context ? context.location : null, [context]);
-  const setLocation = useCallback((loc: LocationObject) => {if (context) context.setLocation(loc)}, [context]);
-  const selectedCategories = useMemo(() => context ? context.selectedCategories : [], [context]);
-  const setSelectedCategories = useCallback((cat: string[]) => {if (context) context.setSelectedCategories(cat)}, [context]);
-  const sortOption = useMemo(() => context ? context.sortOption : SortOptions.distanceLowHigh, [context]);
-  const setSortOption = useCallback((option: SortOption) => {if (context) context.setSortOption(option)}, [context]);
-  const searchQuery = useMemo(() => context ? context.searchQuery : undefined, [context]);
-  const setSearchQuery = useCallback((query: string) => {if (context) context.setSearchQuery(query)}, [context]);
-  const prevSearches = useMemo(() => context ? context.prevSearches : [], [context]);
-  const setPrevSearches = useCallback((s: string[]) => {if (context) context.setPrevSearches(s)}, [context]);
-  return {
-    location, setLocation,
-    selectedCategories, setSelectedCategories,
-    sortOption, setSortOption,
-    searchQuery, setSearchQuery,
-    prevSearches, setPrevSearches
-  }
-}

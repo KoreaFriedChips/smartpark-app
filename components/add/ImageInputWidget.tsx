@@ -26,9 +26,9 @@ const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColor
   )
 }
 
-export default function ImageInputWidget( { onChange }: { onChange: (images: string[]) => void }) {
+export default function ImageInputWidget( { onChange, init }: { onChange: (images: string[]) => void, init: string[] }) {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [images, setImages] = useState<string[]>(["", "", "", ""]);
+  const [images, setImages] = useState<string[]>(init);
   useEffect(() => {
     onChange(images);
   }, [images]);

@@ -8,7 +8,7 @@ import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link, router } from "expo-router";
 import { MapPin, Navigation } from "lucide-react-native";
-import { useListings, useSearchContext } from "@/hooks/hooks";
+import { useListings, useSearchContext } from "@/hooks";
 
 
 
@@ -135,7 +135,7 @@ const ListingMarkers = ({listings, onMarkerPress}: {listings: Listing[], onMarke
           longitude: listing.longitude,
         }}
         title={`$${listing.startingPrice}`}
-        onPress={() => router.push({pathname: "/listing/[id]", params: {id: listing.id, distance: listing.distance}})}
+        onPress={() => router.push({pathname: "/listing/[id]/detail", params: {id: listing.id, distance: listing.distance}})}
       >
         {TagIcon && <Tag
             name={`$${listing.startingPrice}`}

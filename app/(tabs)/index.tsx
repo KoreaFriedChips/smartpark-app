@@ -3,7 +3,7 @@ import { StyleSheet, FlatList, ScrollViewComponent, Animated,  } from "react-nat
 import { Text, View } from "@/components/Themed";
 import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
-import { ListingSearchOptions, useListings } from "@/hooks/hooks";
+import { ListingSearchOptions, useListings } from "@/hooks";
 
 export default function HomeScreen() {
   const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings(); 

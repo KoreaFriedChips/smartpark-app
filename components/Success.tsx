@@ -1,13 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
-export default function MessagesScreen() {
+export default function Success({ message }: {message: string}) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>add bid</Text>
+      <Text style={styles.title}>{message}</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}

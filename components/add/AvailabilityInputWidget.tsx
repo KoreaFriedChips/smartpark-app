@@ -14,13 +14,13 @@ interface AvailabilityItem {
 
 export type Availability = AvailabilityItem[]
 
-export default function AvailabilityWidget({onChange}: 
-  {onChange: (props: Interval[])=>void}) 
+export default function AvailabilityWidget({onChange, init}: 
+  {onChange: (props: Interval[])=>void, init:Interval[]}) 
   {
   const themeColors = Colors[useColorScheme() || "light"];
   const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const  weekStart = new Date(new Date().setDate(new Date().getDate() - new Date().getDay()));
-  const [intervals, setIntervals] = useState<Array<Interval>>([]);
+  const [intervals, setIntervals] = useState<Array<Interval>>(init);
 
   useEffect(() => {
     onChange(intervals);

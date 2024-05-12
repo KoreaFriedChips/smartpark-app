@@ -3,7 +3,7 @@ import { StyleSheet, useColorScheme, Dimensions, NativeSyntheticEvent, TextInput
 import { View, TextInput, Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Search } from "lucide-react-native";
-import { useSearchContext } from "@/hooks/hooks";
+import { useSearchContext } from "@/hooks";
 
 interface SearchBarProps {
   searchQuery: string | undefined,
