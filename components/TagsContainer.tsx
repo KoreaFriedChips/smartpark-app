@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, memo, createContext, useContext, useCallback } from "react";
 import { StyleSheet, FlatList, Modal, ScrollView, TouchableOpacity, useColorScheme } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Text, View } from "@/components/Themed";
@@ -6,8 +6,8 @@ import Colors from "@/constants/Colors";
 import { PartyPopper, Music, Trophy, FerrisWheel, SlidersHorizontal, Theater, CalendarClock, Cctv, Truck, LockOpen, LampDesk, PlugZap } from "lucide-react-native";
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
-import * as Location from "expo-location";
-import { getDistanceFromLatLonInKm, convertKmToMiles } from "@/components/utils/utils";
+import { ListingSearchOptions, useSearchContext } from "@/hooks/hooks";
+import { SortOptions } from "@/components/utils/utils";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
 interface TagItem {
@@ -16,9 +16,8 @@ interface TagItem {
 }
 
 interface TagsContainerProps {
-  listingData: Listing[];
 	search: boolean,
-  onFilterChange: (filteredData: Listing[]) => void;
+  fetchListings: (props: ListingSearchOptions) => any
 }
 
 const categories: TagItem[] = [
@@ -41,87 +40,31 @@ export const getTagIcon = (tagName: string) => {
   return category ? category.icon : null;
 };
 
-export default function TagsContainer({ listingData, onFilterChange, search }: TagsContainerProps) {
+function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [isLocationFetched, setIsLocationFetched] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortOption, setSortOption] = useState("distanceLowHigh");
+  const {
+    location, setLocation,
+    selectedCategories, setSelectedCategories,
+    sortOption, setSortOption,
+    searchQuery, setSearchQuery,
+  } = useSearchContext();
+
   const [modalVisible, setModalVisible] = useState(false);
 
+
   const handlePressCategory = (category: string) => {
-    setSelectedCategories((prevCategories) => (prevCategories.includes(category) ? prevCategories.filter((c) => c !== category) : [...prevCategories, category]));
+    setSelectedCategories(selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category]);
   };
+
+  const submitSearch = () => {
+    fetchListings({amenities: selectedCategories, searchQuery, sortOption: sortOption.value});
+  }
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
-        setIsLocationFetched(false);
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setIsLocationFetched(true);
-    })();
-  }, []);
-
-  const processListingData = (location: Location.LocationObject) => {
-    return listingData
-      .filter((listing) => selectedCategories.length === 0 || selectedCategories.some((category) => listing.tags.includes(category)))
-      .map((listing) => {
-        const distanceInKm = getDistanceFromLatLonInKm(location.coords.latitude, location.coords.longitude, listing.latitude, listing.longitude);
-        const distanceInMiles = convertKmToMiles(distanceInKm);
-        return { ...listing, distance: parseFloat(distanceInMiles.toFixed(1)) };
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .sort((a, b) => {
-        switch (sortOption) {
-          case "distanceLowHigh":
-            return a.distance - b.distance;
-          case "distanceHighLow":
-            return b.distance - a.distance;
-          case "ratingLowHigh":
-            return a.rating - b.rating;
-          case "ratingHighLow":
-            return b.rating - a.rating;
-          case "reviewsLowHigh":
-            return a.reviews - b.reviews;
-          case "reviewsHighLow":
-            return b.reviews - a.reviews;
-          case "priceLowHigh":
-            return a.startingPrice - b.startingPrice;
-          case "priceHighLow":
-            return b.startingPrice - a.startingPrice;
-          default:
-            return 0;
-        }
-      });
-  };
-
-  useEffect(() => {
-    if (location) {
-      const updatedListings = processListingData(location);
-      onFilterChange(updatedListings);
-    }
-  }, [location, selectedCategories, sortOption]);
-
-  const formatSortOption = (sortOption: string) => {
-    if (!sortOption || sortOption === "distanceLowHigh") return "Filter: Default";
-
-    const attributeEndIndex = sortOption.indexOf("LowHigh") !== -1 ? sortOption.indexOf("LowHigh") : sortOption.indexOf("HighLow");
-    const newAttribute = sortOption.substring(0, attributeEndIndex);
-    const direction = sortOption.substring(attributeEndIndex);
-
-    const formattedAttribute = newAttribute ? `${newAttribute.charAt(0).toUpperCase()}${newAttribute.slice(1).toLowerCase()}` : "";
-    const formattedDirection = direction === "LowHigh" ? "Low to High" : "High to Low";
-
-    return `Filter: ${formattedAttribute} - ${formattedDirection}`;
-  };
+    submitSearch();
+  }, [selectedCategories]);
 
   return (
     <View>
@@ -149,18 +92,14 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
               selectedValue={sortOption}
               onValueChange={(itemValue) => setSortOption(itemValue)}
             >
-              <Picker.Item label="Reviews: Low to High" value="reviewsLowHigh" />
-              <Picker.Item label="Reviews: High to Low" value="reviewsHighLow" />
-              <Picker.Item label="Distance: Low to High" value="distanceLowHigh" />
-              <Picker.Item label="Distance: High to Low" value="distanceHighLow" />
-              <Picker.Item label="Rating: Low to High" value="ratingLowHigh" />
-              <Picker.Item label="Rating: High to Low" value="ratingHighLow" />
-              <Picker.Item label="Price: Low to High" value="priceLowHigh" />
-              <Picker.Item label="Price: High to Low" value="priceHighLow" />
+              {Object.values(SortOptions).flatMap((option, index) => (
+                <Picker.Item label={option.label} value={option} key={index}/>
+              ))}
             </Picker>
             <TouchableOpacity
               onPress={() => {
                 setSortOption(sortOption);
+                submitSearch();
                 setModalVisible(!modalVisible);
               }}
             >
@@ -170,7 +109,7 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setSortOption("distanceLowHigh");
+                setSortOption(SortOptions.distanceLowHigh);
                 setSelectedCategories([]);
                 setModalVisible(!modalVisible);
               }}
@@ -189,7 +128,7 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
           backgroundColor: themeColors.header,
         }}
       >
-        {search && <SearchBar />}
+        {search && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSubmitEditing={submitSearch} />}
         <View
           style={{
             backgroundColor: "transparent",
@@ -208,7 +147,7 @@ export default function TagsContainer({ listingData, onFilterChange, search }: T
             ]}
           >
             <Tag
-              name={formatSortOption(sortOption)}
+              name={sortOption.label}
               // style={{ backgroundColor: themeColors.background }}
               Icon={SlidersHorizontal}
               isSelected={selectedCategories.includes("Filter")}
@@ -278,3 +217,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default memo(TagsContainer);

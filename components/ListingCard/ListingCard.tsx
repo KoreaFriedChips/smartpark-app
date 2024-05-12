@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Image } from "expo-image";
 import { Link, useRouter, useLocalSearchParams , useGlobalSearchParams } from "expo-router";
@@ -26,7 +26,7 @@ export interface Review {
 }
 // const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-export default function ListingCard({ item }: {item: Listing}) {
+function ListingCard({ item }: {item: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
 
@@ -174,3 +174,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export default memo(ListingCard);
