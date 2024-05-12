@@ -88,7 +88,7 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Where you'll be parked
           </Text>
-          {listing && <ListingMiniMap listing={listing}/>}
+          {listing && <ListingMiniMap coordinates={{latitude: listing.latitude, longitude: listing.longitude}}/>}
         </ScrollView>
       )}
     </View>

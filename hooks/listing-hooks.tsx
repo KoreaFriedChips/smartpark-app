@@ -18,7 +18,7 @@ export const useListingWithId = (listingId: string) => {
   useEffect(() => {
     const fetchListing = async () => {
       const listings = await readListings(getToken, { id: listingId });
-      if (!listings) {
+      if (listings.length === 0) {
         console.log(`could not load listingId ${listingId}`);
         return;
       }
