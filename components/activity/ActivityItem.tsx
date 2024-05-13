@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, ReactElement } from "react";
+import React, { useState, useEffect, useRef, ReactElement, useMemo } from "react";
 import { Text, View } from "@/components/Themed";
 import { StyleSheet, useColorScheme, TouchableOpacity, Pressable } from "react-native";
 import Colors from "@/constants/Colors";
@@ -6,30 +6,42 @@ import * as Haptics from "expo-haptics";
 import { Pencil } from "lucide-react-native";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import { isAfter, isBefore } from "date-fns";
+import moment from "moment";
+import { useListingWithId } from "@/hooks";
+import { imageUriFromKey } from "@/serverconn";
 
 interface ActivityItemProps {
-  active?: boolean;
-  startDate: string;
-  endDate?: string;
-  startTime: string;
-  endTime: string;
-  city: string;
-  state: string;
-  duration: string;
-  image: string;
+  reservation: Reservation;
   onPress?: () => void;
-  id: string;
 }
 
-export default function ActivityItem({ active, startDate, endDate, startTime, endTime, city, state, duration, image, onPress, id }: ActivityItemProps) {
+export default function ActivityItem({ reservation, onPress }: ActivityItemProps) {
   const themeColors = Colors[useColorScheme() || "light"];
-
+  const active = isAfter(reservation.ends, Date.now());
+  const listing = useListingWithId(reservation.listingId);
+  const durationText = useMemo(() => {
+    if (!listing) return "";
+    switch (listing.duration) {
+      case "hour":
+        return "Hourly";
+      case "day":
+        return "Daily";
+      case "week":
+        return "Weekly";
+      case "month":
+        return "Monthly";
+      default: 
+        return "";
+    }
+  }, [listing]);
+  
   return (
     // link to add spot page with the data from the spot inserted when opening owned spots
     <Link
       href={{
         pathname: "/spot",
-        params: { id: id },
+        params: { id: reservation.id },
       }}
       asChild
       style={{ ...styles.listingContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}
@@ -37,13 +49,13 @@ export default function ActivityItem({ active, startDate, endDate, startTime, en
       <TouchableOpacity>
         <View style={{ ...styles.listingInfo, opacity: !active ? 0.7 : 1, }}>
           {active && <View style={{ ...styles.notificationIcon, borderColor: themeColors.outline }}></View>}
-          <Image source={{ uri: image }} style={{ ...styles.image, borderColor: themeColors.outline }} />
+          <Image source={{ uri: imageUriFromKey(listing?.thumbnail || "") }} style={{ ...styles.image, borderColor: themeColors.outline }} />
           <View style={styles.listingText}>
-            <Text weight="semibold" style={{ fontSize: 16 }}>
-              {city}, {state} / {duration}
-            </Text>
+            {listing && <Text weight="semibold" style={{ fontSize: 16 }}>
+              {listing.city}, {listing.state} / {durationText}
+            </Text>}
             <Text italic style={{ color: themeColors.secondary }}>
-              {startDate} @ {startTime} - {endDate ? `${endDate} @ ` : ""}{endTime}
+              {moment(reservation.starts).format('M/D')} @ {moment(reservation.starts).format('h:mm a')} - {moment(reservation.ends).format('M/D')} @ {moment(reservation.ends).format('h:mm a')}
             </Text>
           </View>
         </View>

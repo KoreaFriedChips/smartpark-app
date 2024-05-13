@@ -1,4 +1,5 @@
-import ActivityView from "@/components/activity/ActivityView";
+import ActivityController from "@/components/activity/ActivityController";
+
 export default function ActivityScreen() {
-  return <ActivityView/>
+  return <ActivityController/>
 }

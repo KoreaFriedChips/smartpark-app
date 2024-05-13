@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, ReactElement } from "react";
+import React, { useState, useEffect, useRef, ReactElement, useMemo } from "react";
 import { Text, View, TextInput } from "@/components/Themed";
 import { Platform, Dimensions, StyleSheet, useColorScheme, TouchableOpacity, FlatList, Pressable } from "react-native";
 import Colors from "@/constants/Colors";
@@ -7,59 +7,11 @@ import TabRow from "@/components/TabRow";
 import * as Haptics from "expo-haptics";
 import { Pencil } from "lucide-react-native";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 
 import ActivityItem from "@/components/activity/ActivityItem";
-
-const activities = [
-  {
-    id: "1",
-    active: true,
-    startDate: "12/16",
-    endDate: "12/29",
-    startTime: "3:00 PM",
-    endTime: "5:00 PM",
-    city: "Minnetonka",
-    state: "MN",
-    duration: "Daily",
-    image: "https://source.unsplash.com/random?parking-spot&21",
-  },
-  {
-    id: "2",
-    active: false,
-    startDate: "12/16",
-    endDate: "12/29",
-    startTime: "3:00 PM",
-    endTime: "5:00 PM",
-    city: "Minnetonka",
-    state: "MN",
-    duration: "Daily",
-    image: "https://source.unsplash.com/random?parking-spot&22",
-  },
-  {
-    id: "3",
-    active: true,
-    startDate: "Today",
-    startTime: "3:00 PM",
-    endTime: "5:00 PM",
-    city: "Minnetonka",
-    state: "MN",
-    duration: "Daily",
-    image: "https://source.unsplash.com/random?parking-spot&23",
-  },
-  {
-    id: "4",
-    active: false,
-    startDate: "12/16",
-    endDate: "12/29",
-    startTime: "3:00 PM",
-    endTime: "5:00 PM",
-    city: "Minnetonka",
-    state: "MN",
-    duration: "Daily",
-    image: "https://source.unsplash.com/random?parking-spot&24",
-  },
-];
+import { useReservations, useUserListings } from "@/hooks";
+import ListingCard from "@/components/ListingCard/ListingCard";
 
 export default function ActivityView() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -67,6 +19,41 @@ export default function ActivityView() {
   const [selection, setSelection] = useState("Your spots");
   const [open, setOpen] = useState(true);
   const refRBSheet = useRef<ReactElement>(null);
+  const listings = useUserListings();
+  const { reservations, refreshReservations } = useReservations();
+
+  const reservationList = useMemo(() => (
+    <FlatList
+        data={reservations}
+        renderItem={({ item }) => (
+          <ActivityItem  reservation={item} />
+        )}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
+        // onEndReached={loadMoreListings}
+        // onEndReachedThreshold={0.5}
+        // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No notifications found.</Text> : null}
+      />
+  ), [reservations]);
+
+  const handleListingCardPress = (listingId: string) => {
+    router.push({
+      pathname: "/listing/[id]/edit/",
+      params: { id: listingId }
+    })
+  }
+
+  const listingList = useMemo(() => (
+    <FlatList
+      data={listings}
+      renderItem={({ item }) => <ListingCard item={item} onPress={()=>handleListingCardPress(item.id)}/>} 
+      keyExtractor={(item) => item.id}
+      ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
+      // onEndReached={fetchNextPage}
+      // onEndReachedThreshold={0.5}
+      // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No spots found.</Text> : null}
+    />
+  ), [listings]);
 
   // cant get rbsheet ref to work
   // this the video i watched https://www.youtube.com/watch?v=fgDR1O-SORY - get an option to cancel spot for owned spots and deactivate for listed spots
@@ -76,8 +63,6 @@ export default function ActivityView() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const activity = activities[0];
-
   return (
     <View style={styles.container}>
       {/* <RBSheet ref={refRBSheet} closeOnDragDown={true} openDuration={250}>
@@ -86,17 +71,7 @@ export default function ActivityView() {
         </View>
       </RBSheet> */}
       <TabRow selection={selection} optOne="Your spots" optTwo="Your listings" setSelection={setSelect} />
-      <FlatList
-        data={activities}
-        renderItem={({ item }) => (
-          <ActivityItem active={item.active} startDate={item.startDate} endDate={item.endDate} startTime={item.startTime} endTime={item.endTime} city={item.city} state={item.state} duration={item.duration} image={item.image} id={item.id} />
-        )}
-        keyExtractor={item => item.id.toString()}
-        ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
-        // onEndReached={loadMoreListings}
-        // onEndReachedThreshold={0.5}
-        // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No notifications found.</Text> : null}
-      />
+      {selection === "Your spots" ? reservationList : listingList}
     
     </View>
   );
