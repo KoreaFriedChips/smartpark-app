@@ -10,7 +10,7 @@ import moment from "moment";
 import { isToday } from "date-fns";
 
 
-export default function ListingBidWidget({listing}: {listing: Listing}) {
+export function ListingBidWidget({listing}: {listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [timeRemaining, setTimeRemaining] = useState("");
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
       </View>
       <Link
         href={{
-          pathname: "/bid/add-bid",
+          pathname: "/listing/[id]/bid/",
           params: { id: listing.id },
         }}
         asChild
@@ -100,7 +100,7 @@ export default function ListingBidWidget({listing}: {listing: Listing}) {
       </Link>
       <Link
         href={{
-          pathname: "/buy/buy-now",
+          pathname: "/listing/[id]/buy/",
           params: { id: listing.id },
         }}
         asChild

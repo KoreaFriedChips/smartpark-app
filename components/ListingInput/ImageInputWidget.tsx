@@ -9,9 +9,6 @@ import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
-import { SelectableSlidingAmenitiesWidget } from '@/components/SlidingAmenitiesWidget';
-import LocationInputWidget, { LocationProps } from '@/components/add/LocationInputWidget';
-import AvailabilityWidget, { Availability } from '@/components/add/AvailabilityInputWidget';
 
 const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColors: any, onPress: () => Promise<void> } )=> {
   return ( <TouchableOpacity onPress={onPress} style={[styles.spotImage, {justifyContent: "center", alignItems:"center"}]}>
@@ -26,7 +23,7 @@ const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColor
   )
 }
 
-export default function ImageInputWidget( { onChange, init }: { onChange: (images: string[]) => void, init: string[] }) {
+export function ImageInputWidget( { onChange, init }: { onChange: (images: string[]) => void, init: string[] }) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [images, setImages] = useState<string[]>(init);
   useEffect(() => {
@@ -45,7 +42,7 @@ export default function ImageInputWidget( { onChange, init }: { onChange: (image
       const image = await fetchImageFromUri(result.assets[0].uri);
       const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
       const fileSize = result.assets[0].fileSize ?? image.size;
-      const key = await uploadImage(await getToken() ?? "", filename, fileSize , image);
+      const key = await uploadImage(getToken, filename, fileSize , image);
       setImages(images.map((image, i) => i === index ? key : image));
     }
   }

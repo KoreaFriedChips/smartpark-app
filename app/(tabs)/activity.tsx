@@ -17,7 +17,7 @@ export default function ActivityScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Activities</Text>
-      {userListings && userListings.length > 0 && <Link href={`/edit-listing/${userListings[0].id}`} asChild >
+      {userListings && userListings.length > 0 && <Link href={`/listing/${userListings[0].id}/edit/`} asChild >
         <TouchableOpacity>
           <Text style={styles.title}>Edit listing</Text>
         </TouchableOpacity>

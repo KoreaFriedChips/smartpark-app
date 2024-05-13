@@ -10,7 +10,7 @@ import { MessageCircleMore, BadgeCheck } from "lucide-react-native";
 import RatingsText from "@/components/ListingCard/RatingsText";
 import { imageUriFromKey } from "@/serverconn";
 
-export default function SellerQuickInfo({seller }: {seller: User}) {
+export function SellerQuickInfo({seller }: {seller: User}) {
   const themeColors = Colors[useColorScheme() || "light"];
   return (
   <Link

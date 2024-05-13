@@ -36,7 +36,7 @@ export default function BuyController() {
       const reservation = await createReservation(getToken, listing.id, desiredInterval.current);
       console.log("reservation created");
       console.log(reservation);
-      router.push("/buy/success");
+      router.push(`/listing/${listing.id}/buy/success`);
       desiredInterval.current = undefined;
     } catch (err: any) {
       console.log(err);

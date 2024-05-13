@@ -239,7 +239,7 @@ export default function SignInScreen() {
     const completeSignUp = async (csi: string, setA: SetActive) => {
         try {
             await setA({ session: csi });
-            await signin((await getToken()) ?? "");
+            await signin(getToken);
         } catch (err) {
             console.error(err);
             signOut();

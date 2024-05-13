@@ -9,7 +9,7 @@ export const createReservation = async (getToken: GetToken, listingId: string, i
         ends: interval.end,
         listingId
     };
-    const res = await create(await getToken() ?? "", "/api/reservations", reservationData);
+    const res = await create(getToken, "/api/reservations", reservationData);
     return ReservationModel.parse(res);
 };
 
@@ -18,7 +18,7 @@ export const readUserReservations = async (getToken: GetToken, userId: string) =
 };
 
 export const readReservations = async (getToken: GetToken, searchParams: any): Promise<Reservation[]> => {
-    const res = await read(await getToken() ?? "", "/api/reservations", searchParams);
+    const res = await read(getToken, "/api/reservations", searchParams);
     return res.map(ReservationModel.parse);
 };
 
@@ -29,5 +29,5 @@ export const readReservation = async (getToken: GetToken, id: string) => {
 }
 
 export const deleteReservation = async (getToken: GetToken, id: string) => {
-    return await serverDelete(await getToken() ?? "", `/api/reservations/${id}`);
+    return await serverDelete(getToken, `/api/reservations/${id}`);
 }

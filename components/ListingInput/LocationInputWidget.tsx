@@ -18,7 +18,7 @@ export interface LocationProps {
   state: string,
 }
 
-export default function LocationInputWidget({onChange, init}: {onChange: (props: LocationProps)=> void, init: LocationProps}){
+export function LocationInputWidget({onChange, init}: {onChange: (props: LocationProps)=> void, init: LocationProps}){
   const themeColors = Colors[useColorScheme() || "light"];
   const { getToken } = useAuth();
   const [coordinates, setCoordinates] = useState<LatLng>({

@@ -61,7 +61,7 @@ export default function BidController(){
         ends: desiredSlot.current?.end,
         listingId: listing?.id
       });
-      router.push("/bid/success");
+      router.push(`/listing/${listing?.id}/bid/success`);
       console.log(bid);
 
       amount.current = 0;

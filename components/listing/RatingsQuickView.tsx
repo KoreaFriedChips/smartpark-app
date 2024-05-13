@@ -8,23 +8,22 @@ import { useAuth } from "@clerk/clerk-expo";
 import { useMemo } from "react";
 import RatingsText from "@/components/ListingCard/RatingsText";
 
-export default function RatingsQuickView({ listing }: { listing: Listing}) {
+export function RatingsQuickView({ listing }: { listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const { getToken } = useAuth();
-  const token = useMemo(async () => await getToken() ?? "", [getToken]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewers, setReviewers] = useState<User[]>([]);
   const [seller, setSeller] = useState<User>();
   useEffect(() => {
     const fetchSeller = async () => {
-      setSeller(await getSeller(await token, listing));
+      setSeller(await getSeller(getToken, listing));
     }
     fetchSeller();
   }, [listing]);
 
   useEffect(() => {
     const fetchReviewers = async () => {
-      const newReviewers = await Promise.all(reviews.map(async(review) => await getReviewer(await token, review)));
+      const newReviewers = await Promise.all(reviews.map(async(review) => await getReviewer(getToken, review)));
       setReviewers(newReviewers);
     }
     fetchReviewers();
@@ -32,7 +31,7 @@ export default function RatingsQuickView({ listing }: { listing: Listing}) {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      let newReviews = await readReviews(await token, { listingId: listing.id });
+      let newReviews = await readReviews(getToken, { listingId: listing.id });
       setReviews(newReviews);
     } 
     fetchReviews(); 

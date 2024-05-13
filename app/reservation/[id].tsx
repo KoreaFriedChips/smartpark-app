@@ -29,7 +29,7 @@ export default function Reservation() {
     if (!listing) return;
     if (listing.availability.length === 0) return;
     router.push({
-      pathname: "/buy/buy-now",
+      pathname: "/listing/[id]/buy/",
       params: { id: listing.id },
     })
   }
@@ -37,7 +37,7 @@ export default function Reservation() {
   const handleRereserve = async () => {
     if (!listing) return;
     router.push({
-      pathname: `/listing/${listing.id}/detail`
+      pathname: `/listing/${listing.id}/`
     })
   }
 

@@ -14,7 +14,7 @@ interface AvailabilityItem {
 
 export type Availability = AvailabilityItem[]
 
-export default function AvailabilityWidget({onChange, init}: 
+export function AvailabilityWidget({onChange, init}: 
   {onChange: (props: Interval[])=>void, init:Interval[]}) 
   {
   const themeColors = Colors[useColorScheme() || "light"];

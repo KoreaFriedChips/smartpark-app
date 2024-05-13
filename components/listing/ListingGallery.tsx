@@ -9,7 +9,7 @@ import SideSwipe from 'react-native-sideswipe';
 import { imageUriFromKey } from "@/serverconn";
 
 
-export default function ListingGallery( { listing }: {listing: Listing}) {
+export function ListingGallery( { listing }: {listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const { distance } = useLocalSearchParams();
   const width = Dimensions.get('window').width;

@@ -56,7 +56,7 @@ export default function CreateListing() {
     if (!listingDataValid()) {
       return;
     }
-    const createdListing = await createListing(await getToken() ?? "", {
+    const createdListing = await createListing(getToken, {
       ...listingData.current,
       startingPrice: Number(listingData.current.startingPrice),
       buyPrice: Number(listingData.current.buyPrice)

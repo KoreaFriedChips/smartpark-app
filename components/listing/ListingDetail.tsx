@@ -10,7 +10,7 @@ interface ListingDetailProps {
   Icon: React.ElementType;
 }
 
-export default function ListingDetail({ title, description, Icon }: ListingDetailProps) {
+export function ListingDetail({ title, description, Icon }: ListingDetailProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (

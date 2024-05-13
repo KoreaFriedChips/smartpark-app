@@ -7,16 +7,18 @@ import { FolderLock, Car, ShieldCheck } from "lucide-react-native";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import RatingsText from "@/components/ListingCard/RatingsText";
-import RatingsQuickView from "@/components/RatingsQuickView";
-import ListingDetail from "@/components/ListingDetail";
-import SellerQuickInfo from "@/components/SellerQuickInfo";
 import { getSeller } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
-import ListingBidWidget from "@/components/ListingBidWidget";
-import SlidingAmenitiesWidget from "@/components/SlidingAmenitiesWidget";
-import ListingMiniMap from "@/components/ListingMiniMap";
 import { useListing } from "@/hooks";
-import ListingGallery from "@/components/ListingGallery";
+import { 
+  ListingGallery,
+  RatingsQuickView,
+  ListingDetail,
+  SellerQuickInfo,
+  ListingBidWidget,
+  SlidingAmenitiesWidget,
+  ListingMiniMap
+ } from "@/components/listing";
 
 
 export default function Listing() {
@@ -35,7 +37,7 @@ export default function Listing() {
   useEffect(() => {
     if (!listing) return;
     const fetchSeller = async () => {
-      setSeller(await getSeller(await getToken() ?? "", listing));
+      setSeller(await getSeller(getToken, listing));
     }
     fetchSeller();
   }, [listing]);
