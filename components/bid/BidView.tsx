@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, MutableRefObject } from "react";
 import { Platform, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity, Dimensions, useColorScheme } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -8,12 +8,12 @@ import { useNavigation } from "@react-navigation/native";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import { Calendar, Car, CreditCard, DollarSign, ListChecks, Pencil } from "lucide-react-native";
 import DistanceText from "@/components/ListingCard/DistanceText";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
 import moment from "moment";
-import { intervalToDuration } from "date-fns";
+import { differenceInCalendarDays, differenceInHours, differenceInMonths } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 
 export interface BidViewRef {
@@ -22,7 +22,21 @@ export interface BidViewRef {
   desiredSlot: Interval | undefined
 }
 
-export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
+export interface BidViewProps {
+  listingId: MutableRefObject<string | undefined>;
+  amount: MutableRefObject<number | undefined>;
+  desiredSlot: MutableRefObject<Interval | undefined>;
+  highestBid: MutableRefObject<Bid | undefined>; 
+  handleSubmitBid: () => Promise<void>;
+}
+
+export default function BidView({
+  listingId: listingIdRef, 
+  amount: amountRef, 
+  desiredSlot: desiredSlotRef, 
+  highestBid: highestBidRef,
+  handleSubmitBid,
+}: BidViewProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const listing = useListing();
@@ -39,8 +53,20 @@ export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
   }, [listing]);
 
   useEffect(() => {
-    bidData.current.desiredSlot = desiredSlot;
+    if (listing) listingIdRef.current = listing.id;
+  }, [listing]);
+
+  useEffect(() => {
+    amountRef.current = Number(bidAmount);
+  }, [bidAmount]);
+
+  useEffect(() => {
+    if (desiredSlot) desiredSlotRef.current = desiredSlot;
   }, [desiredSlot]);
+
+  useEffect(() => {
+    if (highestBid) highestBidRef.current = highestBid;
+  }, [highestBid]);
 
   const setSelect = (selection: string) => {
     setSelection(selection);
@@ -54,6 +80,46 @@ export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
     });
   }, [navigation, themeColors, listing]);
 
+
+  const spotPrice = () => {
+    let spotPrice = {
+      price: 0,
+      calcText: ""
+    }
+    if (!listing) return spotPrice;
+    if (!desiredSlot) return spotPrice;
+    let diff: number;
+    switch(listing.duration) {
+      case "hour":
+        diff = differenceInHours(desiredSlot.end, desiredSlot.start);
+        spotPrice.price = diff * Number(bidAmount) * 1.075;
+        spotPrice.calcText = `(${diff} hours x ${Number(bidAmount).toFixed(2)} / hour) + 7.5% fee`
+        break;
+      case "day":
+        diff = differenceInCalendarDays(desiredSlot.end, desiredSlot.start);
+        spotPrice.price = diff * Number(bidAmount) * 1.075;
+        spotPrice.calcText = `(${diff} days x ${Number(bidAmount).toFixed(2)} / day) + 7.5% fee`
+        break;
+      case "month":
+        diff = differenceInMonths(desiredSlot.end, desiredSlot.start);
+        spotPrice.price = diff * Number(bidAmount) * 1.075;
+        spotPrice.calcText = `(${diff} months x ${Number(bidAmount).toFixed(2)} / month) + 7.5% fee`
+        break;
+      default:
+        spotPrice.price = 0;
+        break;
+    }
+    return spotPrice;
+  }
+
+  const handleReviewButtonPress = () => {
+    if (!listing) return;
+    router.replace({
+      pathname: "/listing/[id]/bid/",
+      params: { id: listing.id },
+    });
+    handleSubmitBid();
+  }
 
   return (
     <KeyboardAvoidingView
@@ -116,11 +182,11 @@ export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
                   Spot price
                 </Text>
                 <Text weight="semibold" style={{ fontSize: 16, marginTop: 14 }}>
-                  {Number(bidAmount).toFixed(2)}
+                  {spotPrice().price.toFixed(2)}
                 </Text>
               </View>
               {desiredSlot && <Text italic style={{ ...styles.subtitle, color: themeColors.third }}>
-                ({`${intervalToDuration(desiredSlot).hours}`} hours x ${Number(bidAmount).toFixed(2)} / hour) + 7.5% fee
+                {spotPrice().calcText}
               </Text>}
 
               <TouchableOpacity style={{ ...styles.infoRow, borderColor: themeColors.outline, marginTop: 10 }}>
@@ -151,12 +217,8 @@ export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
                 <Pencil size={14} color={themeColors.primary} />
               </TouchableOpacity>
             </View>
-            <Link
-              href={{
-                pathname: "/listing/[id]/bid/",
-                params: { id: listing.id },
-              }}
-              asChild
+            <TouchableOpacity 
+              onPress={handleReviewButtonPress} 
               style={[
                 styles.button,
                 {
@@ -166,26 +228,24 @@ export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
                 },
               ]}
             >
-              <TouchableOpacity>
-                <ListChecks
-                  size={14}
-                  color={Colors["light"].primary}
-                  strokeWidth={3}
-                  style={{
-                    marginRight: 4,
-                  }}
-                />
-                <Text
-                  weight="bold"
-                  style={{
-                    ...styles.buttonText,
-                    color: Colors["light"].primary,
-                  }}
-                >
-                  Review {selection === "Place bid" ? "bid" : "reservation"}
-                </Text>
-              </TouchableOpacity>
-            </Link>
+              <ListChecks
+                size={14}
+                color={Colors["light"].primary}
+                strokeWidth={3}
+                style={{
+                  marginRight: 4,
+                }}
+              />
+              <Text
+                weight="bold"
+                style={{
+                  ...styles.buttonText,
+                  color: Colors["light"].primary,
+                }}
+              >
+                Review {selection === "Place bid" ? "bid" : "reservation"}
+              </Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>

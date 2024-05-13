@@ -13,20 +13,23 @@ import BidView, { BidViewRef } from "./BidView";
 export default function BidController(){
   const {getToken} = useAuth();
 
-  const listing = useListing();
-  const amount = useRef(0);
+  const listingId = useRef<string>();
+  const amount = useRef<number>();
   const desiredSlot = useRef<Interval | undefined>(undefined);
   const highestBid = useRef<Bid>();
 
-  useEffect(() => {
-    if (!listing) return;
-    if (listing.availability.length === 0) return;
-    desiredSlot.current = listing.availability[0];
-
-  }, [listing]);
-
 
   const handleSubmitBid = async () => {
+
+    if (!amount.current) {
+      showErrorPage("must put a bid amount");
+      return;
+    }
+
+    if (!listingId.current) {
+      showErrorPage("listingId not loaded");
+      return;
+    }
 
     if (!desiredSlot.current) {
       showErrorPage("must select a timeslot");
@@ -41,11 +44,11 @@ export default function BidController(){
     try {
       const bid = await createBid(getToken, {
         amount: amount.current,
-        starts: desiredSlot.current?.start,
-        ends: desiredSlot.current?.end,
-        listingId: listing?.id
+        starts: desiredSlot.current.start,
+        ends: desiredSlot.current.end,
+        listingId: listingId.current
       });
-      router.push(`/listing/${listing?.id}/bid/success`);
+      router.replace(`/listing/${listingId.current}/bid/success`);
       console.log(bid);
 
       amount.current = 0;
@@ -56,14 +59,6 @@ export default function BidController(){
     }
   }
 
-  const initialBidData = {
-    buyPrice: 150,
-    bidAmount: 0,
-    desiredSlot: desiredSlot.current
-  }
-  const bidData = useRef<BidViewRef>(initialBidData)
-
-
-  return (BidView(bidData));
+  return (BidView({listingId, amount, desiredSlot, highestBid, handleSubmitBid}));
 
 }

@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { useListingWithId } from "./listing-hooks";
 import { getBidCount, getHighestBid } from "@/serverconn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { minutesToMilliseconds } from "date-fns";
 
 export const useBidCount = (listingId: string | undefined, desiredSlot: Interval | undefined) => {
@@ -17,7 +17,10 @@ export const useBidCount = (listingId: string | undefined, desiredSlot: Interval
       return;
     }
   }
-  setInterval(async ()=>  fetchCount(), minutesToMilliseconds(1));
+  useEffect(() => {
+    fetchCount();
+  }, []);
+  setInterval(async ()=>  fetchCount(), minutesToMilliseconds(5));
 
   return count;
 } 
@@ -36,7 +39,10 @@ export const useHighestBid = (listingId: string | undefined, desiredSlot: Interv
       return;
     }
   }
-  setInterval(async () =>  fetchHighestBid(), minutesToMilliseconds(1));
+  useEffect(() => {
+    fetchHighestBid();
+  }, []);
+  setInterval(async () =>  fetchHighestBid(), minutesToMilliseconds(5));
 
   return highestBid;
 }
