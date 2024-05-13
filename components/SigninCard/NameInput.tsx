@@ -1,12 +1,11 @@
 import {
     StyleSheet,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
     useColorScheme,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useState } from "react";
 import {
@@ -16,39 +15,39 @@ import {
 import { RootStackParamList } from "../SignInScreen";
 import { styles } from "./PhoneInput";
 
-type EmailInputProps = {
-    navigation: StackNavigationProp<RootStackParamList, "EmailInput">;
-    setGlobal: (email: string) => Promise<keyof RootStackParamList>;
+type NameInputProps = {
+    navigation: StackNavigationProp<RootStackParamList, "NameInput">;
+    setGlobal: (name: string) => Promise<keyof RootStackParamList>;
 };
 
-export const EmailInput = (props: EmailInputProps) => {
+export const NameInput = (props: NameInputProps) => {
     const colorScheme = useColorScheme()
-    const [email, setEmail] = useState("");
+    const [name, setName] = useState("");
     const [error, setError] = useState("");
 
     const next = async () => {
-        if (!/^.*@.*\..*$/.test(email)) {
-            setError("You've entered an invalid email.")
-            return;  
+        if (!/.+/.test(name)) {
+            setError("Enter at least one character for your name.");
+            return;
         }
         try {
-            const nextStep = await props.setGlobal(email);
-            setError("")
-            props.navigation.push(nextStep, {})
+            const nextStep = await props.setGlobal(name);
+            setError("");
+            props.navigation.push(nextStep, {});
         } catch (err) {
-            setError((err as Error).message)
+            setError((err as Error).message);
         }
-    }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ ...styles.container, ...styles.modalContainer }}>
-                <Text style={styles.subText}>Please enter your email.</Text>
+                <Text style={styles.subText}>What's your name?</Text>
                 <TextInput
                     style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
-                    placeholder="joe@trysmartpark.com"
-                    onChangeText={setEmail}
-                    value={email}
+                    placeholder="Joe Smith"
+                    onChangeText={setName}
+                    value={name}
                     keyboardType="default"
                     clearButtonMode="while-editing"
                 />
@@ -74,7 +73,7 @@ export const EmailInput = (props: EmailInputProps) => {
                         Next
                     </Text>
                 </TouchableOpacity>
-                <Text style={{ ...styles.subText, color: "red" }}>{error}</Text>
+                <Text style={{ ...styles.errorText }}>{error}</Text>
             </View>
         </TouchableWithoutFeedback>
     );

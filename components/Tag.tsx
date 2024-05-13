@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors";
 
 interface TagProps {
   name?: string;
-  Icon: React.ElementType;
+  Icon?: React.ElementType;
   isSelected?: boolean;
   onPress: () => void;
   style?: ViewStyle | ViewStyle[];
@@ -37,7 +37,7 @@ export default function Tag({ name, Icon, isSelected, onPress = () => null, styl
           backgroundColor: "transparent",
         }}
       >
-        <Icon size={18} strokeWidth={2} color={isSelected ? Colors.light.primary : themeColors.primary} />
+        {Icon && <Icon size={18} strokeWidth={2} color={isSelected ? Colors.light.primary : themeColors.primary} />}
         {name && <Text
           weight={weight}
           style={{

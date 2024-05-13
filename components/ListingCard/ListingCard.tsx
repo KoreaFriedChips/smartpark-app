@@ -124,14 +124,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 1,
+    // },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 3.84,
+    // elevation: 3,
   },
   thumbnail: {
     width: "100%",

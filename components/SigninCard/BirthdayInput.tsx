@@ -1,12 +1,11 @@
 import {
     StyleSheet,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
     useColorScheme,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useState } from "react";
 import {
@@ -15,24 +14,26 @@ import {
 } from "@react-navigation/stack";
 import { RootStackParamList } from "../SignInScreen";
 import { styles } from "./PhoneInput";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-type NameInputProps = {
-    navigation: StackNavigationProp<RootStackParamList, "NameInput">;
-    setGlobal: (name: string) => Promise<keyof RootStackParamList>;
+type BirthdayInputProps = {
+    navigation: StackNavigationProp<RootStackParamList, "BirthdayInput">;
+    setGlobal: (birthday: Date) => Promise<keyof RootStackParamList>;
 };
 
-export const NameInput = (props: NameInputProps) => {
-    const colorScheme = useColorScheme()
-    const [name, setName] = useState("");
+export const BirthdayInput = (props: BirthdayInputProps) => {
+    const [date, setDate] = useState(new Date());
     const [error, setError] = useState("");
 
     const next = async () => {
-        if (!/.+/.test(name)) {
-            setError("Enter at least one character for your name.");
+        const today = new Date();
+        const date16YearsAgo = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+        if (date > date16YearsAgo) {
+            setError("You must be at least 16 to use this service.");
             return;
         }
         try {
-            const nextStep = await props.setGlobal(name);
+            const nextStep = await props.setGlobal(date);
             setError("");
             props.navigation.push(nextStep, {});
         } catch (err) {
@@ -40,18 +41,15 @@ export const NameInput = (props: NameInputProps) => {
         }
     };
 
+    const resend = () => {}
+
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ ...styles.container, ...styles.modalContainer }}>
-                <Text style={styles.subText}>What's your name?</Text>
-                <TextInput
-                    style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
-                    placeholder="Joe Smith"
-                    onChangeText={setName}
-                    value={name}
-                    keyboardType="default"
-                    clearButtonMode="while-editing"
-                />
+                <Text style={styles.subText}>
+                    When were you born? You must be at least 16 to use this service.
+                </Text>
+                <DateTimePicker testID="test" value={date} mode="date" onChange={(_, d) => setDate(d ?? new Date())}/>
                 <TouchableOpacity
                     style={[
                         styles.nextButton,
@@ -74,7 +72,7 @@ export const NameInput = (props: NameInputProps) => {
                         Next
                     </Text>
                 </TouchableOpacity>
-                <Text style={{ ...styles.subText, color: "red" }}>{error}</Text>
+                <Text style={{ ...styles.errorText }}>{error}</Text>
             </View>
         </TouchableWithoutFeedback>
     );

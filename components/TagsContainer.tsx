@@ -8,6 +8,7 @@ import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import { ListingSearchOptions, useSearchContext } from "@/hooks";
 import { SortOptions } from "@/components/utils/utils";
+import * as Haptics from "expo-haptics";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
 interface TagItem {
@@ -25,7 +26,6 @@ const categories: TagItem[] = [
   { name: "Concerts", icon: Music },
   { name: "Sports", icon: Trophy },
   { name: "Attractions", icon: FerrisWheel },
-
   { name: "Near Venue", icon: Theater },
   { name: "24/7 Access", icon: CalendarClock },
   { name: "Surveillance", icon: Cctv },
@@ -56,6 +56,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
 
   const handlePressCategory = (category: string) => {
     setSelectedCategories(selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category]);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const submitSearch = () => {
@@ -139,11 +140,11 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={[
               styles.tagContainer,
-							{
-								backgroundColor: "transparent",
-								borderColor: themeColors.outline,
-							},
-							!search && styles.tagsPadded
+              {
+                backgroundColor: "transparent",
+                borderColor: themeColors.outline,
+              },
+              !search && styles.tagsPadded,
             ]}
           >
             <Tag
@@ -190,9 +191,9 @@ const styles = StyleSheet.create({
     paddingBottom: 10, //6
     paddingHorizontal: 12,
   },
-	tagsPadded: {
+  tagsPadded: {
     paddingTop: 12,
-	},
+  },
   modalBackground: {
     flex: 1,
     justifyContent: "center",

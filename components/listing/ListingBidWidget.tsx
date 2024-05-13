@@ -173,14 +173,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginVertical: 12,
     marginBottom: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 3,
   },
   textContainer: {
     display: "flex",

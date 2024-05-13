@@ -1,12 +1,11 @@
 import {
     StyleSheet,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
     useColorScheme,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useState } from "react";
 import {
@@ -16,46 +15,25 @@ import {
 import { RootStackParamList } from "../SignInScreen";
 import { styles } from "./PhoneInput";
 
-type EmailVerificationProps = {
-    navigation: StackNavigationProp<RootStackParamList, "EmailVerification">;
-    setGlobal: (code: string) => Promise<keyof RootStackParamList>;
-    resend: () => void
+type EmailInputProps = {
+    navigation: StackNavigationProp<RootStackParamList, "EmailInput">;
+    setGlobal: (email: string) => Promise<keyof RootStackParamList>;
 };
 
-export const EmailVerification = (props: EmailVerificationProps) => {
-    const colorScheme = useColorScheme();
-    const [code, setSCode] = useState("");
+export const EmailInput = (props: EmailInputProps) => {
+    const colorScheme = useColorScheme()
+    const [email, setEmail] = useState("");
     const [error, setError] = useState("");
-    const [resendT, setResendT] = useState("Resend");
-    let shouldResend = true;
 
     const next = async () => {
-        if (!code) { setError("Please enter a verification code."); return; }
+        if (!/^.*@.*\..*$/.test(email)) {
+            setError("You've entered an invalid email.")
+            return;  
+        }
         try {
-            const nextStep = await props.setGlobal(code);
+            const nextStep = await props.setGlobal(email);
             setError("")
             props.navigation.push(nextStep, {})
-        } catch (err) {
-            setError((err as Error).message)
-        }
-    }
-
-    const resend = () => {
-        if (!shouldResend) return;
-        try {
-            props.resend()
-            shouldResend = false;
-            let i = 60;
-            const inter = setInterval(() => {
-                if (i == 0) {
-                    shouldResend = true;
-                    setResendT("Resend");
-                    clearInterval(inter)
-                } else {
-                    setResendT(`Try again in ${i}`)
-                    i--;
-                }
-            }, 1000)
         } catch (err) {
             setError((err as Error).message)
         }
@@ -64,21 +42,15 @@ export const EmailVerification = (props: EmailVerificationProps) => {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ ...styles.container, ...styles.modalContainer }}>
-                <Text style={styles.subText}>
-                    We've just sent you an email. Enter the verification code
-                    here.
-                </Text>
+                <Text style={styles.subText}>Please enter your email.</Text>
                 <TextInput
                     style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
-                    placeholder="123456"
-                    onChangeText={setSCode}
-                    value={code}
+                    placeholder="joe@trysmartpark.com"
+                    onChangeText={setEmail}
+                    value={email}
                     keyboardType="default"
                     clearButtonMode="while-editing"
                 />
-                <TouchableOpacity onPressOut={resend}>
-                    <Text weight="bold">{resendT}</Text>
-                </TouchableOpacity>
                 <TouchableOpacity
                     style={[
                         styles.nextButton,
@@ -101,7 +73,7 @@ export const EmailVerification = (props: EmailVerificationProps) => {
                         Next
                     </Text>
                 </TouchableOpacity>
-                <Text style={{ ...styles.subText, color: "red" }}>{error}</Text>
+                <Text style={{ ...styles.errorText }}>{error}</Text>
             </View>
         </TouchableWithoutFeedback>
     );

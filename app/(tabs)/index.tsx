@@ -1,11 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, FlatList, ScrollViewComponent, Animated,  } from "react-native";
+import { StyleSheet, FlatList, ScrollViewComponent, Animated, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
 import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
+import { useLayoutEffect } from "react";
+import Colors from "@/constants/Colors";
+import { useNavigation } from "@react-navigation/native";
 import { ListingSearchOptions, useListings } from "@/hooks";
+import HeaderTitle from "@/components/Headers/HeaderTitle";
 
 export default function HomeScreen() {
+  const themeColors = Colors[useColorScheme() || "light"];
   const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings(); 
 
   const listRef = useRef<FlatList>(null);
@@ -40,6 +45,15 @@ export default function HomeScreen() {
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
+  const navigation = useNavigation();
+
+  // location will be set/loaded here
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <HeaderTitle name={"Minnetonka, MN"} arrow={true} />,
+    });
+  }, [navigation, themeColors]);
 
   return (
     <View style={styles.container}>
