@@ -1,14 +1,9 @@
-import { useListing } from "@/hooks";
-import { getHighestBid, createBid } from "@/serverconn";
+import { createBid } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
-import { useEffect, useRef, useState } from "react";
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { minutesToMilliseconds } from "date-fns";
+import { useRef } from "react";
 import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
-import BidView, { BidViewRef } from "./BidView";
+import BidView from "./BidView";
 
 export default function BidController(){
   const {getToken} = useAuth();
@@ -48,14 +43,14 @@ export default function BidController(){
         ends: desiredSlot.current.end,
         listingId: listingId.current
       });
-      router.replace(`/listing/${listingId.current}/bid/success`);
+      router.replace({pathname: "/message-screen", params: {id: "bid-placed"}});
       console.log(bid);
 
       amount.current = 0;
       desiredSlot.current = undefined;
     } catch (err: any) {
       console.log(err);
-      showErrorPage(err.message);
+      router.replace({pathname: "/message-screen", params: {id: "error"}});
     }
   }
 

@@ -16,12 +16,6 @@ import moment from "moment";
 import { differenceInCalendarDays, differenceInHours, differenceInMonths } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 
-export interface BidViewRef {
-  buyPrice: number
-  bidAmount: number
-  desiredSlot: Interval | undefined
-}
-
 export interface BidViewProps {
   listingId: MutableRefObject<string | undefined>;
   amount: MutableRefObject<number | undefined>;
