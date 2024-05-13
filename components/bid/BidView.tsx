@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import { Calendar, Car, CreditCard, DollarSign, ListChecks, Pencil } from "lucide-react-native";
 import DistanceText from "@/components/ListingCard/DistanceText";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
@@ -22,6 +22,7 @@ export interface BidViewProps {
   desiredSlot: MutableRefObject<Interval | undefined>;
   highestBid: MutableRefObject<Bid | undefined>; 
   handleSubmitBid: () => Promise<void>;
+  handleSubmitBuy: () => Promise<void>;
 }
 
 export default function BidView({
@@ -30,12 +31,14 @@ export default function BidView({
   desiredSlot: desiredSlotRef, 
   highestBid: highestBidRef,
   handleSubmitBid,
+  handleSubmitBuy,
 }: BidViewProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const listing = useListing();
   const navigation = useNavigation();
-  const [selection, setSelection] = useState("Place bid");
+  const { mode } = useLocalSearchParams<{mode: string}>();
+  const [selection, setSelection] = useState(mode === "buy" ? "Buy now" : "Place bid");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
   const [bidAmount, setBidAmount] = useState("");
   const highestBid = useHighestBid(listing?.id, desiredSlot);
@@ -83,21 +86,22 @@ export default function BidView({
     if (!listing) return spotPrice;
     if (!desiredSlot) return spotPrice;
     let diff: number;
+    const amount = selection === "Place bid" ? Number(bidAmount) : listing.buyPrice;
     switch(listing.duration) {
       case "hour":
         diff = differenceInHours(desiredSlot.end, desiredSlot.start);
-        spotPrice.price = diff * Number(bidAmount) * 1.075;
-        spotPrice.calcText = `(${diff} hours x ${Number(bidAmount).toFixed(2)} / hour) + 7.5% fee`
+        spotPrice.price = diff * amount * 1.075;
+        spotPrice.calcText = `(${diff} hours x ${amount.toFixed(2)} / hour) + 7.5% fee`
         break;
       case "day":
         diff = differenceInCalendarDays(desiredSlot.end, desiredSlot.start);
-        spotPrice.price = diff * Number(bidAmount) * 1.075;
-        spotPrice.calcText = `(${diff} days x ${Number(bidAmount).toFixed(2)} / day) + 7.5% fee`
+        spotPrice.price = diff * amount * 1.075;
+        spotPrice.calcText = `(${diff} days x ${amount.toFixed(2)} / day) + 7.5% fee`
         break;
       case "month":
         diff = differenceInMonths(desiredSlot.end, desiredSlot.start);
-        spotPrice.price = diff * Number(bidAmount) * 1.075;
-        spotPrice.calcText = `(${diff} months x ${Number(bidAmount).toFixed(2)} / month) + 7.5% fee`
+        spotPrice.price = diff * amount * 1.075;
+        spotPrice.calcText = `(${diff} months x ${amount.toFixed(2)} / month) + 7.5% fee`
         break;
       default:
         spotPrice.price = 0;
@@ -108,11 +112,15 @@ export default function BidView({
 
   const handleReviewButtonPress = () => {
     if (!listing) return;
-    router.replace({
-      pathname: "/listing/[id]/bid/",
-      params: { id: listing.id },
-    });
-    handleSubmitBid();
+    // router.replace({
+    //   pathname: "/listing/[id]/bid/",
+    //   params: { id: listing.id },
+    // });
+    if (selection === "Place bid") {
+      handleSubmitBid();
+    } else {
+      handleSubmitBuy();
+    }
   }
 
   return (

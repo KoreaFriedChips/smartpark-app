@@ -1,4 +1,4 @@
-import { createBid } from "@/serverconn";
+import { createBid, createReservation } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useRef } from "react";
 import { showErrorPage } from "@/components/utils/utils";
@@ -10,7 +10,7 @@ export default function BidController(){
 
   const listingId = useRef<string>();
   const amount = useRef<number>();
-  const desiredSlot = useRef<Interval | undefined>(undefined);
+  const desiredSlot = useRef<Interval>();
   const highestBid = useRef<Bid>();
 
 
@@ -54,6 +54,31 @@ export default function BidController(){
     }
   }
 
-  return (BidView({listingId, amount, desiredSlot, highestBid, handleSubmitBid}));
+  
+  const handleSubmitBuy = async () => {
+    if (!listingId.current) {
+      showErrorPage("listingId not loaded");
+      return;
+    }
+
+    if (!desiredSlot.current) {
+      showErrorPage("you must select a timeslot");
+      return;
+    }
+
+    try {
+      const reservation = await createReservation(getToken, listingId.current, desiredSlot.current);
+      console.log("reservation created");
+      console.log(reservation);
+      router.replace({pathname: "/message-screen", params: {id: "bid-won"}});
+      desiredSlot.current = undefined;
+    } catch (err: any) {
+      console.log(err);
+      router.push({pathname: "/message-screen", params: {id: "order-error"}});
+    }
+
+  }
+
+  return (BidView({listingId, amount, desiredSlot, highestBid, handleSubmitBid, handleSubmitBuy}));
 
 }

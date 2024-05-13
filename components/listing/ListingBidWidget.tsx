@@ -100,8 +100,8 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
       </Link>
       <Link
         href={{
-          pathname: "/listing/[id]/buy/",
-          params: { id: listing.id },
+          pathname: "/listing/[id]/bid/",
+          params: { id: listing.id, mode: "buy" },
         }}
         asChild
         style={[
