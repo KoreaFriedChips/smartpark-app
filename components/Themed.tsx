@@ -24,7 +24,7 @@ export function useThemeColor(props: { light?: string; dark?: string }, colorNam
 }
 
 interface CustomTextProps extends TextProps {
-  weight?: "bold" | "semibold" | "black" | "extrabold";
+  weight?: "normal" | "bold" | "semibold" | "black" | "extrabold";
   style?: TextStyle;
   italic?: boolean;
 }

@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors";
 import { Heart } from "lucide-react-native";
 import { useAuth } from "@clerk/clerk-expo";
 import { createFavorite, readFavorites, deleteFavorite, readUsers } from "@/serverconn";
+import * as Haptics from "expo-haptics";
 
 interface ButtonProps {
   id: string;
@@ -35,6 +36,7 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
 
 
   const handleLike = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isLiked) {
       setIsLiked(false);
       favoriteId && await deleteFavorite(getToken, favoriteId);

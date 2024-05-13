@@ -1,12 +1,11 @@
 import {
     StyleSheet,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
     TouchableOpacity,
     useColorScheme,
 } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useState } from "react";
 import {
@@ -16,33 +15,21 @@ import {
 import { RootStackParamList } from "../SignInScreen";
 import { styles } from "./PhoneInput";
 
-type CodeVerificationProps = {
-    navigation: StackNavigationProp<RootStackParamList, "CodeVerification">;
+type EmailVerificationProps = {
+    navigation: StackNavigationProp<RootStackParamList, "EmailVerification">;
     setGlobal: (code: string) => Promise<keyof RootStackParamList>;
     resend: () => void
 };
 
-export const CodeVerification = (props: CodeVerificationProps) => {
-    const colorScheme = useColorScheme()
+export const EmailVerification = (props: EmailVerificationProps) => {
+    const colorScheme = useColorScheme();
     const [code, setSCode] = useState("");
     const [error, setError] = useState("");
     const [resendT, setResendT] = useState("Resend");
     let shouldResend = true;
 
-    const setCode = (t: string) => {
-        console.log(t);
-        if (!/^\d{0,6}$/.test(t)) {
-            return;
-        }
-
-        setSCode(t);
-    };
-
     const next = async () => {
-        if (!/^\d{6}$/.test(code)) {
-            setError("You've entered an invalid code.")
-            return;  
-        }
+        if (!code) { setError("Please enter a verification code."); return; }
         try {
             const nextStep = await props.setGlobal(code);
             setError("")
@@ -77,13 +64,13 @@ export const CodeVerification = (props: CodeVerificationProps) => {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={{ ...styles.container, ...styles.modalContainer }}>
                 <Text style={styles.subText}>
-                    We've just sent you a text. Enter the verification code
+                    We've just sent you an email. Enter the verification code
                     here.
                 </Text>
                 <TextInput
                     style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
                     placeholder="123456"
-                    onChangeText={setCode}
+                    onChangeText={setSCode}
                     value={code}
                     keyboardType="default"
                     clearButtonMode="while-editing"
@@ -113,9 +100,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
                         Next
                     </Text>
                 </TouchableOpacity>
-                <Text style={{ ...styles.subText, color: "red" }}>
-                    {error}
-                </Text>
+                <Text style={{ ...styles.errorText }}>{error}</Text>
             </View>
         </TouchableWithoutFeedback>
     );

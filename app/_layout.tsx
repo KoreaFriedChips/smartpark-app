@@ -15,12 +15,14 @@ import ModalScreen from "@/components/ModalScreen";
 import Colors from "@/constants/Colors";
 import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-react-native";
 import * as Linking from 'expo-linking';
+import HeaderTitle from "@/components/Headers/HeaderTitle";
+import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListing, UserContext, useUser } from "@/hooks";
 // import { TouchableOpacity } from "@gorhom/bottom-sheet";
 
-export { ErrorBoundary, Router } from "expo-router";
+// export { ErrorBoundary, router } from "expo-router";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
@@ -96,15 +98,15 @@ export default function RootLayout() {
   const clerkPublishableKey = env?.clerkPublishableKey;
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
-      <SignedIn>
-        <RootLayoutNav />
-      </SignedIn>
-      <SignedOut>
-        <SignInScreen />
-      </SignedOut>
-    </ClerkProvider>
-    // <RootLayoutNav />
+    // <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+    //   <SignedIn>
+    //     <RootLayoutNav />
+    //   </SignedIn>
+    //   <SignedOut>
+    //     <SignInScreen />
+    //   </SignedOut>
+    // </ClerkProvider>
+    <RootLayoutNav />
   );
 }
 
@@ -134,30 +136,6 @@ function RootLayoutNav() {
     } catch (error) {
       console.error("error sharing listing: ", error);
     }
-  };
-
-  const headerTitle = (name: string) => {
-    return (
-      <View
-        style={{
-          flexDirection: "row",
-          backgroundColor: themeColors.header,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: "Soliden-SemiBold",
-            letterSpacing: -0.5,
-            color: themeColors.primary,
-            fontSize: 18,
-          }}
-        >
-          {name}
-        </Text>
-      </View>
-    );
   };
 
   const headerLeft = () => {
@@ -225,14 +203,54 @@ function RootLayoutNav() {
     <UserContext.Provider value={user}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />\
+        <Stack.Screen
+          name="spot"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Your spot" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="messages"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Messages" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="set-location"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Set location" />,
+            headerRight: () => headerRightClose(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="notifications"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Notifications" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
         <Stack.Screen
           name="listing/[id]/bid/index"
           options={{
             presentation: "modal",
             title: "",
-            headerTitle: () => headerTitle("Place Bid"),
+            headerTitle: () => <HeaderTitle name="Place Bid" />,
             headerStyle: {
               backgroundColor: themeColors.background,
             },
@@ -243,26 +261,11 @@ function RootLayoutNav() {
         />
         <Stack.Screen name="listing/[id]/bid/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
-          name="listing/[id]/buy/index"
-          options={{
-            presentation: "modal",
-            title: "",
-            headerTitle: () => headerTitle("Buy Now"),
-            headerStyle: {
-              backgroundColor: themeColors.background,
-            },
-            headerLeft: () => null,
-            headerRight: () => headerRightClose(),
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen name="listing/[id]/buy/success" options={{presentation: "modal", title: ""}}/>
-        <Stack.Screen
           name="listing-detail"
           options={{
             presentation: "modal",
             title: "Listing",
-            headerTitle: () => headerTitle("Spot Details"),
+            headerTitle: () => <HeaderTitle name="Spot Details" />,
             headerLeft: () => headerLeft(),
             headerRight: () => headerRight(),
             headerTitleAlign: "center",
@@ -287,7 +290,7 @@ function RootLayoutNav() {
           options={{
             presentation: "modal",
             title: "",
-            headerTitle: () => headerTitle("Spot Availability"),
+            headerTitle: () => <HeaderTitle name="Spot Availability" />,
             headerStyle: {
               backgroundColor: themeColors.background,
             },
@@ -301,7 +304,7 @@ function RootLayoutNav() {
           options={{
             presentation: "modal", 
             title: "",
-            headerTitle: () => headerTitle("Error"),
+            headerTitle: () => <HeaderTitle name="Error"/>,
             headerTitleAlign: "center",
           }}
         />

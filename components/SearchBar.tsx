@@ -37,6 +37,8 @@ export default function SearchBar({searchQuery, setSearchQuery, onSubmitEditing}
         onFocus={() => setShowPrevSearches(true)}
         onBlur={() => setShowPrevSearches(false)}
         value={searchQuery}
+        autoCorrect={false}
+        spellCheck={false}
         keyboardType="default"
         returnKeyType="search"
         clearButtonMode="while-editing"

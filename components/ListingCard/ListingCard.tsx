@@ -1,7 +1,7 @@
 import React, { memo, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Image } from "expo-image";
-import { Link, useRouter, useLocalSearchParams , useGlobalSearchParams } from "expo-router";
+import { Link, useRouter, useLocalSearchParams , useGlobalSearchParams, router } from "expo-router";
 import { useRoute } from "@react-navigation/native"
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -26,7 +26,7 @@ export interface Review {
 }
 // const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-function ListingCard({ item }: {item: Listing}) {
+function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
 
@@ -34,23 +34,27 @@ function ListingCard({ item }: {item: Listing}) {
     setIsLiked(!isLiked);
   };
 
+  const handleCardPress = () => {
+    if (onPress) return onPress();
+
+    router.push({
+      pathname: `/listing/${item.id}/`,
+      params: { distance: item.distance },
+    })
+  }
+
   return (
-    <Link
-			href={{
-				pathname: `/listing/${item.id}/`,
-				params: { distance: item.distance },
-			}}
-      asChild
-      style={[
-        styles.listingCard,
-        {
-          borderColor: themeColors.outline,
-          backgroundColor: themeColors.header,
-          position: "relative",
-        },
-      ]}
-    >
-      <TouchableOpacity>
+      <TouchableOpacity
+        onPress={handleCardPress}
+        style={[
+          styles.listingCard,
+          {
+            borderColor: themeColors.outline,
+            backgroundColor: themeColors.header,
+            position: "relative",
+          },
+        ]}
+      >
         <Image
           source={{ uri: imageUriFromKey(item.thumbnail) }}
           // placeholder={blurhash}
@@ -109,7 +113,6 @@ function ListingCard({ item }: {item: Listing}) {
           </TouchableOpacity>
         </Link>
       </TouchableOpacity>
-    </Link>
   );
 }
 
@@ -121,14 +124,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 1,
+    // },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 3.84,
+    // elevation: 3,
   },
   thumbnail: {
     width: "100%",

@@ -1,94 +1,80 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, Dimensions, useColorScheme } from "react-native";
-import MapView, { Marker, Region, Callout } from "react-native-maps";
-import { View } from "@/components/Themed";
+import React from "react";
+import { StyleSheet, Dimensions, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import Colors from "@/constants/Colors";
-import {  MapPin  } from "lucide-react-native";
+import { useColorScheme } from "react-native";
 import Tag from "@/components/Tag";
+import { MapPin } from "lucide-react-native";
 
+interface ListingLocationProps {
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  height?: number;
+}
 
-export function ListingMiniMap({listing}: {listing: Listing}) {
+export function ListingMiniMap({ coordinates, height = 300 }: ListingLocationProps) {
   const themeColors = Colors[useColorScheme() || "light"];
-  const [region, setRegion] = useState<Region>({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.00922,
-    longitudeDelta: 0.00421,
-  });
-  const mapStyle = [
-    {
-      elementType: "labels",
-      stylers: [
-        {
-          visibility: "off",
-        },
-      ],
-    },
-  ];
-  
-  useEffect(() => {
-    if (listing) {
-      setRegion({
-        latitude: listing.latitude,
-        longitude: listing.longitude,
-        latitudeDelta: 0.000222,
-        longitudeDelta: 0.00221,
-      });
-    }
-  }, [listing]);
-return (
-  <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-    <MapView style={[styles.map, { borderColor: themeColors.outline }]} zoomEnabled={false} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
-      <Marker
-        coordinate={{
-          latitude: listing.latitude,
-          longitude: listing.longitude,
-        }}
-        title={"Location"}
-      >
-        <Tag
-          name={"Relative location"}
-          Icon={MapPin}
-          isSelected={true}
-          onPress={() => {
-            // mapRef.current?.animateToRegion({
-            //   latitude: location.coords.latitude,
-            //   longitude: location.coords.longitude,
-            //   latitudeDelta: 0.00922,
-            //   longitudeDelta: 0.00421,
-            // });
-          }}
-          weight="bold"
-          shadow={true}
-        />
-        <View style={{ ...styles.pinRadius, borderColor: themeColors.outline }}></View>
-        <Callout tooltip>
-          {/* <View>
-        <Text>Callout text</Text>
-      </View> */}
-        </Callout>
-      </Marker>
-    </MapView>
-  </View>
-);}
 
+  const region = {
+    latitude: coordinates.latitude,
+    longitude: coordinates.longitude,
+    latitudeDelta: 0.000922,
+    longitudeDelta: 0.00421,
+  };
+
+  return (
+    <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+      <MapView style={[styles.map, { borderColor: themeColors.outline, height: height }]} region={region} customMapStyle={mapStyle} showsCompass={false}>
+        <Marker
+          coordinate={{
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+          }}
+        >
+          <Tag
+            name={"Relative location"}
+            Icon={MapPin}
+            isSelected={true}
+            onPress={() => {
+              // mapRef.current?.animateToRegion({
+              //   latitude: location.coords.latitude,
+              //   longitude: location.coords.longitude,
+              //   latitudeDelta: 0.00922,
+              //   longitudeDelta: 0.00421,
+              // });
+            }}
+            weight="bold"
+            shadow={true}
+          />
+          <View style={{ ...styles.pinRadius, borderColor: themeColors.outline }}></View>
+        </Marker>
+      </MapView>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   map: {
     width: Dimensions.get("window").width - 32,
-    height: 300,
     marginTop: 22,
     marginBottom: 42,
     borderRadius: 8,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 3,
   },
   pinRadius: {
     width: 100,
@@ -112,3 +98,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
 });
+
+const mapStyle = [
+  {
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+];

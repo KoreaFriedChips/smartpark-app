@@ -29,8 +29,8 @@ export default function Reservation() {
     if (!listing) return;
     if (listing.availability.length === 0) return;
     router.push({
-      pathname: "/listing/[id]/buy/",
-      params: { id: listing.id },
+      pathname: "/listing/[id]/bid/",
+      params: { id: listing.id, mode: "buy" },
     })
   }
 
