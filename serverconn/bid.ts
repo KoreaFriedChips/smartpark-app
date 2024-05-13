@@ -4,9 +4,17 @@ import { create, read, update, serverDelete } from "./crud";
 
 
 export const getHighestBid = async (getToken: GetToken, listingId: string, starts: Date, ends: Date) => {
-    const bids = readBids(getToken, { listingId, starts, ends });
-    return bids;
-};export const createBid = async (getToken: GetToken, data: any): Promise<Bid> => {
+    const bids = await readBids(getToken, { listingId, starts, ends });
+    if (bids.length === 0) throw new Error("no bids found");
+    return bids[0];
+};
+
+export const getBidCount = async (getToken: GetToken, listingId: string, starts: Date, ends: Date) => {
+    const bids = await readBids(getToken, { listingId, starts, ends });
+    return bids.length;
+};
+
+export const createBid = async (getToken: GetToken, data: any): Promise<Bid> => {
     const res = await create(getToken, "/api/bids", data);
     return BidModel.parse(res);
 };

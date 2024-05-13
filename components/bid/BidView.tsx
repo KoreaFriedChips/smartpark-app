@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, KeyboardAvoidingView, ScrollView, TouchableOpacity, Dimensions, useColorScheme } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -12,13 +12,35 @@ import { Link } from "expo-router";
 import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
+import moment from "moment";
+import { intervalToDuration } from "date-fns";
+import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 
-export default function BidView() {
+export interface BidViewRef {
+  buyPrice: number
+  bidAmount: number
+  desiredSlot: Interval | undefined
+}
+
+export default function BidView(bidData: React.MutableRefObject<BidViewRef>) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
-  const spotData = useListing();
+  const listing = useListing();
   const navigation = useNavigation();
   const [selection, setSelection] = useState("Place bid");
+  const [desiredSlot, setDesiredSlot] = useState<Interval>();
+  const [bidAmount, setBidAmount] = useState("");
+  const highestBid = useHighestBid(listing?.id, desiredSlot);
+  const bidCount = useBidCount(listing?.id, desiredSlot);
+
+  useEffect(() => {
+    if (!listing) return;
+    if (listing.availability.length > 0) setDesiredSlot(listing.availability[0]);
+  }, [listing]);
+
+  useEffect(() => {
+    bidData.current.desiredSlot = desiredSlot;
+  }, [desiredSlot]);
 
   const setSelect = (selection: string) => {
     setSelection(selection);
@@ -26,13 +48,12 @@ export default function BidView() {
   }
 
   useLayoutEffect(() => {
-    if (!spotData) return;
+    if (!listing) return;
     navigation.setOptions({
-      headerTitle: () => <HeaderTitle name={`${spotData.city} (${spotData.rating})`} text={"12 bids / 3 spots left"} stacked={true} />,
+      headerTitle: () => <HeaderTitle name={`${listing.city} (${listing.rating})`} text={`${bidCount} bids / ${listing.spotsLeft} spot${listing.spotsLeft > 1 ? "s" : ""} left`} stacked={true} />,
     });
-  }, [navigation, themeColors, spotData]);
+  }, [navigation, themeColors, listing]);
 
-  const [searchQuery, setSearchQuery] = React.useState("");
 
   return (
     <KeyboardAvoidingView
@@ -41,14 +62,14 @@ export default function BidView() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 82 : 36}
     >
       <ScrollView style={styles.scroll}>
-        {spotData && (
+        {listing && (
           <>
             <View style={{ ...styles.mapContainer }}>
               <DistanceText
                 distance={12}
                 style={{ top: 34, left: "auto", right: 12 }}
               />
-              <ListingMiniMap coordinates={{latitude: spotData.latitude, longitude: spotData.longitude}} height={225} />
+              <ListingMiniMap coordinates={{latitude: listing.latitude, longitude: listing.longitude}} height={225} />
             </View>
             <TabRow selection={selection} optOne="Place bid" optTwo="Buy now" setSelection={setSelect}/>
             <View style={styles.textContainer}>
@@ -60,8 +81,8 @@ export default function BidView() {
                   weight="bold"
                   style={{ ...styles.searchBar }}
                   placeholder={`Enter bid..`}
-                  onChangeText={(text) => setSearchQuery(text)}
-                  value={selection === "Place bid" ? searchQuery : "$150"}
+                  onChangeText={(text) => setBidAmount(text)}
+                  value={selection === "Place bid" ? String(bidAmount) : String(listing.buyPrice)}
                   editable={selection === "Place bid"}
                   autoComplete="off"
                   autoCorrect={false}
@@ -72,27 +93,41 @@ export default function BidView() {
                 />
               </View>
               <Text style={{ color: themeColors.secondary, marginTop: 4, marginBottom: 4 }}>
-                {selection === "Place bid" ? "Highest bid: $117 / Buy now: $150" : "You're about to instantly reserve this spot."}
+                {selection === "Place bid" ? `${highestBid ? `Highest bid: $${highestBid.amount} /` : "No bids yet!"} Buy now: $${listing.buyPrice}` : "You're about to instantly reserve this spot."}
               </Text>
-              <Text style={styles.subheader}>Arrive after</Text>
-              <Text style={styles.subheader}>Leave before</Text>
+              {desiredSlot && <View style={styles.textRow}>
+                <Text style={styles.subheader}>
+                Arrive after
+                </Text>
+                <Text weight="semibold" style={{ fontSize: 16, marginTop: 14 }}>
+                  {moment(desiredSlot.start).format("h:mm a")}
+                </Text>
+              </View>}
+              {desiredSlot && <View style={styles.textRow}>
+                <Text style={styles.subheader}>
+                Leave Before
+                </Text>
+                <Text weight="semibold" style={{ fontSize: 16, marginTop: 14 }}>
+                  {moment(desiredSlot.end).format("h:mm a")}
+                </Text>
+              </View>}
               <View style={styles.textRow}>
                 <Text weight="semibold" style={styles.subheader}>
                   Spot price
                 </Text>
                 <Text weight="semibold" style={{ fontSize: 16, marginTop: 14 }}>
-                  $55.63
+                  {Number(bidAmount).toFixed(2)}
                 </Text>
               </View>
-              <Text italic style={{ ...styles.subtitle, color: themeColors.third }}>
-                (3 hours x $17.25 / hour) + 7.5% fee
-              </Text>
+              {desiredSlot && <Text italic style={{ ...styles.subtitle, color: themeColors.third }}>
+                ({`${intervalToDuration(desiredSlot).hours}`} hours x ${Number(bidAmount).toFixed(2)} / hour) + 7.5% fee
+              </Text>}
 
               <TouchableOpacity style={{ ...styles.infoRow, borderColor: themeColors.outline, marginTop: 10 }}>
                 <View style={styles.buttonRow}>
                   <Calendar size={16} color={themeColors.secondary} />
                   <Text weight="semibold" style={{ ...styles.subtitle, fontSize: 14, color: themeColors.secondary }}>
-                    Date: 5/4/2024
+                    Date: {moment(desiredSlot?.start).calendar()}
                   </Text>
                 </View>
                 <Pencil size={14} color={themeColors.primary} />
@@ -119,7 +154,7 @@ export default function BidView() {
             <Link
               href={{
                 pathname: "/listing/[id]/bid/",
-                params: { id: spotData.id },
+                params: { id: listing.id },
               }}
               asChild
               style={[

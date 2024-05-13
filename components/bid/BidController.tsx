@@ -8,6 +8,7 @@ import { Text, View } from '@/components/Themed';
 import { minutesToMilliseconds } from "date-fns";
 import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
+import BidView, { BidViewRef } from "./BidView";
 
 export default function BidController(){
   const {getToken} = useAuth();
@@ -15,6 +16,7 @@ export default function BidController(){
   const listing = useListing();
   const amount = useRef(0);
   const desiredSlot = useRef<Interval | undefined>(undefined);
+  const highestBid = useRef<Bid>();
 
   useEffect(() => {
     if (!listing) return;
@@ -24,20 +26,6 @@ export default function BidController(){
   }, [listing]);
 
 
-  const fetchHighestBid = async () => {
-    try {
-      if (!listing) return;
-      if (!desiredSlot.current) return;
-      const bids = await getHighestBid(getToken, listing.id, desiredSlot.current.start, desiredSlot.current.end);
-      return bids[0];
-    } catch (err) {
-      return;
-    }
-  }  
-
-  const [highestBid, setHighestBid] = useState<Bid>();
-  setInterval(async ()=>  setHighestBid(await fetchHighestBid()), minutesToMilliseconds(1))
-
   const handleSubmitBid = async () => {
 
     if (!desiredSlot.current) {
@@ -45,11 +33,7 @@ export default function BidController(){
       return;
     }
 
-    if (!highestBid) {
-      await setHighestBid(await fetchHighestBid());
-    }
-
-    if (highestBid && amount.current < highestBid.amount) {
+    if (highestBid.current && amount.current < highestBid.current.amount) {
       showErrorPage("bid must be higher than current highest");
       return;
     }
@@ -72,33 +56,14 @@ export default function BidController(){
     }
   }
 
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={handleSubmitBid}>
-        <Text style={styles.title}>add bid</Text>
-      </TouchableOpacity>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+  const initialBidData = {
+    buyPrice: 150,
+    bidAmount: 0,
+    desiredSlot: desiredSlot.current
+  }
+  const bidData = useRef<BidViewRef>(initialBidData)
 
-      {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-    </View>
-  );
+
+  return (BidView(bidData));
 
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
