@@ -12,8 +12,7 @@ import { TouchableOpacity } from "react-native";
 
 export default function Reservation() {
   const { getToken } = useAuth();
-  const { id } = useLocalSearchParams();
-  if (id instanceof Array) throw new Error("id should be string, not array");
+  const { id } = useLocalSearchParams<{id: string}>();
   const { reservation, listing } = useReservation(id);
   const handleEndReservation = async () => {
     if (!reservation) return;
@@ -61,8 +60,6 @@ export default function Reservation() {
       <TouchableOpacity onPress={handleCreateReview}>
         <Text style={styles.title}>Create Review</Text>
       </TouchableOpacity>
-      {reservation && <Text style={styles.title}>{JSON.stringify(reservation)}</Text>}
-      {listing && <Text style={styles.title}>{JSON.stringify(listing)}</Text>}
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />

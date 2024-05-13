@@ -98,15 +98,15 @@ export default function RootLayout() {
   const clerkPublishableKey = env?.clerkPublishableKey;
 
   return (
-    // <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
-    //   <SignedIn>
-    //     <RootLayoutNav />
-    //   </SignedIn>
-    //   <SignedOut>
-    //     <SignInScreen />
-    //   </SignedOut>
-    // </ClerkProvider>
-    <RootLayoutNav />
+    <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
+      <SignedIn>
+        <RootLayoutNav />
+      </SignedIn>
+      <SignedOut>
+        <SignInScreen />
+      </SignedOut>
+    </ClerkProvider>
+    // <RootLayoutNav />
   );
 }
 
@@ -205,7 +205,7 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />\
         <Stack.Screen
-          name="spot"
+          name="reservation/[id]"
           options={{
             title: "",
             headerTitle: () => <HeaderTitle name="Your spot" />,
