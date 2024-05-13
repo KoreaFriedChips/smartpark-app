@@ -9,6 +9,8 @@ import { useAuth } from "@clerk/clerk-expo";
 import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import { TouchableOpacity } from "react-native";
+import QRCode from "react-native-qrcode-svg";
+import * as Linking from "expo-linking";
 
 export default function Reservation() {
   const { getToken } = useAuth();
@@ -48,18 +50,13 @@ export default function Reservation() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Reservation</Text>
-      <TouchableOpacity onPress={handleEndReservation}>
-        <Text style={styles.title}>End Reservation</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleExtendReservation}>
-        <Text style={styles.title}>Extend Reservation</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleRereserve}>
-        <Text style={styles.title}>Re-Reserve</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleCreateReview}>
-        <Text style={styles.title}>Create Review</Text>
-      </TouchableOpacity>
+      <QRCode
+        value={Linking.createURL(`/reservation/${id}/`)}
+        logo={require("@/assets/images/SMARTPARK-SOCIAL-ICON-SMALL.png")}
+        logoSize={50}
+        size={300}
+        logoBackgroundColor="transparent"
+      />
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
