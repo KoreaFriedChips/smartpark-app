@@ -40,7 +40,7 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
     // link to add spot page with the data from the spot inserted when opening owned spots
     <Link
       href={{
-        pathname: "/reservation/[id]",
+        pathname: "/reservation/[id]/",
         params: { id: reservation.id },
       }}
       asChild

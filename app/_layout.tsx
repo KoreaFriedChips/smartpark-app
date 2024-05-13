@@ -205,7 +205,17 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />\
         <Stack.Screen
-          name="reservation/[id]"
+          name="reservation/[id]/index"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Your spot" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="reservation/[id]/qr-code"
           options={{
             title: "",
             headerTitle: () => <HeaderTitle name="Your spot" />,
