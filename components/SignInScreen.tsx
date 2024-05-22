@@ -17,6 +17,7 @@ import { NameInput } from "./SigninCard/NameInput";
 import { Phone, X } from "lucide-react-native";
 import HeaderTitle from "./Headers/HeaderTitle";
 import HeaderLeft from "./Headers/HeaderLeft";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,6 +31,7 @@ const useWarmUpBrowser = () => {
 };
 
 export type RootStackParamList = {
+  Main: {};
   PhoneInput: {};
   CodeVerification: {};
   EmailInput: {};
@@ -83,30 +85,7 @@ export default function SignInScreen() {
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date());
 
-  const handleSignIn = async (provider: string) => {
-    try {
-      const startFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
-
-      const { createdSessionId, signUp, setActive } = await startFlow();
-      if (createdSessionId) {
-        await completeSignUp(createdSessionId, setActive!);
-      } else {
-        if (signUp) {
-          sUp = signUp;
-          console.log(signUp);
-          if (sUp.emailAddress) {
-            setEmail(sUp.emailAddress);
-          }
-          if (sUp.firstName && sUp.lastName) {
-            setName(sUp.firstName + " " + sUp.lastName);
-          }
-          startSignUp();
-        }
-      }
-    } catch (err: any) {
-      console.error(err.toString());
-    }
-  };
+  
 
   type RSP = (...args: any[]) => Promise<keyof RootStackParamList>;
   const setGlobalPhone: RSP = async (p: string) => {
@@ -224,9 +203,7 @@ export default function SignInScreen() {
     }
   };
 
-  const startSignUp = () => {
-    setModalVisible(true);
-  };
+
 
   const completeSignUp = async (csi: string, setA: SetActive) => {
     try {
@@ -238,46 +215,38 @@ export default function SignInScreen() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <NavigationContainer independent={true}>
-        <Modal style={{ backgroundColor: themeColors.background }} presentationStyle="formSheet" animationType="slide" visible={modalVisible}>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: true,
-              presentation: "card",
-              headerStyle: {
-                backgroundColor: themeColors.background,
-              },
-              // headerLeft: () => <HeaderLeft />,
-              headerTitle: () => <HeaderTitle name="Next steps" />,
-              headerRight: () => (
-                <Pressable
-                  onPress={() => setModalVisible(false)}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  })}
-                >
-                  <X size={22} color={themeColors.primary} />
-                </Pressable>
-              ),
-              headerBackTitle: "Back",
-              headerBackTitleStyle: {
-                fontFamily: "Soliden-SemiBold",
-              },
-            }}
-          >
-            <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
-            <Stack.Screen name="CodeVerification">{(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}</Stack.Screen>
-            <Stack.Screen name="EmailInput">{(props) => <EmailInput {...props} setGlobal={setGlobalEmail} />}</Stack.Screen>
-            <Stack.Screen name="EmailVerification">{(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}</Stack.Screen>
-            <Stack.Screen name="NameInput">{(props) => <NameInput {...props} setGlobal={setGlobalName} />}</Stack.Screen>
-            <Stack.Screen name="BirthdayInput">{(props) => <BirthdayInput {...props} setGlobal={setGlobalBirthday} />}</Stack.Screen>
-          </Stack.Navigator>
-        </Modal>
-      </NavigationContainer>
+  const MainScreen = (props : { navigation: StackNavigationProp<RootStackParamList, "Main">}) => {
+    
+    const handleSignIn = async (provider: string) => {
+      try {
+        const startFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
+  
+        const { createdSessionId, signUp, setActive } = await startFlow();
+        if (createdSessionId) {
+          await completeSignUp(createdSessionId, setActive!);
+        } else {
+          if (signUp) {
+            sUp = signUp;
+            console.log(signUp);
+            if (sUp.emailAddress) {
+              setEmail(sUp.emailAddress);
+            }
+            if (sUp.firstName && sUp.lastName) {
+              setName(sUp.firstName + " " + sUp.lastName);
+            }
+            startSignUp();
+          }
+        }
+      } catch (err: any) {
+        console.error(err.toString());
+      }
+    };
+
+    const startSignUp = () => {
+      props.navigation.push("PhoneInput", {});
+    };
+    
+    return (<View style={styles.container}>
       <Image source={logoImg} style={[styles.logoImg]} />
       <View style={styles.textContainer}>
         <Text weight="bold" style={styles.title}>
@@ -369,33 +338,49 @@ export default function SignInScreen() {
         </Text>
       </TouchableOpacity>
       <Text style={{ ...styles.termsText, color: themeColors.third }}>By signing up or logging in you agree to SmartPark's Terms and Conditions and Privacy Policy.</Text>
-      {/* <Image
-        source={require("../assets/images/smartpark-loading-icon.png")}
-        style={{
-          width: 100,
-          height: 100,
-        }}
-      />
-      <TouchableOpacity style={buttonStyle} onPress={() => handleSignIn("google")}>
-        <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
-        <Text style={buttonTextStyle}>Continue with Google</Text>
-      </TouchableOpacity>
+    </View>)
+  }
 
-      <TouchableOpacity style={buttonStyle} onPress={() => handleSignIn("facebook")}>
-        <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
-        <Text style={buttonTextStyle}>Continue with Facebook</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={buttonStyle} onPress={() => handleSignIn("apple")}>
-        <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
-        <Text style={buttonTextStyle}>Continue with Apple</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={buttonStyle} onPress={() => startSignUp()}>
-        <Text style={poundStyle}>#</Text>
-        <Text style={buttonTextStyle}>Continue with Number</Text>
-      </TouchableOpacity> */}
-    </View>
+  return (
+      <NavigationContainer independent={true}>
+          <Stack.Navigator initialRouteName="Main" >
+          <Stack.Group screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Main" component={MainScreen}/>
+          </Stack.Group>
+          <Stack.Group screenOptions={{
+              headerShown: true,
+              presentation: "modal",
+              headerStyle: {
+                backgroundColor: themeColors.background,
+              },
+              // headerLeft: () => <HeaderLeft />,
+              headerTitle: () => <HeaderTitle name="Next steps" />,
+              headerRight: () => (
+                <Pressable
+                  onPress={() => setModalVisible(false)}
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.5 : 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  })}
+                >
+                  <X size={22} color={themeColors.primary} />
+                </Pressable>
+              ),
+              headerBackTitle: "Back",
+              headerBackTitleStyle: {
+                fontFamily: "Soliden-SemiBold",
+              },
+            }}>
+            <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
+            <Stack.Screen name="CodeVerification">{(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}</Stack.Screen>
+            <Stack.Screen name="EmailInput">{(props) => <EmailInput {...props} setGlobal={setGlobalEmail} />}</Stack.Screen>
+            <Stack.Screen name="EmailVerification">{(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}</Stack.Screen>
+            <Stack.Screen name="NameInput">{(props) => <NameInput {...props} setGlobal={setGlobalName} />}</Stack.Screen>
+            <Stack.Screen name="BirthdayInput">{(props) => <BirthdayInput {...props} setGlobal={setGlobalBirthday} />}</Stack.Screen>
+          </Stack.Group>
+          </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 

@@ -21,12 +21,21 @@ export default {
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.smartpark.smartpark"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.smartpark.smartpark",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/smartpark-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY
+        }
       }
     },
     "web": {
@@ -35,7 +44,11 @@ export default {
       "favicon": "./assets/images/smartpark-favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      // "@react-native-firebase/app",
+      // "@react-native-firebase/messaging"
     ],
     "experiments": {
       "typedRoutes": true
@@ -43,7 +56,9 @@ export default {
     "extra": {
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
       serverURL: process.env.SERVER_URL,
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+      "eas": {
+        "projectId": "ce2b7b29-9307-495c-ab35-f7755a43205b"
+      }
     }
   }
 };
