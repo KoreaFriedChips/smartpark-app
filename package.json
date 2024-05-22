@@ -8,6 +8,8 @@
     "android": "dotenv -f .env.local run -- expo start --android",
     "ios": "dotenv -f .env.local run -- expo start --ios",
     "web": "dotenv -f .env.local run -- expo start --web",
+    "build-android": "eas build --platform android --profile development",
+    "build-ios": "eas build --platform ios --profile development",
     "test": "jest --watchAll",
     "postinstall": "node postinstall.js",
     "eas-build-pre-install": "echo $GOOGLE_SERVICES_BASE64 | base64 --decode > ./google-services.json"

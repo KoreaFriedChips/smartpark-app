@@ -17,11 +17,15 @@ Both files require:
     - If production, `https://trysmartpark.com`
     - If not production, depends on your local setup, but typically
       `http://<your LAN IP>:3000`
+- `GOOGLE_MAPS_API_KEY`
+    - can be found in cloudflare environment variables
+=AIzaSyDlPaYY7NC5c1WGwoCIQ6KvwT6lEKaWOf4
 
 Here's an example `.env.prod`:
 ```
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXX
 SERVER_URL=https://trysmartpark.com
+GOOGLE_MAPS_API_KEY=xxxxxxxxxxxx
 ```
 
 ## Running
@@ -35,6 +39,15 @@ public server, use `https://trysmartpark.com`. If you want to test it using
 your local environment, figure out your local area network (make sure your
 device is on the same one) IP address (using `ifconfig` on macOS and `ip addr`
 on Linux). 
+
+## Native building & Running
+Run `eas login` to login to your expo.dev acount.
+
+For each environment variable created in Setup, run `eas secret:create --scope project --name VARNAME --value VARVALUE --type string`.
+
+Run `npm run build-android | npm run build-ios` to build. Install the resulting build on your device/emulator/simulator.
+
+Run `npm run dev` to start the dev-client server.
 
 ## Deployment
 Instructions coming soon.
