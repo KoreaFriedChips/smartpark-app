@@ -127,11 +127,11 @@ const defaultNotifications = [
 
 export default function NotificationsScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
-
+  const notifications = useNotificationContext();
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <FlatList
-        data={defaultNotifications}
+        data={notifications}
         renderItem={({ item }) => (
           <ListItem
             key={item.id}
