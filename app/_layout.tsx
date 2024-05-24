@@ -24,6 +24,17 @@ import { useListing, UserContext, useUser } from "@/hooks";
 
 // export { ErrorBoundary, router } from "expo-router";
 
+import { NotificationContext } from "@/hooks/notification-hooks";
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import { readAllNotifications, storeNotification } from "@/lib/storage";
+import { remoteMessageToNotification } from "@/lib/utils";
+import { Notification } from "@/types";
+
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Message handled in the background!', remoteMessage);
+  storeNotification(remoteMessageToNotification(remoteMessage));
+});
+
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
@@ -116,6 +127,23 @@ function RootLayoutNav() {
   const navigation = useNavigation();
   const user = useUser();
 
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    (async () => setNotifications(await readAllNotifications()))();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      const notification = remoteMessageToNotification(remoteMessage);
+      alert(JSON.stringify(remoteMessage));
+      setNotifications([notification, ...notifications]);
+      storeNotification(notification);
+    });
+
+    return unsubscribe;
+  },[]);
+
   const handleShare = async (listing: Listing | undefined) => {
     try {
       const url = Linking.createURL(`listing/${listing?.id}`);
@@ -200,6 +228,7 @@ function RootLayoutNav() {
   };
 
   return (
+    <NotificationContext.Provider value={notifications}>
     <UserContext.Provider value={user}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -321,5 +350,6 @@ function RootLayoutNav() {
       </Stack>
     </ThemeProvider>
     </UserContext.Provider>
+    </NotificationContext.Provider>
   );
 }

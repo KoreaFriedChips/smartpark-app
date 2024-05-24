@@ -6,116 +6,121 @@ import { Image } from "expo-image";
 import { Link } from "expo-router";
 import SearchBar from "@/components/SearchBar";
 import ListItem from "@/components/ListItem";
+import { useNotificationContext } from "@/hooks/notification-hooks";
+import { useEffect, useState } from "react";
+import moment from "moment";
+import { Notification } from "@/types";
+import { startOfToday, subDays, subHours, subMinutes, subWeeks } from "date-fns";
 
-const notifications = [
+const defaultNotifications = [
   {
-    id: 1,
+    id: "1",
     title: "New message received",
     description: "You have received a new message from John Doe regarding your parking spot at 1414 Cedar St.",
-    date: "1 hour ago",
+    date: subHours(Date.now(), 1),
     path: "/messages",
     read: false,
   },
   {
-    id: 2,
+    id: "2",
     title: "Nearby spots available",
     description: "5 parking spots are available near your current location.",
-    date: "30 minutes ago",
+    date: subMinutes(Date.now(), 30),
     path: "/message-screen",
     read: false,
   },
   {
-    id: 3,
+    id: "3",
     title: "Reservation confirmed",
     description: "Your reservation for the parking spot at 123 Main St. from 2:00 PM to 4:00 PM has been confirmed.",
-    date: "Today",
+    date: startOfToday(),
     path: "/activity",
     read: false,
   },
   {
-    id: 4,
+    id: "4",
     title: "Reservation reminder",
     description: "Reminder: Your reservation for the parking spot at 456 Elm St. starts in 30 minutes.",
-    date: "Today",
+    date: startOfToday(),
     path: "/activity",
     read: false,
   },
   {
-    id: 5,
+    id: "5",
     title: "Promotional offer",
     description: "Special offer: Get 20% off your next reservation! Book now!",
-    date: "Today",
+    date: startOfToday(),
     path: "/",
     read: false,
   },
   {
-    id: 6,
+    id: "6",
     title: "New bid received",
     description: "You have received a new bid of $15.16 for your parking spot at Minneapolis.",
-    date: "Yesterday",
+    date: subDays(Date.now(), 1),
     read: false,
   },
   {
-    id: 7,
+    id: "7",
     title: "Spot added to favorites",
     description: "The parking spot at 1616 Walnut Ave. has been added to your favorites.",
-    date: "Yesterday",
+    date: subDays(Date.now(), 1),
     read: true,
   },
   {
-    id: 8,
+    id: "8",
     title: "Outbid notification",
     description: "You have been outbid on the parking spot at Minneapolis. The current highest bid is $20.",
-    date: "2 days ago",
+    date: subDays(Date.now(), 2),
     read: true,
   },
   {
-    id: 9,
+    id: "9",
     title: "Re-list expired parking spot",
     description: "Your parking spot at 1818 Birch Ln. has expired. Re-list now to continue earning!",
-    date: "2 days ago",
+    date: subDays(Date.now(), 2),
     read: false,
   },
   {
-    id: 10,
+    id: "10",
     title: "Identity verification approved",
     description: "Your identity has been verified successfully.",
-    date: "3 days ago",
+    date: subDays(Date.now(), 3),
     read: true,
   },
   {
-    id: 11,
+    id: "11",
     title: "Leave a review",
     description: "How was your experience at 2020 Oak St.? Leave a review now.",
-    date: "3 days ago",
+    date: subDays(Date.now(), 3),
     read: false,
   },
   {
-    id: 12,
+    id: "12",
     title: "New review received",
     description: "You have received a new 5-star review for your parking spot at 1212 Maple Dr.",
-    date: "4 days ago",
+    date: subDays(Date.now(), 4),
     read: false,
   },
   {
-    id: 13,
+    id: "13",
     title: "Payment received",
     description: "You have received a payment of $35.50 for your parking spot at 1010 Pine Rd.",
-    date: "5 days ago",
+    date: subDays(Date.now(), 5),
     read: true,
   },
   {
-    id: 14,
+    id: "14",
     title: "Ticket resolved",
     description: "Your support ticket #1234 has been resolved.",
-    date: "6 days ago",
+    date: subDays(Date.now(), 6),
     read: true,
   },
   {
-    id: 15,
+    id: "15",
     title: "Listing expired",
     description: "Your parking spot listing at 789 Oak Ave. has expired.",
-    date: "1 week ago",
+    date: subWeeks(Date.now(), 1),
     read: true,
   },
 ];
@@ -126,7 +131,7 @@ export default function NotificationsScreen() {
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <FlatList
-        data={notifications}
+        data={defaultNotifications}
         renderItem={({ item }) => (
           <ListItem
             key={item.id}

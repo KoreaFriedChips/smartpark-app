@@ -9,10 +9,11 @@
     "ios": "dotenv -f .env.local run -- expo start --ios",
     "web": "dotenv -f .env.local run -- expo start --web",
     "build-android": "eas build --platform android --profile development",
+    "build-android-local": "eas build --platform android --profile development --local",
     "build-ios": "eas build --platform ios --profile development",
     "test": "jest --watchAll",
     "postinstall": "node postinstall.js",
-    "eas-build-pre-install": "echo $GOOGLE_SERVICES_BASE64 | base64 --decode > ./google-services.json"
+    "eas-build-pre-install": "echo $GOOGLE_SERVICES_JSON > ./google-services.json"
   },
   "jest": {
     "preset": "jest-expo"
@@ -21,7 +22,10 @@
     "@clerk/clerk-expo": "^0.20.12",
     "@expo/vector-icons": "^14.0.0",
     "@gorhom/bottom-sheet": "^4.6.1",
+    "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-community/datetimepicker": "7.6.1",
+    "@react-native-firebase/app": "^20.0.0",
+    "@react-native-firebase/messaging": "^20.0.0",
     "@react-native-picker/picker": "2.6.1",
     "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native": "^6.0.2",

@@ -4,13 +4,14 @@ import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import moment from "moment";
 
 interface ListItemProps {
   image?: string;
   title: string;
   description?: string;
-  date: string;
-  id: number;
+  date: Date;
+  id: string;
   path?: any;
   short?: boolean;
   read?: boolean;
@@ -49,7 +50,7 @@ export default function ListItem({ image, title, description, date, id, path, sh
               {title}
             </Text>
             <Text italic style={{ ...styles.date, color: themeColors.secondary }}>
-              / {date}
+              / {moment(date).fromNow()}
             </Text>
           </View>
           <Text style={{ ...styles.description, color: themeColors.secondary }} numberOfLines={short ? 1 : 3}>{description}</Text>

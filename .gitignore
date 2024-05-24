@@ -46,6 +46,7 @@ package-lock.json
 
 google-services.json
 GoogleService-Info.plist
+*.apk
 
 android/
 ios/
