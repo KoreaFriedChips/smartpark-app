@@ -29,6 +29,7 @@ import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messag
 import { readAllNotifications, storeNotification } from "@/lib/storage";
 import { remoteMessageToNotification } from "@/lib/utils";
 import { Notification } from "@/types";
+import { registerDevicePushToken } from "@/serverconn/notification";
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
@@ -128,15 +129,16 @@ function RootLayoutNav() {
   const user = useUser();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     (async () => setNotifications(await readAllNotifications()))();
+    registerDevicePushToken(getToken);
   }, []);
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       const notification = remoteMessageToNotification(remoteMessage);
-      alert(JSON.stringify(remoteMessage));
       setNotifications([notification, ...notifications]);
       storeNotification(notification);
     });
