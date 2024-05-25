@@ -1,6 +1,6 @@
 import { NotificationModel } from '@/types/notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isBefore } from 'date-fns';
+import { isAfter, isBefore } from 'date-fns';
 import { z } from 'zod';
 
 export const storeNotification = async (notification: z.infer<typeof NotificationModel>) => {
@@ -15,9 +15,9 @@ export const readAllNotifications = async (): Promise<z.infer<typeof Notificatio
   try {
     const keys = await AsyncStorage.getAllKeys();
     const pairs = await AsyncStorage.multiGet(keys);
-    const notifications = pairs.map(([_, value]) => NotificationModel.parse(JSON.parse(value as string)));
-    return notifications.toSorted((a, b) => Number(isBefore(a.date, b.date)));
-  } catch (e) {
+    let notifications = pairs.map(([_, value]) => NotificationModel.parse(JSON.parse(value as string)));
+    return notifications.sort((a, b) => b.date.getTime() - a.date.getTime());
+  } catch (e: any) {
     console.log(e);
     return []
   }

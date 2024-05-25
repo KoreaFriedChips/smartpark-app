@@ -6,11 +6,13 @@ import { Image } from "expo-image";
 import { Link } from "expo-router";
 import SearchBar from "@/components/SearchBar";
 import ListItem from "@/components/ListItem";
-import { useNotificationContext } from "@/hooks/notification-hooks";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { Notification } from "@/types";
 import { startOfToday, subDays, subHours, subMinutes, subWeeks } from "date-fns";
+import { readAllNotifications, storeNotification } from "@/lib/storage";
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import { remoteMessageToNotification } from "@/lib/utils";
 
 const defaultNotifications = [
   {
@@ -127,7 +129,29 @@ const defaultNotifications = [
 
 export default function NotificationsScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
-  const notifications = useNotificationContext();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+
+  const fetchNotifications = async () => {
+    setNotifications(await readAllNotifications());
+  }
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      const notification = remoteMessageToNotification(remoteMessage);
+      await storeNotification(notification);
+      fetchNotifications();
+    });
+
+    return unsubscribe;
+  },[]);
+  
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <FlatList

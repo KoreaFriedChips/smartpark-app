@@ -24,7 +24,6 @@ import { useListing, UserContext, useUser } from "@/hooks";
 
 // export { ErrorBoundary, router } from "expo-router";
 
-import { NotificationContext } from "@/hooks/notification-hooks";
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { readAllNotifications, storeNotification } from "@/lib/storage";
 import { remoteMessageToNotification } from "@/lib/utils";
@@ -34,6 +33,7 @@ import { registerDevicePushToken } from "@/serverconn/notification";
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
   storeNotification(remoteMessageToNotification(remoteMessage));
+  console.log(remoteMessage.data);
 });
 
 export const unstable_settings = {
@@ -128,23 +128,11 @@ function RootLayoutNav() {
   const navigation = useNavigation();
   const user = useUser();
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { getToken } = useAuth();
 
   useEffect(() => {
-    (async () => setNotifications(await readAllNotifications()))();
     registerDevicePushToken(getToken);
   }, []);
-
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      const notification = remoteMessageToNotification(remoteMessage);
-      setNotifications([notification, ...notifications]);
-      storeNotification(notification);
-    });
-
-    return unsubscribe;
-  },[]);
 
   const handleShare = async (listing: Listing | undefined) => {
     try {
@@ -230,7 +218,6 @@ function RootLayoutNav() {
   };
 
   return (
-    <NotificationContext.Provider value={notifications}>
     <UserContext.Provider value={user}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -352,6 +339,5 @@ function RootLayoutNav() {
       </Stack>
     </ThemeProvider>
     </UserContext.Provider>
-    </NotificationContext.Provider>
   );
 }
