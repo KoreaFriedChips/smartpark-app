@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import moment from "moment";
+import { setNotificationRead } from "@/lib/storage";
 
 interface ListItemProps {
   image?: string;
@@ -24,6 +25,7 @@ export default function ListItem({ image, title, description, date, id, path, sh
   const handleRead = () => {
     if (!isRead) {
       setRead(true);
+      setNotificationRead(id);
       console.log(id);
     }
   };

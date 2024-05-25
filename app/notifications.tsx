@@ -140,8 +140,6 @@ export default function NotificationsScreen() {
     fetchNotifications();
   }, []);
 
-
-
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       const notification = remoteMessageToNotification(remoteMessage);

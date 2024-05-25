@@ -11,6 +11,17 @@ export const storeNotification = async (notification: z.infer<typeof Notificatio
   }
 }
 
+export const setNotificationRead = async (notificationId: string) => {
+  try {
+    const notifString = await AsyncStorage.getItem(notificationId);
+    let notification = NotificationModel.parse(JSON.parse(notifString as string));
+    notification.read = true;
+    await AsyncStorage.setItem(notificationId, JSON.stringify(notification));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export const readAllNotifications = async (): Promise<z.infer<typeof NotificationModel>[]> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
