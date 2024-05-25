@@ -3,8 +3,32 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { isAfter, isBefore } from 'date-fns';
 import { z } from 'zod';
 
+const notificationKeysListKey = 'notification-keys'
+
+const getNotificationKeys = async () => {
+  try {
+    
+    const keysStr = await AsyncStorage.getItem(notificationKeysListKey);
+    const keys: string[] = keysStr ? JSON.parse(keysStr) : [];
+    return keys;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
+const createNotificationId = async (id: string) => {
+  try {
+    const keys = await getNotificationKeys();
+    await AsyncStorage.setItem(notificationKeysListKey, JSON.stringify([...keys, id]));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export const storeNotification = async (notification: z.infer<typeof NotificationModel>) => {
   try {
+    await createNotificationId(notification.id);
     await AsyncStorage.setItem(notification.id, JSON.stringify(notification));
   } catch (e) {
     console.log(e);
@@ -24,7 +48,7 @@ export const setNotificationRead = async (notificationId: string) => {
 
 export const readAllNotifications = async (): Promise<z.infer<typeof NotificationModel>[]> => {
   try {
-    const keys = await AsyncStorage.getAllKeys();
+    const keys = await getNotificationKeys();
     const pairs = await AsyncStorage.multiGet(keys);
     let notifications = pairs.map(([_, value]) => NotificationModel.parse(JSON.parse(value as string)));
     return notifications.sort((a, b) => b.date.getTime() - a.date.getTime());
