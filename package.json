@@ -35,6 +35,7 @@
     "chalk": "^4.1.2",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
+    "eas-cli": "^9.1.0",
     "expo": "~50.0.14",
     "expo-dev-client": "~3.3.11",
     "expo-font": "~11.10.3",
