@@ -4,8 +4,6 @@ import { SortOption, SortOptions } from "@/components/utils/utils";
 import { createContext, useContext, useMemo, useCallback } from "react";
 
 export interface SearchContextProps {
-  location: LocationObject | null,
-  setLocation: React.Dispatch<React.SetStateAction<LocationObject | null>>,
   selectedCategories: string[],
   setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>,
   sortOption: SortOption,
@@ -20,8 +18,6 @@ export const SearchContext = createContext<SearchContextProps | undefined>(undef
 
 export const useSearchContext = () => {
   const context = useContext(SearchContext);
-  const location = useMemo(() => context ? context.location : null, [context]);
-  const setLocation = useCallback((loc: LocationObject) => {if (context) context.setLocation(loc)}, [context]);
   const selectedCategories = useMemo(() => context ? context.selectedCategories : [], [context]);
   const setSelectedCategories = useCallback((cat: string[]) => {if (context) context.setSelectedCategories(cat)}, [context]);
   const sortOption = useMemo(() => context ? context.sortOption : SortOptions.distanceLowHigh, [context]);
@@ -31,7 +27,6 @@ export const useSearchContext = () => {
   const prevSearches = useMemo(() => context ? context.prevSearches : [], [context]);
   const setPrevSearches = useCallback((s: string[]) => {if (context) context.setPrevSearches(s)}, [context]);
   return {
-    location, setLocation,
     selectedCategories, setSelectedCategories,
     sortOption, setSortOption,
     searchQuery, setSearchQuery,

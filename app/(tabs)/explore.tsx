@@ -8,7 +8,7 @@ import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link, router } from "expo-router";
 import { MapPin, Navigation } from "lucide-react-native";
-import { useListings, useSearchContext } from "@/hooks";
+import { useListings, useLocationContext, UserLocationObject, useSearchContext } from "@/hooks";
 
 
 
@@ -17,7 +17,7 @@ export default function ExploreScreen() {
   const themeColors = Colors[colorScheme || "light"];
   const {listings, fetchListings, fetchNextPage, isRefreshing} = useListings();
 
-  const {location} = useSearchContext();
+  const {location} = useLocationContext();
   const [region, setRegion] = useState<Region>();
   const setRegionLatLng = (newPos: LatLng) => {
     setRegion({
@@ -81,7 +81,7 @@ export default function ExploreScreen() {
   );
 }
 
-const LocationButton = ({location, animateToRegion}: {location: Location.LocationObject, animateToRegion: (pos: LatLng)=>void}) => {
+const LocationButton = ({location, animateToRegion}: {location: UserLocationObject, animateToRegion: (pos: LatLng)=>void}) => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   return (
@@ -97,7 +97,7 @@ const LocationButton = ({location, animateToRegion}: {location: Location.Locatio
     </TouchableOpacity>
 )}
 
-const LocationMarker = ({location, animateToRegion}: {location: Location.LocationObject, animateToRegion: (pos: LatLng)=>void}) => {
+const LocationMarker = ({location, animateToRegion}: {location: UserLocationObject, animateToRegion: (pos: LatLng)=>void}) => {
   return (
     <Marker
       coordinate={{

@@ -6,6 +6,7 @@ import { useUserContext } from "./user-hooks";
 import { createContext, useContext, useMemo, useCallback } from "react";
 import { readListingsPaginated } from "@/serverconn";
 import { useSearchContext } from "./search-hooks";
+import { useLocationContext } from "./location-hooks";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
@@ -16,7 +17,7 @@ export const useListing = () => {
 export const useListingWithId = (listingId: string) => {
   const { getToken } = useAuth();
   const [listing, setListing] = useState<Listing>();
-  const { location } = useSearchContext();
+  const { location } = useLocationContext();
   useEffect(() => {
     const fetchListing = async () => {
       const listings = await readListings(getToken, { id: listingId, latitude: location?.coords.latitude, longitude: location?.coords.longitude });
@@ -58,7 +59,7 @@ export const useListings = () => {
   const listingContext = useContext(ListingContext);
   const listings = useMemo(() => listingContext ? listingContext.listings : undefined, [listingContext]);
   const setListings = useCallback((listings: Listing[]) => {if (listingContext) listingContext.setListings(listings)}, [listingContext]);
-  const { location } = useSearchContext();
+  const { location } = useLocationContext();
 
   const fetchListings = async ({ amenities, searchQuery, sortOption }: ListingSearchOptions) => {
     if (!isLoaded || !isSignedIn) return;
@@ -86,7 +87,7 @@ export const useListings = () => {
   useEffect(() => {
     if (!listings) return;
     setIsRefreshing(false);
-  }, [listings, location]);
+  }, [listings]);
 
   const fetchNextPage = async () => {
     if (!isLoaded || !isSignedIn || isRefreshing) return;
@@ -115,7 +116,7 @@ export const useListings = () => {
 
   useEffect(() => {
     fetchListings({ amenities: [], searchQuery: undefined, sortOption: undefined });
-  }, [isLoaded, isSignedIn, getToken]);
+  }, [isLoaded, isSignedIn, getToken, location]);
   return { listings, fetchListings, fetchNextPage, isRefreshing }
 }
 

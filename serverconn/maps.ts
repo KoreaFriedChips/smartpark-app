@@ -13,3 +13,14 @@ export const readMapsCoordinates = async (getToken: GetToken, address?: string, 
   const latLng = LatLngModel.parse(res);
   return latLng;
 }
+
+const CityStateModel = z.object({
+  city: z.string(),
+  state: z.string(),
+})
+
+export const readCityStateFromCoordinates = async (getToken: GetToken, coords: LatLng) => {
+  const res = await read(getToken, "/api/maps/citystate", { ...coords });
+  const cityState = CityStateModel.parse(res);
+  return cityState;
+}

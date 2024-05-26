@@ -38,6 +38,7 @@ export const sendToServer = async (getToken: GetToken, path: string, method: str
       headers: { token: await getToken() ?? "" },
       body: data ? JSON.stringify(data): undefined,
   });
+  if (res.status != 200) console.log((await res.json()).error);
   if (res.status != 200) throw new Error((await res.json()).error);
   return res;
 }

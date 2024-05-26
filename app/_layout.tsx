@@ -29,6 +29,8 @@ import { readAllNotifications, storeNotification } from "@/lib/storage";
 import { remoteMessageToNotification } from "@/lib/utils";
 import { Notification } from "@/types";
 import { registerDevicePushToken } from "@/serverconn/notification";
+import { LocationContext, UserLocationObject } from "@/hooks/location-hooks";
+import { readCityStateFromCoordinates } from "@/serverconn/maps";
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
@@ -74,7 +76,7 @@ export default function RootLayout() {
     "Soliden-SemiBoldOblique": require("../assets/fonts/soliden/Soliden-SemiBoldOblique.ttf"),
   });
 
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<UserLocationObject | null>(null);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
 
   useEffect(() => {
@@ -110,6 +112,7 @@ export default function RootLayout() {
   const clerkPublishableKey = env?.clerkPublishableKey;
 
   return (
+    <LocationContext.Provider value={{location, setLocation}}>
     <ClerkProvider tokenCache={tokenCache} publishableKey={clerkPublishableKey}>
       <SignedIn>
         <RootLayoutNav />
@@ -118,6 +121,7 @@ export default function RootLayout() {
         <SignInScreen />
       </SignedOut>
     </ClerkProvider>
+    </LocationContext.Provider>
     // <RootLayoutNav />
   );
 }
@@ -127,7 +131,7 @@ function RootLayoutNav() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
   const user = useUser();
-
+  
   const { getToken } = useAuth();
 
   useEffect(() => {

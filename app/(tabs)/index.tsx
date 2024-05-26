@@ -6,12 +6,31 @@ import TagsContainer from "@/components/TagsContainer";
 import { useLayoutEffect } from "react";
 import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
-import { ListingSearchOptions, useListings } from "@/hooks";
+import { ListingSearchOptions, useListings, useLocationContext } from "@/hooks";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
+import MapView from "react-native-maps";
+import { readCityStateFromCoordinates } from "@/serverconn/maps";
+import { useAuth } from "@clerk/clerk-expo";
 
 export default function HomeScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
+  const { getToken } = useAuth();
   const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings(); 
+  const { location } = useLocationContext();
+  const [title, setTitle] = useState("Set location");
+
+  useEffect(() => {
+    if (!location) return;
+    if (!location.city || !location.state) {
+      const fetchCityState = async () => {
+        const cityState = await readCityStateFromCoordinates(getToken, location.coords);
+        setTitle(`${cityState.city}, ${cityState.state}`);
+      }
+      fetchCityState();
+    } else {
+      setTitle(`${location.city}, ${location.state}`);
+    }
+  }, [location]);
 
   const listRef = useRef<FlatList>(null);
   const handleSubmit = (options: ListingSearchOptions) => {
@@ -49,11 +68,15 @@ export default function HomeScreen() {
 
   // location will be set/loaded here
 
+  useEffect(() => {
+    if (!location) return;
+  }, [location]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <HeaderTitle name={"Minnetonka, MN"} arrow={true} />,
+      headerTitle: () => <HeaderTitle name={title} arrow={true} />,
     });
-  }, [navigation, themeColors]);
+  }, [navigation, themeColors, title]);
 
   return (
     <View style={styles.container}>

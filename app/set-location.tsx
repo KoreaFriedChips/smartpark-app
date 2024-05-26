@@ -1,44 +1,56 @@
 import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { StyleSheet, Platform, Dimensions, useColorScheme, TouchableOpacity, ScrollView, Pressable, KeyboardAvoidingView } from "react-native";
 import * as Location from "expo-location";
-import MapView, { Marker, Region, Callout } from "react-native-maps";
+import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Mail, Map, MapPin, Scroll, Search } from "lucide-react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import { useLocationContext } from "@/hooks";
+import { readCityStateFromCoordinates } from "@/serverconn/maps";
+import { useAuth } from "@clerk/clerk-expo";
 
-export default function ExploreScreen() {
+export default function SetLocation() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
+  const { getToken } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const { location, setLocation } = useLocationContext();
   const [region, setRegion] = useState<Region>({
     latitude: 37.78825,
     longitude: -122.4324,
     latitudeDelta: 0.00922,
     longitudeDelta: 0.00421,
   });
+  const [pinCoords, setPinCoords] = useState<LatLng>();
+  const [city, setCity] = useState<string>();
+  const [state, setState] = useState<string>();
+  
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setRegion({
-        ...region,
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    }
-
-    fetchLocation();
+    if (!location) return;
+    setPinCoords(location.coords);
+    setRegion({
+      ...region,
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude
+    })
   }, []);
+
+  const handlePinChange = async (coords: LatLng) => {
+    setPinCoords(coords);
+    const {city, state} = await readCityStateFromCoordinates(getToken, coords);
+    setCity(city);
+    setState(state);
+  }
+
+  const handleSaveLocation = async () => {
+    if (!pinCoords) return;
+    const {city, state} = await readCityStateFromCoordinates(getToken, pinCoords);
+    setLocation({ coords: pinCoords, city, state });
+    router.back();
+  }
 
   if (Platform.OS === "web") {
     return (
@@ -66,8 +78,19 @@ export default function ExploreScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 86 : 38}
     >
       <View style={styles.mapContainer}>
-        <MapView style={{ ...styles.map, borderColor: themeColors.outline }} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}></MapView>
-        <TouchableOpacity
+        <MapView 
+          style={{ ...styles.map, borderColor: themeColors.outline }} 
+          region={region} 
+          customMapStyle={mapStyle} 
+          onRegionChangeComplete={setRegion} 
+          showsCompass={false}
+          onPress={event => handlePinChange(event.nativeEvent.coordinate)}
+        >
+            {pinCoords && (
+              <Marker coordinate={pinCoords} />
+            )}
+        </MapView>
+        {/* <TouchableOpacity
           style={[
             styles.button,
             {
@@ -93,7 +116,7 @@ export default function ExploreScreen() {
           >
             Adjust pin
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={[styles.searchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
@@ -121,6 +144,7 @@ export default function ExploreScreen() {
             marginTop: 12,
           },
         ]}
+        onPress={handleSaveLocation}
       >
         <Map
           size={14}
