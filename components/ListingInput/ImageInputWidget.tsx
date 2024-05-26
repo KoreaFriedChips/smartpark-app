@@ -4,11 +4,12 @@ import { Text, View, TextInput } from '@/components/Themed';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
-import { createListing, uploadImage, fetchImageFromUri, imageUriFromKey } from '@/serverconn';
+import { fetchImageFromUri, imageUriFromKey } from '@/lib/utils';
 import { useAuth } from '@clerk/clerk-expo';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus } from 'lucide-react-native';
+import { useBackend } from '@/hooks';
 
 const SpotImage = ( { image, themeColors, onPress }: { image: string, themeColors: any, onPress: () => Promise<void> } )=> {
   return ( <TouchableOpacity onPress={onPress} style={[styles.spotImage, {justifyContent: "center", alignItems:"center"}]}>
@@ -29,7 +30,7 @@ export function ImageInputWidget( { onChange, init }: { onChange: (images: strin
   useEffect(() => {
     onChange(images);
   }, [images]);
-  const {getToken} = useAuth();
+  const { uploadImage } = useBackend();
   const pickImage = async (index: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -42,7 +43,7 @@ export function ImageInputWidget( { onChange, init }: { onChange: (images: strin
       const image = await fetchImageFromUri(result.assets[0].uri);
       const filename = result.assets[0].fileName || result.assets[0].assetId || result.assets[0].uri.split("/").slice(-1)[0];
       const fileSize = result.assets[0].fileSize ?? image.size;
-      const key = await uploadImage(getToken, filename, fileSize , image);
+      const key = await uploadImage(filename, fileSize , image);
       setImages(images.map((image, i) => i === index ? key : image));
     }
   }

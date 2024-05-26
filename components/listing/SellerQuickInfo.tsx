@@ -8,7 +8,7 @@ import Colors from "@/constants/Colors";
 import { MessageCircleMore, BadgeCheck } from "lucide-react-native";
 
 import RatingsText from "@/components/ListingCard/RatingsText";
-import { imageUriFromKey } from "@/serverconn";
+import { imageUriFromKey } from "@/lib/utils";
 
 export function SellerQuickInfo({seller }: {seller: User}) {
   const themeColors = Colors[useColorScheme() || "light"];

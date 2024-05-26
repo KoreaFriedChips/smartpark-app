@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import { serverDelete } from "./crud";
 import { GetToken } from "@clerk/types";
+import { imageUriFromKey } from "@/lib/utils";
 
 export const uploadImage = async (getToken: GetToken, filename: string, filesize: number, data: Blob): Promise<string> => {
   const env = Constants.expoConfig?.extra;
@@ -29,15 +30,4 @@ export const fileExists = async (key: string) => {
 export const userFileExists = async (getToken: GetToken, filename: string) => {
   const res = await fetch(imageUriFromKey(filename), {method: "HEAD", headers: {token: await getToken() ?? ""}});
   return res.status == 200;
-}
-export const imageUriFromKey = (key: string) => {
-  const env = Constants.expoConfig?.extra;
-  const serverUrl = env?.serverURL;
-  return `${serverUrl}/api/images/${key}`; 
-}
-
-export const fetchImageFromUri = async (uri: string): Promise<Blob> => {
-  const res = await fetch(uri);
-  const blob = await res.blob();
-  return blob;
 }

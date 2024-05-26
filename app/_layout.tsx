@@ -28,9 +28,8 @@ import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messag
 import { readAllNotifications, storeNotification } from "@/lib/storage";
 import { remoteMessageToNotification } from "@/lib/utils";
 import { Notification } from "@/types";
-import { registerDevicePushToken } from "@/serverconn/notification";
+import { useBackend } from "@/hooks/backend-hooks";
 import { LocationContext, UserLocationObject } from "@/hooks/location-hooks";
-import { readCityStateFromCoordinates } from "@/serverconn/maps";
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
@@ -131,11 +130,10 @@ function RootLayoutNav() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
   const user = useUser();
-  
-  const { getToken } = useAuth();
+  const { registerDevicePushToken } = useBackend();
 
   useEffect(() => {
-    registerDevicePushToken(getToken);
+    registerDevicePushToken();
   }, []);
 
   const handleShare = async (listing: Listing | undefined) => {

@@ -3,9 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useReservation } from "@/hooks";
-import { deleteReservation } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
+import { useBackend, useReservation } from "@/hooks";
 import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import { TouchableOpacity } from "react-native";
@@ -15,14 +13,14 @@ import { Modal } from "react-native";
 import Colors from "@/constants/Colors";
 
 export default function Reservation() {
-  const { getToken } = useAuth();
+  const { deleteReservation } = useBackend();
   const { id } = useLocalSearchParams<{id: string}>();
   const { reservation, listing } = useReservation(id);
   const [ showModal, setShowModal ] = useState(true);
   const handleEndReservation = async () => {
     if (!reservation) return;
     try {
-      await deleteReservation(getToken, reservation.id);
+      await deleteReservation(reservation.id);
       router.replace({pathname: "/message-screen", params: {id: "bid-won"}});
     } catch (err: any) {
       showErrorPage(err.message);

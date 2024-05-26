@@ -3,9 +3,8 @@ import { StyleSheet, TouchableOpacity, useColorScheme, ViewStyle } from "react-n
 import { View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Heart } from "lucide-react-native";
-import { useAuth } from "@clerk/clerk-expo";
-import { createFavorite, readFavorites, deleteFavorite, readUsers } from "@/serverconn";
 import * as Haptics from "expo-haptics";
+import { useBackend } from "@/hooks";
 
 interface ButtonProps {
   id: string;
@@ -17,12 +16,12 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
   const [isLiked, setIsLiked] = React.useState(false);
   const [ favoriteId, setFavoriteId] = React.useState<string>();
   const [ userId, setUserId ] = React.useState("");
-  const { getToken } = useAuth();
+  const { readFavorites, deleteFavorite, createFavorite } = useBackend();
 
   React.useEffect(() => {
     const initIsLiked = async () => {
       try {
-        const favorites = await readFavorites(getToken, { listingId: listingId });
+        const favorites = await readFavorites({ listingId: listingId });
         if (favorites.length > 0) {
           setFavoriteId(favorites[0].id);
           setIsLiked(true);
@@ -39,11 +38,11 @@ export default function HeartButton({ id: listingId, style }: ButtonProps) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isLiked) {
       setIsLiked(false);
-      favoriteId && await deleteFavorite(getToken, favoriteId);
+      favoriteId && await deleteFavorite(favoriteId);
       setFavoriteId(undefined);
     } else {
       setIsLiked(true);
-      const favorite = await createFavorite(getToken, { listingId: listingId });
+      const favorite = await createFavorite({ listingId: listingId });
       setFavoriteId(favorite.id);
     }
   };

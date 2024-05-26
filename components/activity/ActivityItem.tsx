@@ -9,7 +9,7 @@ import { Link } from "expo-router";
 import { isAfter, isBefore } from "date-fns";
 import moment from "moment";
 import { useListingWithId } from "@/hooks";
-import { imageUriFromKey } from "@/serverconn";
+import { imageUriFromKey } from "@/lib/utils";
 
 interface ActivityItemProps {
   reservation: Reservation;

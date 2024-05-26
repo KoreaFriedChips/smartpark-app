@@ -10,3 +10,5 @@ export * from "./review";
 export * from "./transaction";
 export * from "./favorite";
 export * from "./confirmation";
+export * from './notification';
+export * from './maps';

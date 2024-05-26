@@ -1,13 +1,11 @@
-import { createBid, createReservation } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
 import { useRef } from "react";
 import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import BidView from "./BidView";
+import { useBackend } from "@/hooks";
 
 export default function BidController(){
-  const {getToken} = useAuth();
-
+  const { createBid, createReservation } = useBackend();
   const listingId = useRef<string>();
   const amount = useRef<number>();
   const desiredSlot = useRef<Interval>();
@@ -37,7 +35,7 @@ export default function BidController(){
     }
 
     try {
-      const bid = await createBid(getToken, {
+      const bid = await createBid({
         amount: amount.current,
         starts: desiredSlot.current.start,
         ends: desiredSlot.current.end,
@@ -67,7 +65,7 @@ export default function BidController(){
     }
 
     try {
-      const reservation = await createReservation(getToken, listingId.current, desiredSlot.current);
+      const reservation = await createReservation(listingId.current, desiredSlot.current);
       console.log("reservation created");
       console.log(reservation);
       router.replace({pathname: "/message-screen", params: {id: "bid-won"}});

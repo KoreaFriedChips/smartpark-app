@@ -6,7 +6,7 @@ import Colors from "@/constants/Colors";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import SideSwipe from 'react-native-sideswipe';
-import { imageUriFromKey } from "@/serverconn";
+import { imageUriFromKey } from "@/lib/utils";
 
 
 export function ListingGallery( { listing }: {listing: Listing}) {

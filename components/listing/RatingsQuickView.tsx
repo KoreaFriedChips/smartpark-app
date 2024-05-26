@@ -3,27 +3,27 @@ import { StyleSheet, ScrollView, Image, TouchableOpacity, useColorScheme } from 
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { BadgeCheck } from "lucide-react-native";
-import { getReviewer, getSeller, imageUriFromKey, readReviews } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
+import { imageUriFromKey } from "@/lib/utils";
 import { useMemo } from "react";
 import RatingsText from "@/components/ListingCard/RatingsText";
+import { useBackend } from "@/hooks";
 
 export function RatingsQuickView({ listing }: { listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
-  const { getToken } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewers, setReviewers] = useState<User[]>([]);
   const [seller, setSeller] = useState<User>();
+  const { getSeller, getReviewer, readReviews } = useBackend();
   useEffect(() => {
     const fetchSeller = async () => {
-      setSeller(await getSeller(getToken, listing));
+      setSeller(await getSeller(listing));
     }
     fetchSeller();
   }, [listing]);
 
   useEffect(() => {
     const fetchReviewers = async () => {
-      const newReviewers = await Promise.all(reviews.map(async(review) => await getReviewer(getToken, review)));
+      const newReviewers = await Promise.all(reviews.map(async(review) => await getReviewer(review)));
       setReviewers(newReviewers);
     }
     fetchReviewers();
@@ -31,7 +31,7 @@ export function RatingsQuickView({ listing }: { listing: Listing}) {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      let newReviews = await readReviews(getToken, { listingId: listing.id });
+      let newReviews = await readReviews({ listingId: listing.id });
       setReviews(newReviews);
     } 
     fetchReviews(); 

@@ -4,11 +4,7 @@ import React, { createRef, forwardRef, Ref, useEffect, useState } from 'react';
 import MapView, { Address, LatLng, Marker, Region } from 'react-native-maps';
 import { Dimensions } from 'react-native';
 import Colors from '@/constants/Colors';
-import { buildSearchParams } from '@/serverconn';
-
-import Constants from "expo-constants";
-import { readMapsCoordinates } from '@/serverconn/maps';
-import { useAuth } from '@clerk/clerk-expo';
+import { useBackend } from '@/hooks';
 
 export interface LocationProps {
   latitude: number,
@@ -20,7 +16,6 @@ export interface LocationProps {
 
 export function LocationInputWidget({onChange, init}: {onChange: (props: LocationProps)=> void, init: LocationProps}){
   const themeColors = Colors[useColorScheme() || "light"];
-  const { getToken } = useAuth();
   const [coordinates, setCoordinates] = useState<LatLng>({
     latitude: init.latitude,
     longitude: init.longitude
@@ -28,6 +23,7 @@ export function LocationInputWidget({onChange, init}: {onChange: (props: Locatio
   const [address, setAddress] = useState(init.address);
   const [city, setCity] = useState(init.city);
   const [state, setState] = useState(init.state); 
+  const { readMapsCoordinates} = useBackend();
 
   useEffect(()=>{
     onChange({
@@ -61,7 +57,7 @@ export function LocationInputWidget({onChange, init}: {onChange: (props: Locatio
 
   const handleFindAddressOnMap = async () => {
     try {
-      const coords = await readMapsCoordinates(getToken, address, city, state);
+      const coords = await readMapsCoordinates(address, city, state);
       setCoordinates(coords);
       handlePinChange(coords);
       setRegion({

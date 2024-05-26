@@ -6,24 +6,21 @@ import TagsContainer from "@/components/TagsContainer";
 import { useLayoutEffect } from "react";
 import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
-import { ListingSearchOptions, useListings, useLocationContext } from "@/hooks";
+import { ListingSearchOptions, useBackend, useListings, useLocationContext } from "@/hooks";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
-import MapView from "react-native-maps";
-import { readCityStateFromCoordinates } from "@/serverconn/maps";
-import { useAuth } from "@clerk/clerk-expo";
 
 export default function HomeScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
-  const { getToken } = useAuth();
   const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings(); 
   const { location } = useLocationContext();
   const [title, setTitle] = useState("Set location");
+  const { readCityStateFromCoordinates } = useBackend();
 
   useEffect(() => {
     if (!location) return;
     if (!location.city || !location.state) {
       const fetchCityState = async () => {
-        const cityState = await readCityStateFromCoordinates(getToken, location.coords);
+        const cityState = await readCityStateFromCoordinates(location.coords);
         setTitle(`${cityState.city}, ${cityState.state}`);
       }
       fetchCityState();

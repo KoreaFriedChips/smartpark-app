@@ -1,10 +1,8 @@
 import React, {  useEffect, useRef, useState } from 'react';
-import { createListing, updateListing } from '@/serverconn';
-import { useAuth } from '@clerk/clerk-expo';
 import { showErrorPage } from '@/components/utils/utils';
 import ListingInput, { ListingInputRef } from '@/components/ListingInput';
 import { useLocalSearchParams } from 'expo-router';
-import { useListing } from "@/hooks";
+import { useBackend, useListing } from "@/hooks";
 import { useRouter } from 'expo-router';
 import { View } from '@/components/Themed';
 
@@ -15,7 +13,7 @@ export default function EditListing() {
 
 const EditListingController = ({listing}: {listing: Listing}): React.JSX.Element => {
   const router = useRouter();
-  const { getToken } = useAuth();
+  const { updateListing } = useBackend();
 
   const initialListingData = {
     latitude: listing.latitude,
@@ -66,7 +64,7 @@ const EditListingController = ({listing}: {listing: Listing}): React.JSX.Element
       return;
     }
     try {
-      await updateListing(getToken, listing.id, {
+      await updateListing(listing.id, {
         ...listingData.current,
         startingPrice: Number(listingData.current.startingPrice),
         buyPrice: Number(listingData.current.buyPrice)

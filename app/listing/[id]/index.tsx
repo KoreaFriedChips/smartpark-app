@@ -7,9 +7,7 @@ import { FolderLock, Car, ShieldCheck } from "lucide-react-native";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import RatingsText from "@/components/ListingCard/RatingsText";
-import { getSeller } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
-import { useListing } from "@/hooks";
+import { useBackend, useListing } from "@/hooks";
 import { 
   ListingGallery,
   RatingsQuickView,
@@ -26,7 +24,7 @@ export default function Listing() {
   const themeColors = Colors[useColorScheme() || "light"];
   const { distance } = useLocalSearchParams();
   const listing = useListing();
-  const { getToken } = useAuth();
+  const { getSeller } = useBackend();
 
   useEffect(() => {
     if (errorMsg) console.log(errorMsg);
@@ -37,7 +35,7 @@ export default function Listing() {
   useEffect(() => {
     if (!listing) return;
     const fetchSeller = async () => {
-      setSeller(await getSeller(getToken, listing));
+      setSeller(await getSeller(listing));
     }
     fetchSeller();
   }, [listing]);

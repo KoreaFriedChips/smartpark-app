@@ -1,12 +1,11 @@
 import {  useRef } from 'react';
-import { createListing } from '@/serverconn';
-import { useAuth } from '@clerk/clerk-expo';
 import { showErrorPage } from '@/components/utils/utils';
 import ListingInput, { ListingInputRef } from '@/components/ListingInput';
+import { useBackend } from '@/hooks';
 
 
 export default function CreateListing() {
-  const { getToken } = useAuth();
+  const { createListing } = useBackend();
 
   const initialListingData = {
     latitude: 37,
@@ -56,7 +55,7 @@ export default function CreateListing() {
     if (!listingDataValid()) {
       return;
     }
-    const createdListing = await createListing(getToken, {
+    const createdListing = await createListing({
       ...listingData.current,
       startingPrice: Number(listingData.current.startingPrice),
       buyPrice: Number(listingData.current.buyPrice)

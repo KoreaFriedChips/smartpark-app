@@ -5,15 +5,13 @@ import { useLocalSearchParams } from "expo-router";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { useListingWithId } from "@/hooks";
+import { useBackend, useListingWithId } from "@/hooks";
 import { TouchableOpacity } from "react-native";
-import { createReview } from "@/serverconn";
-import { useAuth } from "@clerk/clerk-expo";
 import { showErrorPage } from "@/components/utils/utils";
 
 
 export default function CreateReview() {
-  const { getToken } = useAuth();
+  const { createReview } = useBackend();
   const { id } = useLocalSearchParams();
   if (id instanceof Array) throw new Error("id should be string");
   const listing = useListingWithId(id);
@@ -32,7 +30,7 @@ export default function CreateReview() {
   const handleCreateReview = async () => {
     if (!listing) return;
     try {
-      const review = await createReview(getToken, listing.id, reviewData.current);
+      const review = await createReview(listing.id, reviewData.current);
       console.log(review);
       reviewData.current = initReviewData;
     } catch (err: any) {

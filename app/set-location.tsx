@@ -6,14 +6,12 @@ import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Mail, Map, MapPin, Scroll, Search } from "lucide-react-native";
 import { Link, router } from "expo-router";
-import { useLocationContext } from "@/hooks";
-import { readCityStateFromCoordinates, readMapsCoordinates, readMapsCoordinatesWithInput } from "@/serverconn/maps";
+import { useBackend, useLocationContext } from "@/hooks";
 import { useAuth } from "@clerk/clerk-expo";
 
 export default function SetLocation() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
-  const { getToken } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState("");
   const { location, setLocation } = useLocationContext();
   const [region, setRegion] = useState<Region>({
@@ -23,6 +21,7 @@ export default function SetLocation() {
     longitudeDelta: 0.00421,
   });
   const [pinCoords, setPinCoords] = useState<LatLng>();
+  const { readMapsCoordinatesWithInput, readCityStateFromCoordinates } = useBackend();
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -42,7 +41,7 @@ export default function SetLocation() {
 
   const handleSaveLocation = async () => {
     if (!pinCoords) return;
-    const {city, state} = await readCityStateFromCoordinates(getToken, pinCoords);
+    const {city, state} = await readCityStateFromCoordinates(pinCoords);
     setLocation({ coords: pinCoords, city, state });
     router.back();
   }
@@ -64,7 +63,7 @@ export default function SetLocation() {
 
   const handleFindAddressOnMap = async () => {
     try {
-      const coords = await readMapsCoordinatesWithInput(getToken, searchQuery);
+      const coords = await readMapsCoordinatesWithInput(searchQuery);
       setPinCoords(coords);
       setRegion({
         ...region,

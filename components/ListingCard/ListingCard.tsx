@@ -9,7 +9,7 @@ import { Star, Sparkles } from "lucide-react-native";
 import HeartButton from "./HeartButton";
 import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
-import { imageUriFromKey } from "@/serverconn";
+import { imageUriFromKey } from "@/lib/utils";
 
 export interface Availability {
   day: string;
