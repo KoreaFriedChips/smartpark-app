@@ -1,17 +1,17 @@
 require("dotenv").config();
 
 export default {
-  expo: {
-    name: "SmartPark: Online Parking Marketplace",
-    slug: "smartpark",
-    version: "1.0.0",
-    orientation: "portrait",
-    icon: "./assets/images/smartpark-icon.png",
-    scheme: "smartpark",
-    userInterfaceStyle: "automatic",
-    owner: "smartpark",
-    experiments: {
-      typedRoutes: true,
+  "expo": {
+    "name": "SmartPark: Online Parking Marketplace",
+    "slug": "smartpark",
+    "version": "1.0.0",
+    "owner": "smartpark",
+    "orientation": "portrait",
+    "icon": "./assets/images/smartpark-icon.png",
+    "scheme": "smartpark",
+    "userInterfaceStyle": "automatic",
+    "experiments": {
+      "typedRoutes": true
     },
     splash: {
       image: "./assets/images/splash.png",
@@ -68,9 +68,9 @@ export default {
       stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
       serverURL: process.env.SERVER_URL,
-      eas: {
-        projectId: "fa8d0b89-bd2f-45e0-ad8d-3a54bb479ed7",
-      },
-    },
-  },
+      "eas": {
+        "projectId": "fa8d0b89-bd2f-45e0-ad8d-3a54bb479ed7"
+      }
+    }
+  }
 };
