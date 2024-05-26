@@ -4,7 +4,14 @@ import { GetToken } from "@clerk/types";
 export const create = async (getToken: GetToken, path: string, data: any) => {
   const res = await sendToServer(getToken, path, "POST", data, {});
   const resData = await res.json();
+  console.log(resData);
   return resData.data;
+}
+
+export const paymentCreate = async (getToken: GetToken, path: string, data: any) => {
+  const res = await sendToServer(getToken, path, "POST", data, {});
+  const resData = await res.json();
+  return resData;
 }
 
 export const read = async (getToken: GetToken, path: string, searchParams: any) => {

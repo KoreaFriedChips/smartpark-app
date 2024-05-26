@@ -8,8 +8,8 @@ export default {
     orientation: "portrait",
     icon: "./assets/images/smartpark-icon.png",
     scheme: "smartpark",
-    owner: "smartpark",
     userInterfaceStyle: "automatic",
+    owner: "smartpark",
     experiments: {
       typedRoutes: true,
     },
