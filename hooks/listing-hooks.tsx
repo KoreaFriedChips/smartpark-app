@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useUserContext } from "./user-hooks";
 import { createContext, useContext, useMemo, useCallback } from "react";
 import { readListingsPaginated } from "@/serverconn";
+import { useSearchContext } from "./search-hooks";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
@@ -15,9 +16,10 @@ export const useListing = () => {
 export const useListingWithId = (listingId: string) => {
   const { getToken } = useAuth();
   const [listing, setListing] = useState<Listing>();
+  const { location } = useSearchContext();
   useEffect(() => {
     const fetchListing = async () => {
-      const listings = await readListings(getToken, { id: listingId });
+      const listings = await readListings(getToken, { id: listingId, latitude: location?.coords.latitude, longitude: location?.coords.longitude });
       if (listings.length === 0) {
         console.log(`could not load listingId ${listingId}`);
         return;
@@ -25,7 +27,7 @@ export const useListingWithId = (listingId: string) => {
       setListing(listings[0]);
     };
     fetchListing();
-  }, [listingId]);
+  }, [listingId, location]);
   return listing;
 };
 
@@ -56,6 +58,7 @@ export const useListings = () => {
   const listingContext = useContext(ListingContext);
   const listings = useMemo(() => listingContext ? listingContext.listings : undefined, [listingContext]);
   const setListings = useCallback((listings: Listing[]) => {if (listingContext) listingContext.setListings(listings)}, [listingContext]);
+  const { location } = useSearchContext();
 
   const fetchListings = async ({ amenities, searchQuery, sortOption }: ListingSearchOptions) => {
     if (!isLoaded || !isSignedIn) return;
@@ -65,6 +68,10 @@ export const useListings = () => {
     setSortOption(sortOption);
 
     let params: any = { amenities };
+    if (location) {
+      params.latitude = location.coords.latitude;
+      params.longitude = location.coords.longitude;
+    }
     if (searchQuery) params.search = searchQuery;
     if (sortOption) params.sort = sortOption;
     const listings_ = await readListings(getToken, params);
@@ -79,10 +86,10 @@ export const useListings = () => {
   useEffect(() => {
     if (!listings) return;
     setIsRefreshing(false);
-  }, [listings]);
+  }, [listings, location]);
 
   const fetchNextPage = async () => {
-    if (!isLoaded || !isSignedIn) return;
+    if (!isLoaded || !isSignedIn || isRefreshing) return;
     if (endReached) {
       console.log("endreached");
       return;
@@ -90,6 +97,10 @@ export const useListings = () => {
     setIsRefreshing(true);
 
     let params: any = { amenities, page: page + 1 };
+    if (location) {
+      params.latitude = location.coords.latitude;
+      params.longitude = location.coords.longitude;
+    }
     if (searchQuery) params.search = searchQuery;
     if (sortOption) params.sort = sortOption;
     const { data: nextListings, metadata } = await readListingsPaginated(getToken, params);
