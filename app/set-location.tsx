@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors";
 import { Mail, Map, MapPin, Scroll, Search } from "lucide-react-native";
 import { Link, router } from "expo-router";
 import { useLocationContext } from "@/hooks";
-import { readCityStateFromCoordinates } from "@/serverconn/maps";
+import { readCityStateFromCoordinates, readMapsCoordinates, readMapsCoordinatesWithInput } from "@/serverconn/maps";
 import { useAuth } from "@clerk/clerk-expo";
 
 export default function SetLocation() {
@@ -23,8 +23,6 @@ export default function SetLocation() {
     longitudeDelta: 0.00421,
   });
   const [pinCoords, setPinCoords] = useState<LatLng>();
-  const [city, setCity] = useState<string>();
-  const [state, setState] = useState<string>();
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -36,13 +34,10 @@ export default function SetLocation() {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude
     })
-  }, []);
+  }, [location]);
 
   const handlePinChange = async (coords: LatLng) => {
     setPinCoords(coords);
-    const {city, state} = await readCityStateFromCoordinates(getToken, coords);
-    setCity(city);
-    setState(state);
   }
 
   const handleSaveLocation = async () => {
@@ -50,6 +45,34 @@ export default function SetLocation() {
     const {city, state} = await readCityStateFromCoordinates(getToken, pinCoords);
     setLocation({ coords: pinCoords, city, state });
     router.back();
+  }
+
+  const handleUseCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.error("Permission to access location was denied");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setRegion({
+      ...region,
+      ...location.coords
+    });
+    setPinCoords(location.coords);
+  }
+
+  const handleFindAddressOnMap = async () => {
+    try {
+      const coords = await readMapsCoordinatesWithInput(getToken, searchQuery);
+      setPinCoords(coords);
+      setRegion({
+        ...region,
+        ...coords
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   if (Platform.OS === "web") {
@@ -82,7 +105,6 @@ export default function SetLocation() {
           style={{ ...styles.map, borderColor: themeColors.outline }} 
           region={region} 
           customMapStyle={mapStyle} 
-          onRegionChangeComplete={setRegion} 
           showsCompass={false}
           onPress={event => handlePinChange(event.nativeEvent.coordinate)}
         >
@@ -90,7 +112,7 @@ export default function SetLocation() {
               <Marker coordinate={pinCoords} />
             )}
         </MapView>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={[
             styles.button,
             {
@@ -98,6 +120,7 @@ export default function SetLocation() {
               borderColor: themeColors.outline,
             },
           ]}
+          onPress={handleUseCurrentLocation}
         >
           <MapPin
             size={14}
@@ -114,9 +137,9 @@ export default function SetLocation() {
               color: themeColors.secondary,
             }}
           >
-            Adjust pin
+            Use current location
           </Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.searchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
@@ -125,6 +148,7 @@ export default function SetLocation() {
           style={{ ...styles.searchBar }}
           placeholder="Search location.."
           onChangeText={(text) => setSearchQuery(text)}
+          onSubmitEditing={handleFindAddressOnMap}
           value={searchQuery}
           autoCorrect={false}
           spellCheck={false}

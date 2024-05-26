@@ -130,7 +130,6 @@ return (<View>
             style={[styles.map, { borderColor: themeColors.outline }]}
             zoomEnabled={false}
             region={region}
-            onRegionChangeComplete={setRegion}
             onPress={(event) => {
               setCoordinates(event.nativeEvent.coordinate);
               handlePinChange(event.nativeEvent.coordinate);

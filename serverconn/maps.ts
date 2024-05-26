@@ -8,6 +8,12 @@ const LatLngModel = z.object({
   longitude: z.coerce.number(),
 })
 
+export const readMapsCoordinatesWithInput = async (getToken: GetToken, input: string): Promise<LatLng> => {
+  const res = await read(getToken, "/api/maps", {input});
+  const latLng = LatLngModel.parse(res);
+  return latLng;
+}
+
 export const readMapsCoordinates = async (getToken: GetToken, address?: string, city?: string, state?: string): Promise<LatLng> => {
   const res = await read(getToken, "/api/maps", {input: `${address} ${city}, ${state}`});
   const latLng = LatLngModel.parse(res);
