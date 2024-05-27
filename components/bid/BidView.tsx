@@ -92,13 +92,20 @@ export default function BidView({
     return paymentIntent;
   };
 
-  async function pay() {
+  async function handlePayment() {
     await initializePaymentSheet();
     const { error: paymentError } = await presentPaymentSheet();
 
     if (paymentError) {
       Alert.alert(`Error code: ${paymentError.code}`, paymentError.message);
       return;
+    }
+
+    // Call handleSubmitBid or handleSubmitBuy based on the selection
+    if (selection === "Place bid") {
+      await handleSubmitBid();
+    } else {
+      await handleSubmitBuy();
     }
   }
 
@@ -400,7 +407,7 @@ export default function BidView({
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
-                onPress={pay}
+                onPress={handlePayment}
                 style={[
                   styles.button,
                   {
@@ -422,7 +429,7 @@ export default function BidView({
                   title={`Review ${
                     selection === "Place bid" ? "bid" : "reservation"
                   }`}
-                  onPress={pay}
+                  onPress={handlePayment}
                   disabled={loading || !ready}
                 />
               </TouchableOpacity>
