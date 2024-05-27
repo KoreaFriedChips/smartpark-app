@@ -39,6 +39,7 @@ import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
 import { useAuth } from "@clerk/clerk-expo";
+import Constants from "expo-constants";
 
 export interface BidViewProps {
   listingId: MutableRefObject<string | undefined>;
@@ -62,6 +63,9 @@ export default function BidView({
   const { initPaymentSheet, presentPaymentSheet, loading } = usePaymentSheet();
   const [bidAmount, setBidAmount] = useState("");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
+
+  const stripePublishableKey = Constants.expoConfig?.extra?.stripePublishableKey;
+  console.log("Stripe Publishable Key:", stripePublishableKey);
 
   const initializePaymentSheet = async () => {
     const paymentIntent = await fetchPaymentSheetParams();
@@ -90,7 +94,6 @@ export default function BidView({
 
   async function pay() {
     await initializePaymentSheet();
-    console.log(process.env.STRIPE_PUBLISHABLE_KEY)
     const { error: paymentError } = await presentPaymentSheet();
 
     if (paymentError) {
@@ -201,7 +204,7 @@ export default function BidView({
   };
 
   return (
-    <StripeProvider publishableKey={process.env.STRIPE_PUBLISHABLE_KEY || ""}>
+    <StripeProvider publishableKey={stripePublishableKey}>
       <KeyboardAvoidingView
         style={{ ...styles.container, backgroundColor: themeColors.background }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

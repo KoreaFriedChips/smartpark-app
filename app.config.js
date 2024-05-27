@@ -53,6 +53,7 @@ export default {
       typedRoutes: true,
     },
     extra: {
+      stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
       clerkPublishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY,
       serverURL: process.env.SERVER_URL,
       eas: {
