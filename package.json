@@ -31,6 +31,8 @@
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.9.26",
     "@react-navigation/stack": "^6.3.29",
+    "@stripe/connect-js": "^3.3.5",
+    "@stripe/react-connect-js": "^3.3.7",
     "@stripe/stripe-react-native": "^0.38.0",
     "axios": "^1.6.8",
     "chalk": "^4.1.2",
@@ -38,6 +40,7 @@
     "dotenv": "^16.4.5",
     "eas-cli": "^9.1.0",
     "expo": "~50.0.14",
+    "expo-constants": "~15.4.6",
     "expo-dev-client": "~3.3.11",
     "expo-font": "~11.10.3",
     "expo-haptics": "~12.8.1",
@@ -65,8 +68,8 @@
     "react-native-sideswipe": "^1.5.0",
     "react-native-svg": "14.1.0",
     "react-native-web": "~0.19.6",
-    "zod": "^3.23.3",
-    "expo-constants": "~15.4.6"
+    "react-native-webview": "^13.10.2",
+    "zod": "^3.23.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

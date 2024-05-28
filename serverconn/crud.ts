@@ -8,6 +8,12 @@ export const create = async (getToken: GetToken, path: string, data: any) => {
   return resData.data;
 }
 
+export const connectAccountCreate = async (getToken: GetToken, path: string, data: any) => {
+  const res = await sendToServer(getToken, path, "POST", data, {});
+  const resData = await res.json();
+  return resData;
+}
+
 export const paymentCreate = async (getToken: GetToken, path: string, data: any) => {
   const res = await sendToServer(getToken, path, "POST", data, {});
   const resData = await res.json();

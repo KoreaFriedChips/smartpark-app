@@ -1,40 +1,45 @@
-import { StyleSheet, TouchableOpacity } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-import { useAuth } from '@clerk/clerk-expo';
-import { useUserContext } from '@/hooks';
-import { useGivenReviews, useReceivedReviews } from '@/hooks/review-hooks';
-import { useEffect } from 'react';
-import { useTransactions } from '@/hooks/transaction-hooks';
-
+import React, { useState } from "react";
+import { Button, StyleSheet, View, Text, ActivityIndicator, Linking } from "react-native";
+import { useAuth } from "@clerk/clerk-expo";
+import { createConnectedAccount } from "@/serverconn/connect-stripe";
 
 export default function TabTwoScreen() {
-  const { signOut } = useAuth();
-  const givenReviews = useGivenReviews();
-  const receivedReviews = useReceivedReviews();
-  const transactions = useTransactions();
+  const { getToken } = useAuth();
+  const [accountCreatePending, setAccountCreatePending] = useState(false);
+  const [connectedAccountId, setConnectedAccountId] = useState();
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!givenReviews) return;
-    console.log(givenReviews);
-  }, [givenReviews]);
-
-  useEffect(() => {
-    if (!receivedReviews) return;
-    console.log(receivedReviews);
-  }, [receivedReviews]);
-
-  useEffect(() => {
-    if (!transactions) return;
-    console.log(transactions);
-  }, [transactions]);
+  const handleSignUp = async () => {
+    setAccountCreatePending(true);
+    setError(false);
+    try {
+      const response = await createConnectedAccount(getToken);
+      setAccountCreatePending(false);
+      const { accountLink, account } = response;
+      if (accountLink) {
+        setConnectedAccountId(account);
+        Linking.openURL(accountLink);
+      }
+    } catch (error) {
+      setAccountCreatePending(false);
+      setError(true);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => signOut()}><Text style={styles.title}>Tab Two</Text></TouchableOpacity>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
+      {!connectedAccountId && <Text style={styles.headerText}>Get ready for take off</Text>}
+      {connectedAccountId && !accountCreatePending && <Text style={styles.headerText}>Add information to start accepting money</Text>}
+      {!accountCreatePending && !connectedAccountId && (
+        <Button title="Sign up" onPress={handleSignUp} />
+      )}
+      {accountCreatePending && (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Creating a connected account...</Text>
+        </View>
+      )}
+      {error && <Text style={styles.error}>Something went wrong!</Text>}
     </View>
   );
 }
@@ -42,16 +47,20 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 20,
   },
-  title: {
+  headerText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    marginBottom: 10,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  loading: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  error: {
+    color: "red",
+    marginBottom: 20,
   },
 });

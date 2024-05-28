@@ -86,7 +86,9 @@ export default function BidView({
   const fetchPaymentSheetParams = async () => {
     const paymentIntent = await createPaymentIntent(
       getToken,
-      Number(bidAmount) * 100
+      Number(bidAmount) * 100,
+      "usd",
+      listing?.userId ?? ''
     );
     console.log("payment intent: ", paymentIntent);
     return paymentIntent;
@@ -128,6 +130,7 @@ export default function BidView({
 
   useEffect(() => {
     if (listing) listingIdRef.current = listing.id;
+    console.log(listing);
   }, [listing]);
 
   useEffect(() => {
