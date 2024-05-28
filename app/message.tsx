@@ -10,6 +10,7 @@ import Message from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link } from "expo-router";
+import { useBackend } from "@/hooks";
 
 const user = {
   id: 1,
@@ -40,6 +41,8 @@ const messages = [
 export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
+  const [message, setMessage] = useState("");
+  const { createMessage } = useBackend();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -50,6 +53,26 @@ export default function MessagesScreen() {
       headerTitleAlign: "center",
     });
   }, [navigation, themeColors]);
+
+
+  const handleMessageSend = async () => {
+    if (message === "") return;
+
+  
+    console.log('sent');
+    try {
+      await createMessage(
+        message,
+        [],
+        "testId"
+      );
+      setMessage("");
+    } catch (e) {
+      console.log('message send failed');
+      console.log(e);
+    }
+  }
+
 
   return (
     <KeyboardAvoidingView
@@ -100,14 +123,16 @@ export default function MessagesScreen() {
         >
           <PlusCircle size={22} color={themeColors.primary} strokeWidth={2} />
         </Pressable>
-        <Pressable onPress={() => console.log("sent")} style={({ pressed }) => [styles.sendButton, { opacity: pressed ? 0.5 : 1 }]}>
+        <Pressable onPress={handleMessageSend} style={({ pressed }) => [styles.sendButton, { opacity: pressed ? 0.5 : 1 }]}>
           <SendHorizonal size={20} color={useColorScheme() === "light" ? themeColors.primary : themeColors.outline} strokeWidth={2} />
         </Pressable>
         <TextInput
           style={{ ...styles.searchBar }}
           placeholder="Send a message.."
-          // onChangeText={(text) => setSearchQuery(text)}
-          // value={searchQuery}
+          onChangeText={setMessage}
+          onSubmitEditing={handleMessageSend}
+          blurOnSubmit={false}
+          value={message}
           autoCorrect={true}
           keyboardType="default"
           returnKeyType="send"
