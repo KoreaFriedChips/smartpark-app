@@ -13,7 +13,7 @@ const notifications = [
     title: "John Doe",
     description: "Hey! Is your parking spot still available for today?",
     date: subMinutes(Date.now(), 2),
-    path: "/message",
+    path: "/messages/10/",
     read: false,
   },
   {
@@ -22,7 +22,7 @@ const notifications = [
     title: "Dris Elamri",
     description: "Thanks for the smooth transaction. Great spot!",
     date: subMinutes(Date.now(), 15),
-    path: "/message",
+    path: "/messages/11/",
     read: false,
   },
   {
@@ -31,7 +31,7 @@ const notifications = [
     title: "Jane Doe",
     description: "I'm interested in your monthly parking spot.",
     date: subMinutes(Date.now(), 30),
-    path: "/message",
+    path: "/messages/12/",
     read: false,
   },
   {
@@ -40,7 +40,7 @@ const notifications = [
     title: "Mike Johnson",
     description: "Your parking spot was perfect for the event!",
     date: subHours(Date.now(), 1),
-    path: "/message",
+    path: "/messages/13/",
     read: true,
   },
   {
@@ -49,7 +49,7 @@ const notifications = [
     title: "Emily Davis",
     description: "Quick question about your parking spot dimensions.",
     date: subHours(Date.now(), 2),
-    path: "/message",
+    path: "/messages/14/",
     read: true,
   },
   {
@@ -58,7 +58,7 @@ const notifications = [
     title: "Alex Wilson",
     description: "I've sent you a reservation request for next week.",
     date: subHours(Date.now(), 3),
-    path: "/message",
+    path: "/messages/15/",
     read: true,
   },
 ];

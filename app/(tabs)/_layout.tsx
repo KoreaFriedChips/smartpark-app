@@ -93,7 +93,7 @@ export default function TabLayout() {
                     )}
                   </Pressable>
                 </Link>
-                <Link href="/messages" asChild>
+                <Link href="/messages/" asChild>
                   <Pressable>
                     {({ pressed }) => (
                       <Send

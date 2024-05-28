@@ -64,7 +64,7 @@ export default function MessagesScreen() {
       await createMessage(
         message,
         [],
-        "testId"
+        "test Id"
       );
       setMessage("");
     } catch (e) {

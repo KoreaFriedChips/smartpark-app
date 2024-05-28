@@ -202,7 +202,7 @@ function RootLayoutNav() {
             }}
           />
         </TouchableOpacity>
-        <Link href="/messages" asChild>
+        <Link href="/messages/" asChild>
           <Pressable>
             {({ pressed }) => (
               <MessageCircleMore
@@ -245,7 +245,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="messages"
+          name="messages/index"
           options={{
             title: "",
             headerTitle: () => <HeaderTitle name="Messages" />,
