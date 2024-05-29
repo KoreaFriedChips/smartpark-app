@@ -35,7 +35,7 @@ export const useMessages = () => {
 
   const sendMessage = async (message: string, attachments: string[]) => {
     const sentMessage = await createMessage(message, attachments, otherUserId);
-    console.log(sentMessage);
+    await storeMessages(otherUserId, [sentMessage]);
   }
 
   return {
