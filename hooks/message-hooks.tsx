@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router"
 import { useBackend } from "./backend-hooks";
 import { Message } from "@/types";
 import { useEffect, useState } from "react";
+import { loadMessages, storeMessages } from "@/lib/storage";
 
 export const useMessages = () => {
   const { id: otherUserId } = useLocalSearchParams<{id: string}>();
@@ -10,11 +11,25 @@ export const useMessages = () => {
 
   const fetchBackendMessages = async () => {
     const newBackendMessages = await readMessages(otherUserId);
+    if (newBackendMessages.length <= messages.length) return;
+
+    storeMessages(otherUserId, newBackendMessages);
     setMessages(newBackendMessages);
+  }
+  
+  useEffect(() => {
+    fetchBackendMessages();
+  }, []);
+
+  const fetchLocalMessages = async () => {
+    const localMessages = await loadMessages(otherUserId);
+    if (localMessages.length <= messages.length) return;
+
+    setMessages(localMessages);
   }
 
   useEffect(() => {
-    fetchBackendMessages();
+    fetchLocalMessages();
   }, []);
 
 
