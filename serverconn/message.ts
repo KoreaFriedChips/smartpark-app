@@ -1,6 +1,6 @@
-import { MessageModel, Message } from "@/types";
+import { BackendMessageModel, BackendMessage } from "@/types";
 import { GetToken } from "@clerk/types";
-import { create } from "./crud";
+import { create, read } from "./crud";
 
 export const createMessage = async (
   getToken: GetToken, 
@@ -14,5 +14,13 @@ export const createMessage = async (
     toUserId,
   }
   const res = await create(getToken, "/api/messages", messageData);
-  return MessageModel.parse(res);
+  return BackendMessageModel.parse(res);
+}
+
+export const readMessages = async (
+  getToken: GetToken,
+  otherUserId: string, 
+): Promise<BackendMessage[]> => {
+  const res = await read(getToken, "/api/messages", {userId: otherUserId});
+  return res.map(BackendMessageModel.parse);
 }

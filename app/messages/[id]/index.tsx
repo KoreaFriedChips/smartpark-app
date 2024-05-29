@@ -10,7 +10,7 @@ import Message from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link } from "expo-router";
-import { useBackend } from "@/hooks";
+import { useMessages } from "@/hooks";
 
 const user = {
   id: 1,
@@ -22,7 +22,7 @@ const user = {
 
 //for sent check if user id is equal to the user id of message sent
 
-const messages = [
+const defaultMessages = [
   {
     id: 1,
     date: "9:26 PM",
@@ -42,7 +42,7 @@ export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
-  const { createMessage } = useBackend();
+  const { messages, sendMessage } = useMessages();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -61,11 +61,7 @@ export default function MessagesScreen() {
   
     console.log('sent');
     try {
-      await createMessage(
-        message,
-        [],
-        "test Id"
-      );
+      await sendMessage(message, []);
       setMessage("");
     } catch (e) {
       console.log('message send failed');
@@ -81,11 +77,12 @@ export default function MessagesScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 54}
     >
       <FlatList
+        inverted={true}
         data={messages}
-        renderItem={({ item }) => <Message sent={item.sent} date={item.date} messages={item.messages} image={item.image} />}
+        renderItem={({ item }) => <Message sent={item.sent} date={item.date} message={item.message} profilePicture="https://source.unsplash.com/random?person"/>}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
-        ListHeaderComponent={
+        ListFooterComponent={
           <View style={styles.messageInfo}>
             <Image source={{ uri: user.image }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
             <Text weight="semibold" style={styles.cityText}>

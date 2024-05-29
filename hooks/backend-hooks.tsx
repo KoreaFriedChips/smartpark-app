@@ -82,6 +82,10 @@ export const useBackend = () => {
   const createMessage = async (message: string, attachments: string[], toUserId: string) => {
     return await backend.createMessage(getToken, message, attachments, toUserId);
   }
+
+  const readMessages = async (userId: string) => {
+    return await backend.readMessages(getToken, userId);
+  }
   
 
   return { 
@@ -103,5 +107,6 @@ export const useBackend = () => {
     readMapsCoordinates,
     readCityStateFromCoordinates,
     createMessage,
+    readMessages,
   };
 }

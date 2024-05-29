@@ -4,26 +4,33 @@ import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { Image } from "expo-image";
 import MessageText from "@/components/MessageText";
+import moment from "moment";
+
+// interface MessageProps {
+//   sent?: boolean;
+//   image?: string;
+//   date: string;
+//   messages: { text: string; reaction?: boolean }[];
+// }
 
 interface MessageProps {
-  sent?: boolean;
-  image?: string;
-  date: string;
-  messages: { text: string; reaction?: boolean }[];
+  sent?: boolean,
+  profilePicture?: string,
+  date: Date,
+  message: string,
+  reaction?: boolean
 }
 
-export default function Message({ sent = true, image, date, messages }: MessageProps) {
+export default function Message({ sent = true, profilePicture, date, message, reaction = false }: MessageProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
     <View style={{ ...styles.messageContainer, flexDirection: sent ? "row-reverse" : "row" }}>
-      {!sent && <Image source={{ uri: image }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
+      {!sent && <Image source={{ uri: profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
       <View style={{ ...styles.mContainer, alignItems: sent ? "flex-end" : "flex-start" }}>
-        {messages.map((message, index) => (
-          <MessageText key={index} sent={sent} message={message.text} reaction={message.reaction} />
-        ))}
+          <MessageText sent={sent} message={message} reaction={reaction} />
         <Text italic style={{ ...styles.date, color: themeColors.secondary, marginRight: sent ? 4 : 0, marginLeft: sent ? 0 : 4 }}>
-          {date}
+          {moment(date).format('h:mm a')}
         </Text>
       </View>
     </View>

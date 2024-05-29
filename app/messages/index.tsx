@@ -17,12 +17,12 @@ const notifications = [
     read: false,
   },
   {
-    id: "11",
+    id: "6628a4ebfe82e9bdd500aa2b",
     image: "https://source.unsplash.com/random?person&2",
     title: "Dris Elamri",
     description: "Thanks for the smooth transaction. Great spot!",
     date: subMinutes(Date.now(), 15),
-    path: "/messages/11/",
+    path: "/messages/6628a4ebfe82e9bdd500aa2b/",
     read: false,
   },
   {
