@@ -18,6 +18,12 @@ export const getUserFromClerkId = async (getToken: GetToken, clerkId: string) =>
     return users[0];
 };
 
+export const getUserWithId = async (getToken: GetToken, id: string) => {
+    const users: User[] = await readUsers(getToken, { id });
+    if (users.length === 0) throw new Error("user not found");
+    return users[0];
+}
+
 export const getUserIdFromClerkId = async (getToken: GetToken, clerkId: string) => {
     return (await getUserFromClerkId(getToken, clerkId)).id;
 };

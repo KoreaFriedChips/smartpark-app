@@ -87,6 +87,9 @@ export const useBackend = () => {
     return await backend.readMessages(getToken, userId);
   }
   
+  const getUserWithId = async (id: string) => {
+    return await backend.getUserWithId(getToken, id);
+  }
 
   return { 
     registerDevicePushToken,
@@ -108,5 +111,6 @@ export const useBackend = () => {
     readCityStateFromCoordinates,
     createMessage,
     readMessages,
+    getUserWithId,
   };
 }

@@ -10,55 +10,28 @@ import Message from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link } from "expo-router";
-import { useMessages } from "@/hooks";
-
-const user = {
-  id: 1,
-  name: "John Doe",
-  rating: 4.8,
-  image: "https://source.unsplash.com/random?person",
-  city: "Minneapolis, MN",
-};
-
-//for sent check if user id is equal to the user id of message sent
-
-const defaultMessages = [
-  {
-    id: 1,
-    date: "9:26 PM",
-    messages: [{ text: "Hello" }, { text: "How are you?", reaction: true }],
-    sent: true,
-  },
-  {
-    id: 2,
-    image: "https://source.unsplash.com/random?person",
-    date: "9:27 PM",
-    messages: [{ text: "Hi" }, { text: "What's up?" }],
-    sent: false,
-  },
-];
+import { useMessages, useOtherUser } from "@/hooks";
 
 export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
   const { messages, sendMessage } = useMessages();
+  const otherUser = useOtherUser();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "",
-      headerTitle: () => <HeaderTitle name={user.name} text={`(${user.rating} stars)`} />,
+      headerTitle: () => <HeaderTitle name={otherUser?.name} text={`(${otherUser?.rating.toFixed(2)} stars)`} />,
       headerLeft: () => <HeaderLeft text={false} />,
       headerBackVisible: false,
       headerTitleAlign: "center",
     });
-  }, [navigation, themeColors]);
+  }, [navigation, themeColors, otherUser]);
 
 
   const handleMessageSend = async () => {
     if (message === "") return;
-
-  
     console.log('sent');
     try {
       await sendMessage(message, []);
@@ -83,18 +56,18 @@ export default function MessagesScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={
-          <View style={styles.messageInfo}>
-            <Image source={{ uri: user.image }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
-            <Text weight="semibold" style={styles.cityText}>
-              {user.city}
-            </Text>
+          otherUser && <View style={styles.messageInfo}>
+            {otherUser.profilePicture && <Image source={{ uri: otherUser?.profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
+            {otherUser.city && otherUser.state && <Text weight="semibold" style={styles.cityText}>
+              {`${otherUser.city}, ${otherUser.state}`}
+            </Text>}
             <Text italic style={{ ...styles.dateText, color: themeColors.secondary }}>
-              Joined 2023
+              {`Joined ${otherUser.activeSince.getFullYear()}`}
             </Text>
             <Link
               href={{
                 pathname: "/user-profile",
-                params: { id: user.id },
+                params: { id: otherUser.id },
               }}
               asChild
               style={styles.profileText}
