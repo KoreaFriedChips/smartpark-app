@@ -9,7 +9,7 @@ import HeaderLeft from "@/components/Headers/HeaderLeft";
 import Message from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useMessages, useOtherUser } from "@/hooks";
 
 export default function MessagesScreen() {
@@ -18,6 +18,7 @@ export default function MessagesScreen() {
   const [message, setMessage] = useState("");
   const { messages, sendMessage } = useMessages();
   const otherUser = useOtherUser();
+  const { id: otherUserId } = useLocalSearchParams<{id: string}>();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -52,7 +53,7 @@ export default function MessagesScreen() {
       <FlatList
         inverted={true}
         data={messages}
-        renderItem={({ item }) => <Message sent={item.sent} date={item.date} message={item.message} profilePicture="https://source.unsplash.com/random?person"/>}
+        renderItem={({ item }) => <Message sent={item.toUserId === otherUserId} date={item.date} message={item.message} profilePicture="https://source.unsplash.com/random?person"/>}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={
