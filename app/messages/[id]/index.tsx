@@ -109,6 +109,7 @@ export default function MessagesScreen() {
     for (const message of messages.filter((_, i) => i !== 0)) {
       if (message.toUserId === currentGroup.toUserId) {
         currentGroup.messages = [message.message, ...currentGroup.messages];
+        currentGroup.attachmentLists = [message.attachments, ...currentGroup.attachmentLists]
       } else {
         msgs.push({...currentGroup});
         currentGroup = {
@@ -132,7 +133,7 @@ export default function MessagesScreen() {
       <FlatList
         inverted={true}
         data={aggregatedMessages}
-        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture="https://source.unsplash.com/random?person" messages={item.messages}/>}
+        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture="https://source.unsplash.com/random?person" messages={item.messages} imageLists={item.attachmentLists}/>}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={

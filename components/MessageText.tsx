@@ -1,16 +1,20 @@
-import { StyleSheet, useColorScheme, TouchableOpacity } from "react-native";
+import { StyleSheet, useColorScheme, TouchableOpacity, FlatList } from "react-native";
 import { Text, View } from "@/components/Themed";
 import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
+import SideSwipe from 'react-native-sideswipe';
+import { imageUriFromKey } from "@/lib/utils";
+import { Image } from "expo-image";
 
 interface MessageProps {
   sent?: boolean;
   message: string;
   reaction?: boolean;
+  images: string[];
 }
 
-export default function MessageText({ sent = true, message, reaction = false }: MessageProps) {
+export default function MessageText({ sent = true, message, reaction = false, images }: MessageProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   const [react, isReacted] = React.useState(reaction);
@@ -22,6 +26,29 @@ export default function MessageText({ sent = true, message, reaction = false }: 
   return (
     <View style={styles.messageContainer}>
       <TouchableOpacity style={{ ...styles.message, backgroundColor: sent ? themeColors.header : "transparent", borderColor: themeColors.outline }} onLongPress={() => addReaction()}>
+        {images.length > 0 && (
+          // <SideSwipe
+          //   style={styles.imageContainer}
+          //   data={images}
+          //   renderItem={({itemIndex, currentIndex, item}) => (
+          //     <Image
+          //       source={{ uri: imageUriFromKey(item)}}
+          //       style={styles.image}
+          //     />
+          //   )}
+          // />
+          <FlatList
+            style={styles.imageContainer}
+            data={images}
+            renderItem={({item}) => (
+              <Image
+                source={{ uri: imageUriFromKey(item)}}
+                style={styles.image}
+              />
+            )}
+
+          />
+        )}
         <Text style={styles.title}>{message}</Text>
       </TouchableOpacity>
 			{react && <Text style={{ ...styles.reaction, borderColor: themeColors.outline, backgroundColor: themeColors.header, marginLeft: sent ? 6 : "auto", marginRight: sent ? 0 : 6 }}>❤️</Text>}
@@ -59,5 +86,18 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 4,
     fontSize: 12,
     borderRadius: 8,
+  },
+  imageContainer: {
+    width: 150,
+    gap: 10,
+    borderRadius: 8,
+    marginVertical: 5
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 1,
+    zIndex: 5,
   },
 });
