@@ -96,6 +96,14 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      await storeRemoteMessage(remoteMessage);
+    });
+    return unsubscribe;
+  }, []);
+
+
+  useEffect(() => {
     if (error) throw error;
   }, [error]);
 
@@ -108,13 +116,6 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      await storeRemoteMessage(remoteMessage);
-    });
-    return unsubscribe;
-  }, []);
 
   const env = Constants.expoConfig?.extra;
   const clerkPublishableKey = env?.clerkPublishableKey;
