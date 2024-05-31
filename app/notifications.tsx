@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { Notification } from "@/types";
 import { startOfToday, subDays, subHours, subMinutes, subWeeks } from "date-fns";
-import { readAllNotifications, storeNotification } from "@/lib/storage";
+import { readAllNotifications, setNotificationRead, storeNotification } from "@/lib/storage";
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { remoteMessageToNotification } from "@/lib/utils";
 import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
@@ -154,6 +154,7 @@ export default function NotificationsScreen() {
             description={item.description}
             date={item.date}
             read={item.read}
+            onItemPress={() => setNotificationRead(item.id)}
           />
         )}
         keyExtractor={item => item.id.toString()}

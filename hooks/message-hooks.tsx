@@ -37,12 +37,11 @@ export const useMessages = () => {
 
   const sendMessage = async (message: string, attachments: string[]) => {
     const sentMessage = await createMessage(message, attachments, otherUserId);
-    await storeMessages(otherUserId, [sentMessage]);
     try {
       const latestMessage = await loadLatestMessage(otherUserId);
       await storeLatestMessage({
         ...latestMessage,
-        message: message
+        ...sentMessage
       });
     } catch (e) {
       await storeLatestMessage({
@@ -52,6 +51,8 @@ export const useMessages = () => {
         otherUserName: otherUser?.name as string,
         read: true
       })
+    } finally {
+      setMessages([sentMessage, ...messages]);
     }
   }
 

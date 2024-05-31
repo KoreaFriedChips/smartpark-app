@@ -16,16 +16,17 @@ interface ListItemProps {
   path?: any;
   short?: boolean;
   read?: boolean;
+  onItemPress: () => void;
 }
 
-export default function ListItem({ image, title, description, date, id, path, short, read }: ListItemProps) {
+export default function ListItem({ image, title, description, date, id, path, short, read, onItemPress }: ListItemProps) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isRead, setRead] = React.useState(read);
   
   const handleRead = () => {
     if (!isRead) {
       setRead(true);
-      setNotificationRead(id);
+      onItemPress();
       console.log(id);
     }
   };

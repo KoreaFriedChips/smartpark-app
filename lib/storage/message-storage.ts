@@ -13,6 +13,14 @@ import { getKeys } from "./storage-utils";
 //   return latestMessages;
 // }
 
+export const setLatestMessageRead = async (userId: string) => {
+  const latestMessage = await loadLatestMessage(userId);
+  await storeLatestMessage({
+    ...latestMessage,
+    read: true,
+  })
+}
+
 export const storeLatestMessage = async (latestMessage: LatestMessage) => {
   const userKey = createLatestUserKey(latestMessage.otherUserId);
   await storeLatestMessageKey(userKey);
@@ -20,11 +28,25 @@ export const storeLatestMessage = async (latestMessage: LatestMessage) => {
   await storeMessages(latestMessage.otherUserId, [latestMessage]);
 }
 
+const isLatestMessageRead = async (userId: string) => {
+  const latestMessage = await loadLatestMessage(userId);
+  return latestMessage.read;
+}
+
+const loadLatestMessagesWithKeys = async (keys: string[]) => {
+  const result = await AsyncStorage.multiGet(keys);
+  return result.map(([_, value]) => LatestMessageModel.parse(JSON.parse(value as string)));
+}
+
 export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
   const userKeys = latestMessages.map((msg) => createLatestUserKey(msg.otherUserId));
-  const keyMsgPairs: [string, string][] = latestMessages.map((value) => [
-    createLatestUserKey(value.otherUserId),
-    JSON.stringify(value),
+  const currentLatestMessages = await loadLatestMessagesWithKeys(userKeys);
+  const keyMsgPairs: [string, string][] = latestMessages.map((value, i) => [
+    userKeys[i],
+    JSON.stringify({
+      ...value,
+      read: value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
+    }),
   ]);
   await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));
   await AsyncStorage.multiSet(keyMsgPairs);
@@ -38,8 +60,7 @@ const storeLatestMessageKey = async (userKey: string) => {
 
 export const loadLatestMessages = async() : Promise<LatestMessage[]> => {
   const keys = await loadLatestMessageKeys();
-  const result = await AsyncStorage.multiGet(keys);
-  return result.map(([_, value]) => LatestMessageModel.parse(JSON.parse(value as string)));
+  return loadLatestMessagesWithKeys(keys);
 }
 
 export const loadLatestMessage = async (userId: string): Promise<LatestMessage> => {

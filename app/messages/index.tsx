@@ -6,6 +6,7 @@ import ListItem from "@/components/ListItem";
 import { Mail, Search } from "lucide-react-native";
 import { subHours, subMinutes } from "date-fns";
 import { useLatestMessages, useUserContext } from "@/hooks";
+import { setLatestMessageRead } from "@/lib/storage";
 
 const notifications = [
   {
@@ -99,6 +100,7 @@ export default function NotificationsScreen() {
             date={item.date} 
             short={true} 
             read={item.read} 
+            onItemPress={()=> setLatestMessageRead(item.otherUserId)}
           />
         )}
         keyExtractor={(item) => item.id.toString()}
