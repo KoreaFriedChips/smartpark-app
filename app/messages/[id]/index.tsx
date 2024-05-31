@@ -10,9 +10,12 @@ import MessageComponent from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link, useLocalSearchParams } from "expo-router";
-import { useMessages, useOtherUser } from "@/hooks";
+import { useBackend, useMessages, useOtherUser } from "@/hooks";
 import { Message } from "@/types";
 import messaging from "@react-native-firebase/messaging";
+import * as ImagePicker from "expo-image-picker";
+import { fetchImageFromUri } from "@/lib/utils";
+import SideSwipe from 'react-native-sideswipe';
 
 interface AggregatedMessage extends Message {
   messages: string[]
@@ -27,7 +30,8 @@ export default function MessagesScreen() {
   const { messages, sendMessage, refresh } = useMessages();
   const otherUser = useOtherUser();
   const { id: otherUserId } = useLocalSearchParams<{id: string}>();
-
+  const [attachments, setAttachments] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const { uploadImage } = useBackend();
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage((remoteMessage) => {
@@ -51,18 +55,45 @@ export default function MessagesScreen() {
 
 
   const handleMessageSend = async () => {
-    if (message === "") return;
+    if (message === "" && attachments.length === 0) return;
     console.log('sent');
     try {
-      await sendMessage(message, []);
+      let uris: string[] = [];
+      for (const attachment of attachments) {
+        const image = await fetchImageFromUri(attachment.uri);
+        const filename = attachment.fileName || attachment.assetId || attachment.uri.split("/").slice(-1)[0];
+        const fileSize = attachment.fileSize ?? image.size;
+        const uri = await uploadImage(filename, fileSize, image);
+        uris.push(uri);
+      }
+      await sendMessage(message, uris);
       setMessage("");
+      setAttachments([]);
     } catch (e) {
       console.log('message send failed');
       console.log(e);
     }
   }
 
+  useEffect(() => {
+    if (attachments.length === 0) return;
+    console.log('attachment added');
+    console.log(attachments);
+  }, [attachments]);
 
+  const handleUploadImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setAttachments([...attachments, result.assets[0]]);
+    }
+  }
 
   const aggregatedMessages: AggregatedMessage[] = useMemo(() => {
     if (messages.length === 0) return [];
@@ -130,32 +161,56 @@ export default function MessagesScreen() {
         // onEndReachedThreshold={0.5}
         // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No messages found.</Text> : null}
       />
-      <View style={[styles.searchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
-        <Pressable
-          onPress={() => console.log("upload image")}
-          style={({ pressed }) => [
-            styles.uploadButton,
-            {
-              opacity: pressed ? 0.5 : 1,
-            },
-          ]}
-        >
-          <PlusCircle size={22} color={themeColors.primary} strokeWidth={2} />
-        </Pressable>
-        <Pressable onPress={handleMessageSend} style={({ pressed }) => [styles.sendButton, { opacity: pressed ? 0.5 : 1 }]}>
-          <SendHorizonal size={20} color={useColorScheme() === "light" ? themeColors.primary : themeColors.outline} strokeWidth={2} />
-        </Pressable>
-        <TextInput
-          style={{ ...styles.searchBar }}
-          placeholder="Send a message.."
-          onChangeText={setMessage}
-          onSubmitEditing={handleMessageSend}
-          blurOnSubmit={false}
-          value={message}
-          autoCorrect={true}
-          keyboardType="default"
-          returnKeyType="send"
-        />
+      <View style={[styles.outerSearchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
+        {attachments.length !== 0 && (
+        
+          <SideSwipe
+            style={styles.imageContainer}
+            data={attachments}
+            renderItem={({itemIndex, currentIndex, item}) => (
+              <Image
+                key={itemIndex}
+                source={item}
+                style={styles.image}
+              />
+            )}
+          >
+
+          </SideSwipe>
+          // <FlatList
+          //   data={attachments}
+          //   renderItem={({item}) => <Image source={item} style={styles.image}/>}
+          // >
+          // </FlatList>
+          // <Image source={attachments[0]} style={styles.image}/>
+        )}
+        <View style={[styles.innerSearchContainer]}>
+          <Pressable
+            onPress={handleUploadImage}
+            style={({ pressed }) => [
+              styles.uploadButton,
+              {
+                opacity: pressed ? 0.5 : 1,
+              },
+            ]}
+          >
+            <PlusCircle size={22} color={themeColors.primary} strokeWidth={2} />
+          </Pressable>
+          <Pressable onPress={handleMessageSend} style={({ pressed }) => [styles.sendButton, { opacity: pressed ? 0.5 : 1 }]}>
+            <SendHorizonal size={20} color={useColorScheme() === "light" ? themeColors.primary : themeColors.outline} strokeWidth={2} />
+          </Pressable>
+          <TextInput
+            style={{ ...styles.searchBar }}
+            placeholder="Send a message.."
+            onChangeText={setMessage}
+            onSubmitEditing={handleMessageSend}
+            blurOnSubmit={false}
+            value={message}
+            autoCorrect={true}
+            keyboardType="default"
+            returnKeyType="send"
+          />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -205,17 +260,32 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
   },
-  searchContainer: {
+  outerSearchContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    borderWidth: 0.5,
+    marginHorizontal: 12,
+    marginBottom: 40,
+    borderRadius: 8,
+    zIndex: 3
+    // shadowColor: "#000",
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 1,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 3,
+  },
+  innerSearchContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    borderWidth: 0.5,
     height: 42,
-    marginHorizontal: 12,
-    marginBottom: 40,
     paddingVertical: 10, //12?
     borderRadius: 8,
     position: "relative",
+    backgroundColor: "transparent",
     // shadowColor: "#000",
     // shadowOffset: {
     //   width: 0,
@@ -245,5 +315,18 @@ const styles = StyleSheet.create({
     padding: 2.5,
     paddingHorizontal: 10,
     zIndex: 3,
+  },
+  imageContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    marginVertical: 5
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 1,
+    zIndex: 5,
   },
 });
