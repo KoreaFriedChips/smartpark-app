@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from "expo-router"
 import { useBackend } from "./backend-hooks";
-import { Message } from "@/types";
+import { LatestMessage, Message } from "@/types";
 import { useEffect, useState } from "react";
-import { loadMessages, storeMessages } from "@/lib/storage";
+import { loadLatestMessages, loadMessages, storeMessages } from "@/lib/storage";
 
 export const useMessages = () => {
   const { id: otherUserId } = useLocalSearchParams<{id: string}>();
@@ -43,4 +43,18 @@ export const useMessages = () => {
     sendMessage
   }
 
+}
+
+export const useLatestMessages = () => {
+  const [messages, setMessages] = useState<LatestMessage[]>([]);
+  const { readLatestMessages } = useBackend();
+  const fetchLatestMessagesBackend = async () => {
+    const latestMessages = await readLatestMessages();
+    setMessages(latestMessages);
+  }
+
+  useEffect(() => {
+    fetchLatestMessagesBackend();
+  }, []);
+  return messages;
 }

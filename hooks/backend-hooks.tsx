@@ -91,6 +91,10 @@ export const useBackend = () => {
     return await backend.getUserWithId(getToken, id);
   }
 
+  const readLatestMessages = async () => {
+    return await backend.readLatestMessages(getToken);
+  }
+
   return { 
     registerDevicePushToken,
     createListing,
@@ -112,5 +116,6 @@ export const useBackend = () => {
     createMessage,
     readMessages,
     getUserWithId,
+    readLatestMessages,
   };
 }

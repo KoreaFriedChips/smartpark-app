@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NotificationModel } from "./notification";
 
 export const MessageModel = z.object({
   id: z.string(),
@@ -10,3 +11,18 @@ export const MessageModel = z.object({
 });
 
 export type Message = z.infer<typeof MessageModel>;
+
+export const LatestMessageModel = z.object({
+  id: z.string(),
+  message: z.string(),
+  date: z.coerce.date(),
+  attachments: z.string().array(),
+  fromUserId: z.string(),
+  toUserId: z.string(),
+  otherUserId: z.string(),
+  otherUserName: z.string(),
+  otherProfilePicture: z.string(),
+  read: z.coerce.boolean(),
+});
+
+export type LatestMessage = z.infer<typeof LatestMessageModel>;

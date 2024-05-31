@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors";
 import ListItem from "@/components/ListItem";
 import { Mail, Search } from "lucide-react-native";
 import { subHours, subMinutes } from "date-fns";
+import { useLatestMessages, useUserContext } from "@/hooks";
 
 const notifications = [
   {
@@ -66,8 +67,10 @@ const notifications = [
 export default function NotificationsScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const [searchQuery, setSearchQuery] = React.useState("");
+  const latestMessages = useLatestMessages();
+  const user = useUserContext();
 
-  return (
+  return (user && 
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <View style={[styles.searchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
         <Mail size={20} color={themeColors.primary} strokeWidth={2} />
@@ -84,8 +87,20 @@ export default function NotificationsScreen() {
         />
       </View>
       <FlatList
-        data={notifications}
-        renderItem={({ item }) => <ListItem key={item.id} id={item.id} path={item.path} image={item.image} title={item.title} description={item.description} date={item.date} short={true} read={item.read} />}
+        data={latestMessages}
+        renderItem={({ item }) => (
+          <ListItem 
+            key={item.id} 
+            id={item.id} 
+            path={`/messages/${item.otherUserId}`} 
+            image={item.otherProfilePicture} 
+            title={item.otherUserName} 
+            description={item.message} 
+            date={item.date} 
+            short={true} 
+            read={item.read} 
+          />
+        )}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListEmptyComponent={<Text style={styles.noListings}>No conversations found.</Text>}
