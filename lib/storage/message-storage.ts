@@ -13,8 +13,8 @@ import { getKeys } from "./storage-utils";
 //   return latestMessages;
 // }
 
-const storeLatestMessage = async (userId: string, latestMessage: LatestMessage) => {
-  const userKey = createLatestUserKey(userId);
+export const storeLatestMessage = async (latestMessage: LatestMessage) => {
+  const userKey = createLatestUserKey(latestMessage.otherUserId);
   await storeLatestMessageKey(userKey);
   await AsyncStorage.setItem(userKey, JSON.stringify(latestMessage));
 }
@@ -41,7 +41,8 @@ export const loadLatestMessages = async() : Promise<LatestMessage[]> => {
   return result.map(([_, value]) => LatestMessageModel.parse(JSON.parse(value as string)));
 }
 
-const loadLatestMessage = async (userKey: string): Promise<LatestMessage> => {
+export const loadLatestMessage = async (userId: string): Promise<LatestMessage> => {
+  const userKey = createLatestUserKey(userId);
   const msg = await AsyncStorage.getItem(userKey);
   if (msg == null) throw new Error("latest message userKey not found");
 
