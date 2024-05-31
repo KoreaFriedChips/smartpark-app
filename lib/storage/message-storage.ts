@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MessageModel, Message, LatestMessage, LatestMessageModel } from "@/types";
 import { getKeys } from "./storage-utils";
-
+import { Mutex } from "async-mutex";
 
 // const loadLatestMessages = async (): Promise<[string, Message][]> => {
 //   const userKeyList = await loadUserKeyList();
@@ -13,15 +13,25 @@ import { getKeys } from "./storage-utils";
 //   return latestMessages;
 // }
 
+const latestMessagesMutex = new Mutex();
+
 export const setLatestMessageRead = async (userId: string) => {
-  const latestMessage = await loadLatestMessage(userId);
-  await storeLatestMessage({
-    ...latestMessage,
-    read: true,
-  })
+  await latestMessagesMutex.runExclusive(async () => {
+    const latestMessage = await loadLatestMessageImpl(userId);
+    await storeLatestMessageImpl({
+      ...latestMessage,
+      read: true,
+    })
+  });
 }
 
 export const storeLatestMessage = async (latestMessage: LatestMessage) => {
+  await latestMessagesMutex.runExclusive(async () => {
+    await storeLatestMessageImpl(latestMessage);
+  })
+}
+
+const storeLatestMessageImpl = async (latestMessage: LatestMessage) => {
   const userKey = createLatestUserKey(latestMessage.otherUserId);
   await storeLatestMessageKey(userKey);
   await AsyncStorage.setItem(userKey, JSON.stringify(latestMessage));
@@ -39,17 +49,19 @@ const loadLatestMessagesWithKeys = async (keys: string[]) => {
 }
 
 export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
-  const userKeys = latestMessages.map((msg) => createLatestUserKey(msg.otherUserId));
-  const currentLatestMessages = await loadLatestMessagesWithKeys(userKeys);
-  const keyMsgPairs: [string, string][] = latestMessages.map((value, i) => [
-    userKeys[i],
-    JSON.stringify({
-      ...value,
-      read: value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
-    }),
-  ]);
-  await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));
-  await AsyncStorage.multiSet(keyMsgPairs);
+  await latestMessagesMutex.runExclusive(async () => {
+    const userKeys = latestMessages.map((msg) => createLatestUserKey(msg.otherUserId));
+    const currentLatestMessages = await loadLatestMessagesWithKeys(userKeys);
+    const keyMsgPairs: [string, string][] = latestMessages.map((value, i) => [
+      userKeys[i],
+      JSON.stringify({
+        ...value,
+        read: value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
+      }),
+    ]);
+    await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));
+    await AsyncStorage.multiSet(keyMsgPairs);
+  });
 }
 
 const storeLatestMessageKey = async (userKey: string) => {
@@ -59,11 +71,24 @@ const storeLatestMessageKey = async (userKey: string) => {
 }
 
 export const loadLatestMessages = async() : Promise<LatestMessage[]> => {
-  const keys = await loadLatestMessageKeys();
-  return loadLatestMessagesWithKeys(keys);
+  let msgs: LatestMessage[] = []
+  await latestMessagesMutex.runExclusive(async () => {
+    const keys = await loadLatestMessageKeys();
+    msgs = await loadLatestMessagesWithKeys(keys);
+  })
+  return msgs;
 }
 
 export const loadLatestMessage = async (userId: string): Promise<LatestMessage> => {
+  let latestMessage: LatestMessage | undefined;
+  await latestMessagesMutex.runExclusive(async () => {
+    latestMessage = await loadLatestMessageImpl(userId);
+  });
+  if (!latestMessage) throw new Error("latest message not loaded");
+  return latestMessage;
+}
+
+const loadLatestMessageImpl = async (userId: string): Promise<LatestMessage> => {
   const userKey = createLatestUserKey(userId);
   const msg = await AsyncStorage.getItem(userKey);
   if (msg == null) throw new Error("latest message userKey not found");
@@ -88,8 +113,14 @@ const userIdFromUserKey = (userKey: string) => {
   return userKey.substring(messageKeyTag.length + 6);
 }
 
+const messagesMutex = new Mutex();
+
 export const loadMessages = async (userId: string): Promise<Message[]> => {
-  return await loadMessagesFromUserKey(createUserKey(userId));
+  let messages: Message[] = [];
+  await messagesMutex.runExclusive(async () => {
+    messages = await loadMessagesFromUserKey(createUserKey(userId));
+  });
+  return messages;
 }
 
 const loadMessagesFromUserKey = async (userKey: string) => {
@@ -105,6 +136,12 @@ const loadMessagesFromUserKey = async (userKey: string) => {
 }
 
 export const storeMessages = async (userId: string, messages: Message[]) => {
+  await messagesMutex.runExclusive(async () => {
+    await storeMessagesImpl(userId, messages);
+  });
+}
+
+const storeMessagesImpl = async (userId: string, messages: Message[]) => {
   const messageKeys = messages.map((message) => createMessageKey(message.id));
   const result = await AsyncStorage.multiGet(messageKeys);
   if (!result) throw new Error;
