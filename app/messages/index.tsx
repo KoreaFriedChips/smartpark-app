@@ -96,7 +96,7 @@ export default function NotificationsScreen() {
             path={`/messages/${item.otherUserId}`} 
             image={item.otherProfilePicture} 
             title={item.otherUserName} 
-            description={item.message} 
+            description={(item.message === "" ? "<image>" : item.message)} 
             date={item.date} 
             short={true} 
             read={item.read} 
