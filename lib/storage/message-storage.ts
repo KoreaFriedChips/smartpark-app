@@ -1,10 +1,76 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MessageModel, Message } from "@/types";
+import { MessageModel, Message, LatestMessage, LatestMessageModel } from "@/types";
+import { getKeys } from "./storage-utils";
 
+
+// const loadLatestMessages = async (): Promise<[string, Message][]> => {
+//   const userKeyList = await loadUserKeyList();
+//   const messageLists = await Promise.all(userKeyList.map(loadMessagesFromUserKey));
+//   const latestMessages: [string, Message][] = messageLists.map((messageList, index) => ([
+//     userIdFromUserKey(userKeyList[index]), 
+//     messageList[0]
+//   ]));
+//   return latestMessages;
+// }
+
+const storeLatestMessage = async (userId: string, latestMessage: LatestMessage) => {
+  const userKey = createLatestUserKey(userId);
+  await storeLatestMessageKey(userKey);
+  await AsyncStorage.setItem(userKey, JSON.stringify(latestMessage));
+}
+
+export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
+  const userKeys = latestMessages.map((msg) => createLatestUserKey(msg.otherUserId));
+  const keyMsgPairs: [string, string][] = latestMessages.map((value) => [
+    createLatestUserKey(value.otherUserId),
+    JSON.stringify(value),
+  ]);
+  await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));
+  await AsyncStorage.multiSet(keyMsgPairs);
+}
+
+const storeLatestMessageKey = async (userKey: string) => {
+  const keys = await loadLatestMessageKeys();
+  if (keys.includes(userKey)) return;
+  await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify([...keys, userKey]));
+}
+
+export const loadLatestMessages = async() : Promise<LatestMessage[]> => {
+  const keys = await loadLatestMessageKeys();
+  const result = await AsyncStorage.multiGet(keys);
+  return result.map(([_, value]) => LatestMessageModel.parse(JSON.parse(value as string)));
+}
+
+const loadLatestMessage = async (userKey: string): Promise<LatestMessage> => {
+  const msg = await AsyncStorage.getItem(userKey);
+  if (msg == null) throw new Error("latest message userKey not found");
+
+  return LatestMessageModel.parse(JSON.parse(msg));
+}
+
+const loadLatestMessageKeys = async () => {
+  const keys = await AsyncStorage.getItem(latestMessageKeyTag);
+  if (keys == null) return [];
+  return JSON.parse(keys);
+}
+
+const latestMessageKeyTag = "@message-latest";
+
+const createLatestUserKey = (userId: string) => {
+  const userKey = createUserKey(userId);
+  return `${latestMessageKeyTag}-${userKey}`;
+}
+
+const userIdFromUserKey = (userKey: string) => {
+  return userKey.substring(messageKeyTag.length + 6);
+}
 
 export const loadMessages = async (userId: string): Promise<Message[]> => {
+  return await loadMessagesFromUserKey(createUserKey(userId));
+}
+
+const loadMessagesFromUserKey = async (userKey: string) => {
   try {
-    const userKey = createUserKey(userId);
     const messageKeys = await loadMessageKeyList(userKey);
     const pairs = await AsyncStorage.multiGet(messageKeys);
     let messages = pairs.map(([_, value]) => MessageModel.parse(JSON.parse(value as string)));
@@ -52,6 +118,19 @@ const loadMessageKeyList = async (userKey: string) => {
   if (keyListStr !== null) 
     return JSON.parse(keyListStr);
 
+  const userKeyList = await loadUserKeyList();
+  await storeUserKeyList([...userKeyList, userKey]);
+  return [];
+}
+
+const storeUserKeyList = async (userKeys: string[]) => {
+  await AsyncStorage.setItem(messageKeyTag, JSON.stringify(userKeys));
+}
+
+const loadUserKeyList = async (): Promise<string[]> => {
+  const keyListStr = await AsyncStorage.getItem(messageKeyTag);
+  if (keyListStr != null)
+    return JSON.parse(keyListStr);
   return [];
 }
 
