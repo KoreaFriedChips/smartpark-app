@@ -13,6 +13,7 @@ import { startOfToday, subDays, subHours, subMinutes, subWeeks } from "date-fns"
 import { readAllNotifications, storeNotification } from "@/lib/storage";
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { remoteMessageToNotification } from "@/lib/utils";
+import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
 
 const defaultNotifications = [
   {
@@ -139,16 +140,6 @@ export default function NotificationsScreen() {
   useEffect(() => {
     fetchNotifications();
   }, []);
-
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      const notification = remoteMessageToNotification(remoteMessage);
-      await storeNotification(notification);
-      fetchNotifications();
-    });
-
-    return unsubscribe;
-  },[]);
   
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>

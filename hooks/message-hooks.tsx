@@ -3,9 +3,11 @@ import { useBackend } from "./backend-hooks";
 import { LatestMessage, Message } from "@/types";
 import { useEffect, useState } from "react";
 import { loadLatestMessage, loadLatestMessages, loadMessages, storeLatestMessage, storeLatestMessages, storeMessages } from "@/lib/storage";
+import { useOtherUser } from "./user-hooks";
 
 export const useMessages = () => {
   const { id: otherUserId } = useLocalSearchParams<{id: string}>();
+  const otherUser = useOtherUser();
   const { createMessage, readMessages } = useBackend();
   const [ messages, setMessages ] = useState<Message[]>([]);
 
@@ -36,11 +38,21 @@ export const useMessages = () => {
   const sendMessage = async (message: string, attachments: string[]) => {
     const sentMessage = await createMessage(message, attachments, otherUserId);
     await storeMessages(otherUserId, [sentMessage]);
-    const latestMessage = await loadLatestMessage(otherUserId);
-    await storeLatestMessage({
-      ...latestMessage,
-      message: message
-    })
+    try {
+      const latestMessage = await loadLatestMessage(otherUserId);
+      await storeLatestMessage({
+        ...latestMessage,
+        message: message
+      });
+    } catch (e) {
+      await storeLatestMessage({
+        ...sentMessage,
+        otherUserId: otherUserId,
+        otherProfilePicture: otherUser?.profilePicture as string,
+        otherUserName: otherUser?.name as string,
+        read: true
+      })
+    }
   }
 
   return {
@@ -56,7 +68,6 @@ export const useLatestMessages = () => {
   const fetchLatestMessagesBackend = async () => {
     const latestMessages = await readLatestMessages();
     if (latestMessages.length < messages.length) return;
-
     storeLatestMessages(latestMessages);
     setMessages(latestMessages);
   }

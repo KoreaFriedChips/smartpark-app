@@ -30,10 +30,12 @@ import { remoteMessageToNotification } from "@/lib/utils";
 import { Notification } from "@/types";
 import { useBackend } from "@/hooks/backend-hooks";
 import { LocationContext, UserLocationObject } from "@/hooks/location-hooks";
+import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
-  storeNotification(remoteMessageToNotification(remoteMessage));
+  await storeRemoteMessage(remoteMessage);
   console.log(remoteMessage.data);
 });
 
@@ -106,6 +108,13 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      await storeRemoteMessage(remoteMessage);
+    });
+    return unsubscribe;
+  }, []);
 
   const env = Constants.expoConfig?.extra;
   const clerkPublishableKey = env?.clerkPublishableKey;

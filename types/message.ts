@@ -12,13 +12,7 @@ export const MessageModel = z.object({
 
 export type Message = z.infer<typeof MessageModel>;
 
-export const LatestMessageModel = z.object({
-  id: z.string(),
-  message: z.string(),
-  date: z.coerce.date(),
-  attachments: z.string().array(),
-  fromUserId: z.string(),
-  toUserId: z.string(),
+export const LatestMessageModel = MessageModel.extend({
   otherUserId: z.string(),
   otherUserName: z.string(),
   otherProfilePicture: z.string(),

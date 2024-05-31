@@ -17,6 +17,7 @@ export const storeLatestMessage = async (latestMessage: LatestMessage) => {
   const userKey = createLatestUserKey(latestMessage.otherUserId);
   await storeLatestMessageKey(userKey);
   await AsyncStorage.setItem(userKey, JSON.stringify(latestMessage));
+  await storeMessages(latestMessage.otherUserId, [latestMessage]);
 }
 
 export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
