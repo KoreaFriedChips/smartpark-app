@@ -14,7 +14,7 @@ export const useMessages = () => {
   const fetchBackendMessages = async () => {
     const newBackendMessages = await readMessages(otherUserId);
     if (newBackendMessages.length <= messages.length) return;
-
+    console.log(newBackendMessages);
     storeMessages(otherUserId, newBackendMessages);
     setMessages(newBackendMessages);
   }
@@ -34,6 +34,9 @@ export const useMessages = () => {
     fetchLocalMessages();
   }, []);
 
+  const refresh = () => {
+    fetchBackendMessages();
+  }
 
   const sendMessage = async (message: string, attachments: string[]) => {
     const sentMessage = await createMessage(message, attachments, otherUserId);
@@ -58,7 +61,8 @@ export const useMessages = () => {
 
   return {
     messages,
-    sendMessage
+    sendMessage,
+    refresh
   }
 
 }

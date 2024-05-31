@@ -12,6 +12,7 @@ import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useMessages, useOtherUser } from "@/hooks";
 import { Message } from "@/types";
+import messaging from "@react-native-firebase/messaging";
 
 interface AggregatedMessage extends Message {
   messages: string[]
@@ -23,9 +24,20 @@ export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
-  const { messages, sendMessage } = useMessages();
+  const { messages, sendMessage, refresh } = useMessages();
   const otherUser = useOtherUser();
   const { id: otherUserId } = useLocalSearchParams<{id: string}>();
+
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage((remoteMessage) => {
+      if (remoteMessage.data?.title === 'New message received' && remoteMessage.data?.fromUserId === otherUserId) 
+        refresh();
+    });
+    
+    return unsubscribe;
+  }, [])
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -65,7 +77,7 @@ export default function MessagesScreen() {
 
     for (const message of messages.filter((_, i) => i !== 0)) {
       if (message.toUserId === currentGroup.toUserId) {
-        currentGroup.messages.push(message.message);
+        currentGroup.messages = [message.message, ...currentGroup.messages];
       } else {
         msgs.push({...currentGroup});
         currentGroup = {
