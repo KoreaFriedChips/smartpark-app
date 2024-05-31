@@ -45,8 +45,7 @@ export function SellerQuickInfo({seller }: {seller: User}) {
       <Text style={{ marginTop: 4 }}>{seller.description}</Text>
       <Link
         href={{
-          pathname: "/messages/",
-          params: { id: seller.id },
+          pathname: `/messages/${seller.id}/`,
         }}
         asChild
         style={[
