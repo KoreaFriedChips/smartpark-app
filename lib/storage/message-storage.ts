@@ -45,22 +45,27 @@ const isLatestMessageRead = async (userId: string) => {
 
 const loadLatestMessagesWithKeys = async (keys: string[]) => {
   const result = await AsyncStorage.multiGet(keys);
-  return result.map(([_, value]) => LatestMessageModel.parse(JSON.parse(value as string)));
+  return result.map(([_, value]) => value === null ? null : LatestMessageModel.parse(JSON.parse(value as string)));
 }
 
 export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
   await latestMessagesMutex.runExclusive(async () => {
+    try {
+      
     const userKeys = latestMessages.map((msg) => createLatestUserKey(msg.otherUserId));
     const currentLatestMessages = await loadLatestMessagesWithKeys(userKeys);
     const keyMsgPairs: [string, string][] = latestMessages.map((value, i) => [
       userKeys[i],
       JSON.stringify({
         ...value,
-        read: value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
+        read: currentLatestMessages[i] && value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
       }),
     ]);
     await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));
     await AsyncStorage.multiSet(keyMsgPairs);
+    } catch (e) {
+      console.log(e);
+    }
   });
 }
 
@@ -71,21 +76,17 @@ const storeLatestMessageKey = async (userKey: string) => {
 }
 
 export const loadLatestMessages = async() : Promise<LatestMessage[]> => {
-  let msgs: LatestMessage[] = []
-  await latestMessagesMutex.runExclusive(async () => {
+  return await latestMessagesMutex.runExclusive(async () => {
     const keys = await loadLatestMessageKeys();
-    msgs = await loadLatestMessagesWithKeys(keys);
+    const msgs = await loadLatestMessagesWithKeys(keys);
+    return LatestMessageModel.array().parse(msgs);
   })
-  return msgs;
 }
 
 export const loadLatestMessage = async (userId: string): Promise<LatestMessage> => {
-  let latestMessage: LatestMessage | undefined;
-  await latestMessagesMutex.runExclusive(async () => {
-    latestMessage = await loadLatestMessageImpl(userId);
+  return await latestMessagesMutex.runExclusive(async () => {
+    return await loadLatestMessageImpl(userId);
   });
-  if (!latestMessage) throw new Error("latest message not loaded");
-  return latestMessage;
 }
 
 const loadLatestMessageImpl = async (userId: string): Promise<LatestMessage> => {
@@ -116,11 +117,9 @@ const userIdFromUserKey = (userKey: string) => {
 const messagesMutex = new Mutex();
 
 export const loadMessages = async (userId: string): Promise<Message[]> => {
-  let messages: Message[] = [];
-  await messagesMutex.runExclusive(async () => {
-    messages = await loadMessagesFromUserKey(createUserKey(userId));
+  return await messagesMutex.runExclusive(async () => {
+    return await loadMessagesFromUserKey(createUserKey(userId));
   });
-  return messages;
 }
 
 const loadMessagesFromUserKey = async (userKey: string) => {
