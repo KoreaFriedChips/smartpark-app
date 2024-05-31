@@ -18,11 +18,13 @@ export default {
       resizeMode: "contain",
       backgroundColor: "#101014",
     },
-    assetBundlePatterns: ["**/*"],
-    ios: {
-      supportsTablet: true,
-      googleServicesFile: "./GoogleService-Info.plist",
-      bundleIdentifier: "com.smartpark.smartpark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "googleServicesFile": process.env.GOOGLE_SERVICES_PLIST_FILE,
+      "bundleIdentifier": "com.smartpark.trysmartpark"
     },
     android: {
       googleServicesFile: "./google-services.json",
@@ -46,6 +48,14 @@ export default {
       "expo-router",
       "expo-font",
       "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       // "@react-native-firebase/app",
       // "@react-native-firebase/messaging"
     ],
