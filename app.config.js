@@ -23,7 +23,7 @@ export default {
     ],
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": process.env.GOOGLE_SERVICES_PLIST_FILE,
+      "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.smartpark.trysmartpark"
     },
     android: {
@@ -48,6 +48,8 @@ export default {
       "expo-router",
       "expo-font",
       "expo-secure-store",
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
       [
         "expo-build-properties",
         {

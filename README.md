@@ -19,16 +19,12 @@ Both files require:
       `http://<your LAN IP>:3000`
 - `GOOGLE_MAPS_API_KEY`
     - can be found in cloudflare environment variables
-- `GOOGLE_SERVICES_PLIST_FILE`
-    - download the GoogleService-Info.plist file from firebase console, save it to some directory
-    - set this variable to the path of the plist file
 
 Here's an example `.env.prod`:
 ```
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXX
 SERVER_URL=https://trysmartpark.com
 GOOGLE_MAPS_API_KEY=xxxxxxxxxxxx
-GOOGLE_SERVICES_PLIST_FILE=/home/xxxx/xxx/xxx/GoogleService-Info.plist
 ```
 
 ## Running
