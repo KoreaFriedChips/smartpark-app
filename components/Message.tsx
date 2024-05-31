@@ -17,18 +17,18 @@ interface MessageProps {
   sent?: boolean,
   profilePicture?: string,
   date: Date,
-  message: string,
   reaction?: boolean
+  messages: string[]
 }
 
-export default function Message({ sent = true, profilePicture, date, message, reaction = false }: MessageProps) {
+export default function Message({ sent = true, profilePicture, date, reaction = false, messages }: MessageProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
     <View style={{ ...styles.messageContainer, flexDirection: sent ? "row-reverse" : "row" }}>
       {!sent && <Image source={{ uri: profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
       <View style={{ ...styles.mContainer, alignItems: sent ? "flex-end" : "flex-start" }}>
-          <MessageText sent={sent} message={message} reaction={reaction} />
+          {messages.flatMap((message, i) => <MessageText key={i} sent={sent} message={message} reaction={reaction} />)}
         <Text italic style={{ ...styles.date, color: themeColors.secondary, marginRight: sent ? 4 : 0, marginLeft: sent ? 0 : 4 }}>
           {moment(date).format('h:mm a')}
         </Text>

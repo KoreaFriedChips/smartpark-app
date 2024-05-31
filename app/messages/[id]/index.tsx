@@ -1,16 +1,23 @@
 import { Platform, FlatList, StyleSheet, useColorScheme, TouchableOpacity, Pressable, ScrollView, Dimensions, KeyboardAvoidingView } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Colors from "@/constants/Colors";
 import { useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderLeft from "@/components/Headers/HeaderLeft";
-import Message from "@/components/Message";
+import MessageComponent from "@/components/Message";
 import { Image } from "expo-image";
 import { Plus, PlusCircle, Send, SendHorizonal } from "lucide-react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useMessages, useOtherUser } from "@/hooks";
+import { Message } from "@/types";
+
+interface AggregatedMessage extends Message {
+  messages: string[]
+  attachmentLists: string[][]
+  message: "",
+}
 
 export default function MessagesScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -44,6 +51,35 @@ export default function MessagesScreen() {
   }
 
 
+
+  const aggregatedMessages: AggregatedMessage[] = useMemo(() => {
+    if (messages.length === 0) return [];
+
+    const msgs: AggregatedMessage[] = [];
+    let currentGroup: AggregatedMessage = {
+      ...messages[0],
+      messages: [ messages[0].message ],
+      attachmentLists: [messages[0].attachments],
+      message: "",
+    }
+
+    for (const message of messages.filter((_, i) => i !== 0)) {
+      if (message.toUserId === currentGroup.toUserId) {
+        currentGroup.messages.push(message.message);
+      } else {
+        msgs.push({...currentGroup});
+        currentGroup = {
+          ...message,
+          messages: [message.message],
+          attachmentLists: [message.attachments],
+          message: ""
+        }
+      }
+    }
+    msgs.push({...currentGroup});
+    return msgs
+
+  }, [messages]);
   return (
     <KeyboardAvoidingView
       style={{ ...styles.container, backgroundColor: themeColors.background }}
@@ -52,8 +88,8 @@ export default function MessagesScreen() {
     >
       <FlatList
         inverted={true}
-        data={messages}
-        renderItem={({ item }) => <Message sent={item.toUserId === otherUserId} date={item.date} message={item.message} profilePicture="https://source.unsplash.com/random?person"/>}
+        data={aggregatedMessages}
+        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture="https://source.unsplash.com/random?person" messages={item.messages}/>}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={
