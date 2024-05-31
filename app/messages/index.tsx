@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, ScrollView, useColorScheme, Dimensions, TouchableOpacity } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -7,6 +7,8 @@ import { Mail, Search } from "lucide-react-native";
 import { subHours, subMinutes } from "date-fns";
 import { useLatestMessages, useUserContext } from "@/hooks";
 import { setLatestMessageRead } from "@/lib/storage";
+import Fuse from "fuse.js";
+import { LatestMessage } from "@/types";
 
 const notifications = [
   {
@@ -71,6 +73,19 @@ export default function NotificationsScreen() {
   const latestMessages = useLatestMessages();
   const user = useUserContext();
 
+  const [fuse, setFuse] = useState<Fuse<LatestMessage>>();
+
+  useEffect(() => {
+    setFuse(new Fuse(latestMessages, {
+      keys: ["message", "otherUserName"]
+    }))
+  }, [latestMessages]);
+
+  const filteredLatestMessages = useMemo(() => {
+    if (searchQuery === "" || !fuse) return latestMessages;
+    return fuse.search(searchQuery).map((result) => result.item);
+  }, [searchQuery, fuse, latestMessages]);
+
   return (user && 
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <View style={[styles.searchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
@@ -88,7 +103,7 @@ export default function NotificationsScreen() {
         />
       </View>
       <FlatList
-        data={latestMessages}
+        data={filteredLatestMessages}
         renderItem={({ item }) => (
           <ListItem 
             key={item.id} 
