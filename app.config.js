@@ -58,6 +58,13 @@ export default {
           }
         }
       ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "smartpark-kq",
+          "project": "smartpark-app"
+        }
+      ]
       // "@react-native-firebase/app",
       // "@react-native-firebase/messaging"
     ],

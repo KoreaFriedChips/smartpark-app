@@ -1,7 +1,8 @@
+import * as Sentry from '@sentry/react-native';
 import { Clerk, ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import { DarkTheme, DefaultTheme, ThemeProvider, useNavigation } from "@react-navigation/native";
-import { Link } from "expo-router";
+import { Link, useNavigationContainerRef } from "expo-router";
 import { Pressable, Image, Share, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -32,6 +33,24 @@ import { useBackend } from "@/hooks/backend-hooks";
 import { LocationContext, UserLocationObject } from "@/hooks/location-hooks";
 import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isRunningInExpoGo } from 'expo';
+
+
+const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
+
+Sentry.init({
+  dsn: "https://d78310986bdf0829d4455572782b0949@o4507354100924416.ingest.us.sentry.io/4507354232258560",
+  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+  integrations: [
+    new Sentry.ReactNativeTracing({
+      // Pass instrumentation to be used as `routingInstrumentation`
+      routingInstrumentation,
+      enableNativeFramesTracking: !isRunningInExpoGo(),
+      // ...
+    }),
+  ],
+});
+
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
@@ -63,7 +82,7 @@ const tokenCache = {
   },
 };
 
-export default function RootLayout() {
+function RootLayout() {
   const [loaded, error] = useFonts({
     "Soliden-Black": require("../assets/fonts/soliden/Soliden-Black.ttf"),
     "Soliden-BlackOblique": require("../assets/fonts/soliden/Soliden-BlackOblique.ttf"),
@@ -79,7 +98,7 @@ export default function RootLayout() {
 
   const [location, setLocation] = useState<UserLocationObject | null>(null);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
-
+  const navigationRef = useNavigationContainerRef();
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -102,6 +121,11 @@ export default function RootLayout() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (navigationRef) {
+      routingInstrumentation.registerNavigationContainer(navigationRef);
+    }
+  }, [navigationRef])
 
   useEffect(() => {
     if (error) throw error;
@@ -353,3 +377,5 @@ function RootLayoutNav() {
     </UserContext.Provider>
   );
 }
+
+export default Sentry.wrap(RootLayout);
