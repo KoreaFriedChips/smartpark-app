@@ -85,7 +85,7 @@ export default function SignInScreen() {
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date());
 
-  
+
 
   type RSP = (...args: any[]) => Promise<keyof RootStackParamList>;
   const setGlobalPhone: RSP = async (p: string) => {
@@ -215,12 +215,12 @@ export default function SignInScreen() {
     }
   };
 
-  const MainScreen = (props : { navigation: StackNavigationProp<RootStackParamList, "Main">}) => {
-    
+  const MainScreen = (props: { navigation: StackNavigationProp<RootStackParamList, "Main"> }) => {
+
     const handleSignIn = async (provider: string) => {
       try {
         const startFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
-  
+
         const { createdSessionId, signUp, setActive } = await startFlow();
         if (createdSessionId) {
           await completeSignUp(createdSessionId, setActive!);
@@ -245,7 +245,7 @@ export default function SignInScreen() {
     const startSignUp = () => {
       props.navigation.push("PhoneInput", {});
     };
-    
+
     return (<View style={styles.container}>
       <Image source={logoImg} style={[styles.logoImg]} />
       <View style={styles.textContainer}>
@@ -253,134 +253,137 @@ export default function SignInScreen() {
           Sign up or log in to continue.
         </Text>
       </View>
-      <TouchableOpacity
-        onPress={() => startSignUp()}
-        style={[
-          styles.button,
-          {
-            backgroundColor: Colors["accent"],
-            borderColor: Colors["accentAlt"],
-          },
-        ]}
-      >
-        <Phone size={16} color={Colors["light"].primary} strokeWidth={3} style={[styles.buttonIcon, { marginRight: 4 }]} />
-        <Text
-          weight="bold"
-          style={{
-            ...styles.buttonText,
-            color: Colors["light"].primary,
-          }}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          onPress={() => startSignUp()}
+          style={[
+            styles.button,
+            {
+              backgroundColor: Colors["accent"],
+              borderColor: Colors["accentAlt"],
+            },
+          ]}
         >
-          Continue with Number
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => handleSignIn("google")}
-        style={[
-          styles.button,
-          {
-            backgroundColor: "transparent",
-            borderColor: themeColors.outline,
-          },
-        ]}
-      >
-        <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
-        <Text
-          weight="bold"
-          style={{
-            ...styles.buttonText,
-            color: themeColors.secondary,
-          }}
+          <Phone size={16} color={Colors["light"].primary} strokeWidth={3} style={[styles.buttonIcon, { marginRight: 4 }]} />
+          <Text
+            weight="bold"
+            style={{
+              ...styles.buttonText,
+              color: Colors["light"].primary,
+            }}
+          >
+            Continue with Number
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSignIn("google")}
+          style={[
+            styles.button,
+            {
+              backgroundColor: "transparent",
+              borderColor: themeColors.outline,
+            },
+          ]}
         >
-          Continue with Google
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => handleSignIn("facebook")}
-        style={[
-          styles.button,
-          {
-            backgroundColor: "transparent",
-            borderColor: themeColors.outline,
-          },
-        ]}
-      >
-        <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
-        <Text
-          weight="bold"
-          style={{
-            ...styles.buttonText,
-            color: themeColors.secondary,
-          }}
+          <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
+          <Text
+            weight="bold"
+            style={{
+              ...styles.buttonText,
+              color: themeColors.secondary,
+            }}
+          >
+            Continue with Google
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSignIn("facebook")}
+          style={[
+            styles.button,
+            {
+              backgroundColor: "transparent",
+              borderColor: themeColors.outline,
+            },
+          ]}
         >
-          Continue with Facebook
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => handleSignIn("apple")}
-        style={[
-          styles.button,
-          {
-            backgroundColor: "transparent",
-            borderColor: themeColors.outline,
-          },
-        ]}
-      >
-        <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
-        <Text
-          weight="bold"
-          style={{
-            ...styles.buttonText,
-            color: themeColors.secondary,
-          }}
+          <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
+          <Text
+            weight="bold"
+            style={{
+              ...styles.buttonText,
+              color: themeColors.secondary,
+            }}
+          >
+            Continue with Facebook
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSignIn("apple")}
+          style={[
+            styles.button,
+            {
+              backgroundColor: "transparent",
+              borderColor: themeColors.outline,
+            },
+          ]}
         >
-          Continue with Apple
-        </Text>
-      </TouchableOpacity>
-      <Text style={{ ...styles.termsText, color: themeColors.third }}>By signing up or logging in you agree to SmartPark's Terms and Conditions and Privacy Policy.</Text>
+          <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
+          <Text
+            weight="bold"
+            style={{
+              ...styles.buttonText,
+              color: themeColors.secondary,
+            }}
+          >
+            Continue with Apple
+          </Text>
+        </TouchableOpacity>
+        <Text style={{ ...styles.termsText, color: themeColors.third }}>By signing up or logging in you agree to SmartPark's Terms of Service and Privacy Policy.</Text>
+      </View>
+
     </View>)
   }
 
   return (
-      <NavigationContainer independent={true}>
-          <Stack.Navigator initialRouteName="Main" >
-          <Stack.Group screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={MainScreen}/>
-          </Stack.Group>
-          <Stack.Group screenOptions={{
-              headerShown: true,
-              presentation: "modal",
-              headerStyle: {
-                backgroundColor: themeColors.background,
-              },
-              // headerLeft: () => <HeaderLeft />,
-              headerTitle: () => <HeaderTitle name="Next steps" />,
-              headerRight: () => (
-                <Pressable
-                  onPress={() => setModalVisible(false)}
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.5 : 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  })}
-                >
-                  <X size={22} color={themeColors.primary} />
-                </Pressable>
-              ),
-              headerBackTitle: "Back",
-              headerBackTitleStyle: {
-                fontFamily: "Soliden-SemiBold",
-              },
-            }}>
-            <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
-            <Stack.Screen name="CodeVerification">{(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}</Stack.Screen>
-            <Stack.Screen name="EmailInput">{(props) => <EmailInput {...props} setGlobal={setGlobalEmail} />}</Stack.Screen>
-            <Stack.Screen name="EmailVerification">{(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}</Stack.Screen>
-            <Stack.Screen name="NameInput">{(props) => <NameInput {...props} setGlobal={setGlobalName} />}</Stack.Screen>
-            <Stack.Screen name="BirthdayInput">{(props) => <BirthdayInput {...props} setGlobal={setGlobalBirthday} />}</Stack.Screen>
-          </Stack.Group>
-          </Stack.Navigator>
-      </NavigationContainer>
+    <NavigationContainer independent={true}>
+      <Stack.Navigator initialRouteName="Main" >
+        <Stack.Group screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={MainScreen} />
+        </Stack.Group>
+        <Stack.Group screenOptions={{
+          headerShown: true,
+          presentation: "modal",
+          headerStyle: {
+            backgroundColor: themeColors.background,
+          },
+          // headerLeft: () => <HeaderLeft />,
+          headerTitle: () => <HeaderTitle name="Next steps" />,
+          headerRight: () => (
+            <Pressable
+              onPress={() => setModalVisible(false)}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+                flexDirection: "row",
+                alignItems: "center",
+              })}
+            >
+              <X size={22} color={themeColors.primary} />
+            </Pressable>
+          ),
+          headerBackTitle: "Back",
+          headerBackTitleStyle: {
+            fontFamily: "Soliden-SemiBold",
+          },
+        }}>
+          <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
+          <Stack.Screen name="CodeVerification">{(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}</Stack.Screen>
+          <Stack.Screen name="EmailInput">{(props) => <EmailInput {...props} setGlobal={setGlobalEmail} />}</Stack.Screen>
+          <Stack.Screen name="EmailVerification">{(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}</Stack.Screen>
+          <Stack.Screen name="NameInput">{(props) => <NameInput {...props} setGlobal={setGlobalName} />}</Stack.Screen>
+          <Stack.Screen name="BirthdayInput">{(props) => <BirthdayInput {...props} setGlobal={setGlobalBirthday} />}</Stack.Screen>
+        </Stack.Group>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -388,8 +391,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
     padding: 16,
+    paddingBottom: 64,
   },
   logoImg: {
     aspectRatio: 875 / 130,
@@ -397,13 +401,16 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     width: "100%",
-    marginTop: 80,
+    marginTop: 100,
   },
   title: {
     textAlign: "left",
-    marginBottom: 20,
+    marginBottom: 22,
     fontSize: 28,
     // letterSpacing: -1.5,
+  },
+  buttonContainer: {
+    width: "100%",
   },
   button: {
     width: "100%",
@@ -473,7 +480,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   termsText: {
-    marginTop: 8,
+    marginTop: 4,
     fontSize: 12,
     lineHeight: 16,
     padding: 4,
