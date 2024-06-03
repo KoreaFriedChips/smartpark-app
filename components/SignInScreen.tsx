@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     width: "100%",
-    marginTop: 100,
+    marginTop: 124,
   },
   title: {
     textAlign: "left",

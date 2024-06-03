@@ -28,7 +28,7 @@ export default function RatingsText({ reviews, rating, full = false, style }: Ra
           ...style,
         }}
       >
-        {`${reviews && reviews > 0 ? rating : "Unrated"} `}
+        {`${reviews && reviews > 0 ? rating?.toFixed(2) : "Unrated"} `}
       </Text>
       <Text
         italic

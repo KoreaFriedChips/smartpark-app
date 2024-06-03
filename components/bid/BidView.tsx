@@ -152,7 +152,7 @@ export default function BidView({
     navigation.setOptions({
       headerTitle: () => (
         <HeaderTitle
-          name={`${listing.city} (${listing.rating})`}
+          name={`${listing.city} (${listing.rating.toFixed(2)})`}
           text={`${bidCount} bids / ${listing.spotsLeft} spot${
             listing.spotsLeft > 1 ? "s" : ""
           } left`}
