@@ -79,19 +79,20 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Animated.View
         style={{
-          zIndex: 100,
+          // zIndex: 100,
           paddingBottom: 10,
           transform: [{translateY}]
         }}
       >
-        <Animated.View style={{opacity}}>
+        <Animated.View style={{opacity, zIndex: 100 }}>
           <TagsContainer
             search={true}
             fetchListings={handleSubmit}
           />
         </Animated.View>
         <Animated.FlatList
-          style={{marginTop, paddingTop}}
+          style={{marginTop, paddingTop }}
+          ListFooterComponent={<View style={{ height: 164 }}></View>}
           bounces={true}
           onScroll={(e) => {
             if (e.nativeEvent.contentOffset.y > 0)

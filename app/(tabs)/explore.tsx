@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Platform, Dimensions, useColorScheme, TouchableOpacity, Pressable } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";
@@ -7,7 +7,7 @@ import Colors from "@/constants/Colors";
 import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link, router } from "expo-router";
-import { MapPin, Navigation } from "lucide-react-native";
+import { MapPin, Navigation, ParkingCircle } from "lucide-react-native";
 import { useListings, useLocationContext, UserLocationObject, useSearchContext } from "@/hooks";
 
 
@@ -15,9 +15,9 @@ import { useListings, useLocationContext, UserLocationObject, useSearchContext }
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
-  const {listings, fetchListings, fetchNextPage, isRefreshing} = useListings();
+  const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings();
 
-  const {location} = useLocationContext();
+  const { location } = useLocationContext();
   const [region, setRegion] = useState<Region>();
   const setRegionLatLng = (newPos: LatLng) => {
     setRegion({
@@ -46,6 +46,16 @@ export default function ExploreScreen() {
     );
   }
 
+  useEffect(() => {
+    if (mapRef.current && region) {
+      const camera = {
+        pitch: 35,
+        altitude: 500,
+      };
+      mapRef.current.animateCamera(camera, { duration: 350 });
+    }
+  }, [mapRef, region]);
+
   const mapStyle = [
     {
       elementType: "labels",
@@ -57,36 +67,40 @@ export default function ExploreScreen() {
     },
   ];
 
-  const animateToRegion = (pos: LatLng) => {
-    mapRef.current?.animateToRegion({
-      latitude: pos.latitude,
-      longitude: pos.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
+  const animateToRegion = (pos: LatLng, pitch: number = 35, altitude: number = 500) => {
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      },
+      pitch: pitch,
+      altitude: altitude,
+      // latitudeDelta: lat,
+      // longitudeDelta: long,
     });
   }
 
   return (
     <View style={styles.container}>
       <TagsContainer search={true} fetchListings={fetchListings} />
-      <View style={{position: "relative"}}>
+      <View style={{ position: "relative" }}>
         <MapView ref={mapRef} style={styles.map} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
-          {listings && <ListingMarkers listings={listings} onMarkerPress={animateToRegion}/>}
-          {location && <LocationMarker location={location} animateToRegion={animateToRegion}/>}
+          {listings && <ListingMarkers listings={listings} onMarkerPress={animateToRegion} />}
+          {location && <LocationMarker location={location} animateToRegion={animateToRegion} />}
         </MapView>
-        {location && <LocationButton location={location} animateToRegion={animateToRegion}/>}
+        {location && <LocationButton location={location} animateToRegion={animateToRegion} />}
       </View>
       {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
     </View>
   );
 }
 
-const LocationButton = ({location, animateToRegion}: {location: UserLocationObject, animateToRegion: (pos: LatLng)=>void}) => {
+const LocationButton = ({ location, animateToRegion }: { location: UserLocationObject, animateToRegion: (pos: LatLng, pitch: number, altitude: number) => void }) => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   return (
-    <TouchableOpacity 
-      onPress={() => {animateToRegion(location.coords)}} 
+    <TouchableOpacity
+      onPress={() => { animateToRegion(location.coords, 0, 1500) }}
       style={{
         backgroundColor: themeColors.header,
         borderColor: themeColors.outline,
@@ -95,9 +109,10 @@ const LocationButton = ({location, animateToRegion}: {location: UserLocationObje
     >
       <Navigation size={22} color={themeColors.primary} strokeWidth={2} />
     </TouchableOpacity>
-)}
+  )
+}
 
-const LocationMarker = ({location, animateToRegion}: {location: UserLocationObject, animateToRegion: (pos: LatLng)=>void}) => {
+const LocationMarker = ({ location, animateToRegion }: { location: UserLocationObject, animateToRegion: (pos: LatLng, pitch: number) => void }) => {
   return (
     <Marker
       coordinate={{
@@ -110,19 +125,17 @@ const LocationMarker = ({location, animateToRegion}: {location: UserLocationObje
         name={""}
         Icon={MapPin}
         isSelected={true}
-        onPress={() => {animateToRegion(location.coords)}}
+        onPress={() => { animateToRegion(location.coords, 35) }}
         weight="bold"
         shadow={true}
       />
       <Callout tooltip>
-        <View>
-          <Text>Callout text</Text>
-        </View>
       </Callout>
     </Marker>
-)}
+  )
+}
 
-const ListingMarkers = ({listings, onMarkerPress}: {listings: Listing[], onMarkerPress: (pos: LatLng)=>void}) => {
+const ListingMarkers = ({ listings, onMarkerPress }: { listings: Listing[], onMarkerPress: (pos: LatLng) => void }) => {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   return listings.map((listing, index) => {
@@ -134,18 +147,18 @@ const ListingMarkers = ({listings, onMarkerPress}: {listings: Listing[], onMarke
           latitude: listing.latitude,
           longitude: listing.longitude,
         }}
-        title={`$${listing.startingPrice}`}
-        onPress={() => router.push({pathname: "/listing/[id]/", params: {id: listing.id, distance: listing.distance}})}
+        // title={`$${listing.startingPrice}`}
+        onPress={() => router.push({ pathname: "/listing/[id]/", params: { id: listing.id, distance: listing.distance } })}
       >
-        {TagIcon && <Tag
-            name={`$${listing.startingPrice}`}
-            Icon={TagIcon}
-            isSelected={false}
-            onPress={() => onMarkerPress({latitude: listing.latitude, longitude: listing.longitude})}
-            weight="semibold"
-            shadow={true}
-            style={{ backgroundColor: themeColors.header }}
-          />}
+        <Tag
+          name={`$${listing.startingPrice}`}
+          Icon={TagIcon || ParkingCircle}
+          isSelected={false}
+          onPress={() => onMarkerPress({ latitude: listing.latitude, longitude: listing.longitude })}
+          weight="semibold"
+          shadow={true}
+          style={{ backgroundColor: themeColors.header }}
+        />
       </Marker>
     );
   })

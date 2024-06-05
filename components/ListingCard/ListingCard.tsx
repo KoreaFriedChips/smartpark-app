@@ -59,7 +59,7 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
           source={{ uri: imageUriFromKey(item.thumbnail) }}
           // placeholder={blurhash}
           style={styles.thumbnail}
-          cachePolicy={"none"}
+          // cachePolicy={"none"}
         />
         <HeartButton id={item.id} />
         <DistanceText distance={item.distance} />

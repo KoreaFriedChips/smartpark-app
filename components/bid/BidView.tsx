@@ -127,7 +127,7 @@ export default function BidView({
   }, [listing]);
 
   useEffect(() => {
-    if (listing) listingIdRef.current = listing.id;
+    if (listing) listingIdRef.current = listing.id
   }, [listing]);
 
   useEffect(() => {
@@ -222,7 +222,7 @@ export default function BidView({
             <>
               <View style={{ ...styles.mapContainer }}>
                 <DistanceText
-                  distance={12}
+                  distance={listing.distance}
                   style={{ top: 34, left: "auto", right: 12 }}
                 />
                 <ListingMiniMap
