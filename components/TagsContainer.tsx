@@ -17,7 +17,7 @@ interface TagItem {
 }
 
 interface TagsContainerProps {
-	search: boolean,
+  search: boolean,
   fetchListings: (props: ListingSearchOptions) => any
 }
 
@@ -45,7 +45,6 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const themeColors = Colors[colorScheme || "light"];
 
   const {
-    location, setLocation,
     selectedCategories, setSelectedCategories,
     sortOption, setSortOption,
     searchQuery, setSearchQuery,
@@ -60,7 +59,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   };
 
   const submitSearch = () => {
-    fetchListings({amenities: selectedCategories, searchQuery, sortOption: sortOption.value});
+    fetchListings({ amenities: selectedCategories, searchQuery, sortOption: sortOption.value });
   }
 
   useEffect(() => {
@@ -94,7 +93,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
               onValueChange={(itemValue) => setSortOption(itemValue)}
             >
               {Object.values(SortOptions).flatMap((option, index) => (
-                <Picker.Item label={option.label} value={option} key={index}/>
+                <Picker.Item label={option.label} value={option} key={index} />
               ))}
             </Picker>
             <TouchableOpacity
@@ -141,8 +140,9 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
             contentContainerStyle={[
               styles.tagContainer,
               {
-                backgroundColor: "transparent",
+                backgroundColor: themeColors.header,
                 borderColor: themeColors.outline,
+                paddingTop: 2,
               },
               !search && styles.tagsPadded,
             ]}
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   tagContainer: {
     flexDirection: "row",
-    paddingBottom: 10, //6
+    paddingBottom: 12, //6
     paddingHorizontal: 12,
   },
   tagsPadded: {

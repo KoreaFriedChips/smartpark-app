@@ -49,6 +49,7 @@ export default function Tag({ name, Icon, isSelected, onPress = () => null, styl
           {name}
         </Text>}
       </View>
+      {/* <View style={{ ...styles.triangle }} /> */}
     </TouchableOpacity>
   );
 }
@@ -60,6 +61,23 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 0.5,
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  triangle: {
+    width: 0,
+    height: 0,
+    borderRadius: 4,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderTopWidth: 14,
+    backgroundColor: "transparent",
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: Colors.accent,
+    position: "absolute",
+    top: 24,
   },
   shadow: {
     shadowColor: "#000",

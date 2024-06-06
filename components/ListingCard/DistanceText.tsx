@@ -9,6 +9,15 @@ interface DistanceProps {
   style?: ViewStyle | ViewStyle[];
 }
 
+const formatDistance = (distance: number | undefined) => {
+  if (distance === undefined) return "N/A";
+  const feet = distance * 5280;
+  if (feet < 1000) {
+    return `${Math.round(feet / 10) * 10} feet`;
+  }
+  return `${distance.toFixed(2)} miles`;
+};
+
 export default function DistanceText({ distance, style }: DistanceProps) {
   return (
     <View
@@ -34,7 +43,7 @@ export default function DistanceText({ distance, style }: DistanceProps) {
           color: Colors["light"].primary,
         }}
       >
-        {`${distance} miles`}
+        {formatDistance(distance)}
       </Text>
     </View>
   );

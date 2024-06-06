@@ -26,7 +26,7 @@ export default function SearchBar({searchQuery, setSearchQuery, onSubmitEditing}
   }
 
   return (
-    <View style={[styles.container,{ backgroundColor: themeColors.background, borderColor: themeColors.outline } ]}>
+    <View style={[styles.container,{ backgroundColor: themeColors.header, borderColor: themeColors.outline } ]}>
     <View style={[styles.searchContainer, { backgroundColor: themeColors.background, borderColor: themeColors.outline }]}>
       <Search size={18} color={themeColors.primary} strokeWidth={3} />
       <TextInput

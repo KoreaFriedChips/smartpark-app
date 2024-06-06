@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Dimensions, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import Colors from "@/constants/Colors";
@@ -16,6 +16,7 @@ interface ListingLocationProps {
 
 export function ListingMiniMap({ coordinates, height = 300 }: ListingLocationProps) {
   const themeColors = Colors[useColorScheme() || "light"];
+  const mapRef = useRef<MapView>(null);
 
   const region = {
     latitude: coordinates.latitude,
@@ -24,9 +25,23 @@ export function ListingMiniMap({ coordinates, height = 300 }: ListingLocationPro
     longitudeDelta: 0.00421,
   };
 
+  useEffect(() => {
+    if (mapRef.current) {
+      const camera = {
+        center: {
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+        },
+        pitch: 35,
+        altitude: 150,
+      };
+      mapRef.current.animateCamera(camera, { duration: 350 });
+    }
+  }, [mapRef]);
+
   return (
     <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-      <MapView style={[styles.map, { borderColor: themeColors.outline, height: height }]} region={region} customMapStyle={mapStyle} showsCompass={false}>
+      <MapView ref={mapRef} style={[styles.map, { borderColor: themeColors.outline, height: height }]} region={region} customMapStyle={mapStyle} showsCompass={false}>
         <Marker
           coordinate={{
             latitude: coordinates.latitude,

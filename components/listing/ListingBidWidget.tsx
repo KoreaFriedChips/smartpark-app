@@ -59,7 +59,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               </Text>
             </View>
           ) : (
-            <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Not available in the near future</Text>
+            <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Unavailable</Text>
           )}
         </View>
       </View>

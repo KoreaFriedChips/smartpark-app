@@ -2,7 +2,7 @@ require("dotenv").config();
 
 export default {
   "expo": {
-    "name": "SmartPark: Online Parking Marketplace",
+    "name": "SmartPark: Parking Marketplace",
     "slug": "smartpark",
     "version": "1.0.0",
     "owner": "smartpark",
@@ -23,7 +23,7 @@ export default {
     ],
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_PLIST_FILE,
       "bundleIdentifier": "com.smartpark.trysmartpark"
     },
     android: {

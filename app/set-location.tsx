@@ -8,6 +8,7 @@ import { Mail, Map, MapPin, Scroll, Search } from "lucide-react-native";
 import { Link, router } from "expo-router";
 import { useBackend, useLocationContext } from "@/hooks";
 import { useAuth } from "@clerk/clerk-expo";
+import Tag from "@/components/Tag";
 
 export default function SetLocation() {
   const colorScheme = useColorScheme();
@@ -22,8 +23,9 @@ export default function SetLocation() {
   });
   const [pinCoords, setPinCoords] = useState<LatLng>();
   const { readMapsCoordinatesWithInput, readCityStateFromCoordinates } = useBackend();
-  
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     if (!location) return;
@@ -41,7 +43,7 @@ export default function SetLocation() {
 
   const handleSaveLocation = async () => {
     if (!pinCoords) return;
-    const {city, state} = await readCityStateFromCoordinates(pinCoords);
+    const { city, state } = await readCityStateFromCoordinates(pinCoords);
     setLocation({ coords: pinCoords, city, state });
     router.back();
   }
@@ -82,6 +84,16 @@ export default function SetLocation() {
     );
   }
 
+  useEffect(() => {
+    if (mapRef.current && region) {
+      const camera = {
+        pitch: 35,
+        altitude: 500,
+      };
+      mapRef.current.animateCamera(camera, { duration: 350 });
+    }
+  }, [mapRef, region]);
+
   const mapStyle = [
     {
       elementType: "labels",
@@ -100,16 +112,28 @@ export default function SetLocation() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 86 : 38}
     >
       <View style={styles.mapContainer}>
-        <MapView 
-          style={{ ...styles.map, borderColor: themeColors.outline }} 
-          region={region} 
-          customMapStyle={mapStyle} 
+        <MapView
+          ref={mapRef}
+          style={{ ...styles.map, borderColor: themeColors.outline }}
+          region={region}
+          customMapStyle={mapStyle}
           showsCompass={false}
           onPress={event => handlePinChange(event.nativeEvent.coordinate)}
         >
-            {pinCoords && (
-              <Marker coordinate={pinCoords} />
-            )}
+          {pinCoords && (
+            <Marker coordinate={pinCoords}>
+              <Tag
+                name={""}
+                Icon={MapPin}
+                isSelected={true}
+                weight="bold"
+                onPress={() => null}
+                shadow={true}
+              />
+              <Callout tooltip>
+              </Callout>
+            </Marker>
+          )}
         </MapView>
         <TouchableOpacity
           style={[
