@@ -41,8 +41,8 @@ export function SellerQuickInfo({seller }: {seller: User}) {
           <RatingsText rating={seller.rating} reviews={seller.reviews} full={true} />
         </View>
       </View>
-      <Text weight="semibold" style={{ marginTop: 13, textAlign: "left" }}>{`Verified since ${new Date(seller.activeSince).toLocaleDateString()}`}</Text>
-      <Text style={{ marginTop: 4 }}>{seller.description}</Text>
+      <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`Verified since ${new Date(seller.activeSince).toLocaleDateString()}`}</Text>
+      <Text style={{ marginTop: 8, lineHeight: 18 }}>{seller.description}</Text>
       <Link
         href={{
           pathname: `/messages/${seller.id}/`,
@@ -95,11 +95,12 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
+    marginRight: 16,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3.84,
+    // elevation: 3,
   },
   button: {
     padding: 10,

@@ -115,7 +115,7 @@ export default function BidView({
   const navigation = useNavigation();
   const { mode } = useLocalSearchParams<{ mode: string }>();
   const [selection, setSelection] = useState(
-    mode === "buy" ? "Buy now" : "Place bid"
+    mode === "buy" ? "Park now" : "Place bid"
   );
   const highestBid = useHighestBid(listing?.id, desiredSlot);
   const bidCount = useBidCount(listing?.id, desiredSlot);
@@ -236,7 +236,7 @@ export default function BidView({
               <TabRow
                 selection={selection}
                 optOne="Place bid"
-                optTwo="Buy now"
+                optTwo="Park now"
                 setSelection={setSelect}
               />
               <View style={styles.textContainer}>
@@ -296,7 +296,7 @@ export default function BidView({
                         highestBid
                           ? `Highest bid: $${highestBid.amount} /`
                           : "No bids yet!"
-                      } Buy now: $${listing.buyPrice}`
+                      } Park now: $${listing.buyPrice}`
                     : "You're about to instantly reserve this spot."}
                 </Text>
                 {desiredSlot && (

@@ -176,6 +176,8 @@ const styles = StyleSheet.create({
     // borderTopWidth: 0.5,
     borderBottomWidth: 0.5,
     display: "flex",
+    paddingTop: 4,
+    paddingBottom: 2,
     flexDirection: "column",
     shadowColor: "#000",
     shadowOffset: {

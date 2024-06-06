@@ -80,11 +80,11 @@ const styles = StyleSheet.create({
   amenities: {
     display: "flex",
     alignItems: "flex-start",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     width: 110,
-    gap: 24,
+    height: 96,
     borderRadius: 8,
     borderWidth: 0.5,
     marginRight: 10,
@@ -101,6 +101,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     // paddingBottom: 10, //6
     paddingTop: 12,
-    marginTop: 8,
+    marginTop: 12,
   },
 });

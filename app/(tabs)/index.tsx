@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import { ListingSearchOptions, useBackend, useListings, useLocationContext } from "@/hooks";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
+import { truncateTitle } from "@/components/utils/ListingUtils";
 
 export default function HomeScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -18,14 +19,15 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!location) return;
+
     if (!location.city || !location.state) {
       const fetchCityState = async () => {
         const cityState = await readCityStateFromCoordinates(location.coords);
-        setTitle(`${cityState.city}, ${cityState.state}`);
+        setTitle(truncateTitle(cityState.city, cityState.state));
       }
       fetchCityState();
     } else {
-      setTitle(`${location.city}, ${location.state}`);
+      setTitle(truncateTitle(location.city, location.state));
     }
   }, [location]);
 
