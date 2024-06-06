@@ -14,6 +14,7 @@ export const useTransactions = () => {
     }
     try {
       fetchTransactions();
+      console.log("fetch transactions succeeded");
     } catch (err) {
       console.log("fetch transactions failed");
       console.log(err);

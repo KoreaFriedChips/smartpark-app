@@ -143,8 +143,7 @@ export default function BidView({
 
   useEffect(() => {
     if (!listing) return;
-    if (mode === "buy")
-      setBidAmount(String(listing.buyPrice));
+    if (mode === "buy") setBidAmount(String(listing.buyPrice));
     if (listing.availability.length > 0)
       setDesiredSlot(listing.availability[0]);
   }, [listing]);
@@ -225,6 +224,25 @@ export default function BidView({
         spotPrice.price = 0;
         break;
     }
+
+    // Placeholder sales tax rate, replace with actual rate from Stripe Tax API
+    const salesTaxRate = 0.05;
+    const salesTax = spotPrice.price * salesTaxRate;
+
+    // Calculate the processing fee
+    const processingFee = (spotPrice.price + salesTax) * 0.029 + 0.3;
+
+    // Calculate the total price including processing fee and sales tax
+    const totalPrice = spotPrice.price + processingFee + salesTax;
+
+    // Update calcText to include the additional fees
+    spotPrice.calcText += `
+Sales tax: $${salesTax.toFixed(2)}
+Processing fee: $${processingFee.toFixed(2)}`;
+
+    // Update the total price
+    spotPrice.price = Math.round(totalPrice * 100) / 100;
+
     return spotPrice;
   };
 

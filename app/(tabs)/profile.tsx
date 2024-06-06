@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, StyleSheet, View, Text, ActivityIndicator, Linking } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
 import { createConnectedAccount } from "@/serverconn/connect-stripe";
+import { router } from "expo-router"; 
 
 export default function TabTwoScreen() {
   const { getToken } = useAuth();
@@ -26,6 +27,10 @@ export default function TabTwoScreen() {
     }
   };
 
+  const navigateToReport = () => {
+    router.push("/report-screen"); // Navigate to the report screen
+  };
+
   return (
     <View style={styles.container}>
       {!connectedAccountId && <Text style={styles.headerText}>Get ready for take off</Text>}
@@ -40,6 +45,7 @@ export default function TabTwoScreen() {
         </View>
       )}
       {error && <Text style={styles.error}>Something went wrong!</Text>}
+      <Button title="View Earnings Report" onPress={navigateToReport} />
     </View>
   );
 }
