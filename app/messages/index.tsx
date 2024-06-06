@@ -10,7 +10,7 @@ import { setLatestMessageRead } from "@/lib/storage";
 import Fuse from "fuse.js";
 import { LatestMessage } from "@/types";
 
-const notifications = [
+const messages = [
   {
     id: "10",
     image: "https://source.unsplash.com/random?person",
@@ -120,7 +120,7 @@ export default function NotificationsScreen() {
         )}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
-        ListEmptyComponent={<Text style={styles.noListings}>No conversations found.</Text>}
+        ListEmptyComponent={<Text style={styles.noListings}>No messages yet!</Text>}
         // onEndReached={loadMoreListings}
         // onEndReachedThreshold={0.5}
         // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No conversations found.</Text> : null}

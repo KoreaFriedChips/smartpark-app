@@ -144,6 +144,7 @@ export default function NotificationsScreen() {
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <FlatList
+        // data={defaultNotifications}
         data={notifications}
         renderItem={({ item }) => (
           <ListItem
