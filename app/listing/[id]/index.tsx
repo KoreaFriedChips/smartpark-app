@@ -40,10 +40,6 @@ export default function Listing() {
     fetchSeller();
   }, [listing]);
 
-  const handleReport = () => console.log("Report");
-  const handleShare = () => console.log("Share");
-  const handleMessageSeller = () => console.log("Message Seller");
-
   return (
     <View style={styles.container}>
       {listing && (

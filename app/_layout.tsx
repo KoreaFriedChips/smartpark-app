@@ -225,6 +225,17 @@ function RootLayoutNav() {
 
   const headerRight = () => {
     const listing = useListing();
+    const { getSeller } = useBackend();
+    
+    const [seller, setSeller] = useState<User>();
+    useEffect(() => {
+      if (!listing) return;
+      const fetchSeller = async () => {
+        setSeller(await getSeller(listing));
+      }
+      fetchSeller();
+    }, [listing]);
+
     return (
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
         <TouchableOpacity onPress={() => handleShare(listing)}>
@@ -236,7 +247,9 @@ function RootLayoutNav() {
             }}
           />
         </TouchableOpacity>
-        <Link href="/messages/" asChild>
+        <Link href={{
+          pathname: `/messages/${seller?.id}/`,
+        }} asChild>
           <Pressable>
             {({ pressed }) => (
               <MessageCircleMore
