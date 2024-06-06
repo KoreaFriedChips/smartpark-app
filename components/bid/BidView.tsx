@@ -84,17 +84,6 @@ export default function BidView({
     }
   };
 
-  //  const fetchPaymentSheetParams = async () => {
-  //    const paymentIntent = await createPaymentIntent(
-  //      getToken,
-  //      Number(bidAmount) * 100,
-  //      "usd",
-  //      listing?.userId ?? ''
-  //    );
-  //    console.log("payment intent: ", paymentIntent);
-  //    return paymentIntent;
-  //  };
-
   const fetchPaymentSheetParams = async () => {
     try {
       console.log("bidAmount: ", bidAmount);
@@ -239,12 +228,16 @@ export default function BidView({
     return spotPrice;
   };
 
-  const handleReviewButtonPress = () => {
-    if (!listing) return;
-    if (selection === "Place bid") {
-      handleSubmitBid();
+  const handleTextChange = (text: string) => {
+    // Validate input to allow only numbers and up to 2 decimal places
+    const formattedText = text.replace(/[^0-9.]/g, ""); // Remove non-numeric characters
+    const decimalIndex = formattedText.indexOf(".");
+    if (decimalIndex >= 0) {
+      const beforeDecimal = formattedText.slice(0, decimalIndex);
+      const afterDecimal = formattedText.slice(decimalIndex, decimalIndex + 3); // Allow 2 decimal places
+      setBidAmount(beforeDecimal + afterDecimal);
     } else {
-      handleSubmitBuy();
+      setBidAmount(formattedText);
     }
   };
 
@@ -307,7 +300,7 @@ export default function BidView({
                     weight="bold"
                     style={{ ...styles.searchBar }}
                     placeholder={`Enter bid..`}
-                    onChangeText={(text) => setBidAmount(text)}
+                    onChangeText={handleTextChange}
                     value={
                       selection === "Place bid"
                         ? String(bidAmount)
