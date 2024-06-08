@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   termsText: {
     marginTop: 4,
     fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 18,
     padding: 4,
     textAlign: "center",
   },

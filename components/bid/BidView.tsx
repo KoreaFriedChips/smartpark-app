@@ -9,6 +9,7 @@ import {
   useColorScheme,
   Alert,
   Button,
+  Modal,
 } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -30,16 +31,13 @@ import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
 import moment from "moment";
-import {
-  differenceInCalendarDays,
-  differenceInHours,
-  differenceInMonths,
-} from "date-fns";
+import { differenceInCalendarDays, differenceInHours, differenceInMonths, intervalToDuration, set } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
 import { useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export interface BidViewProps {
   listingId: MutableRefObject<string | undefined>;
@@ -63,6 +61,58 @@ export default function BidView({
   const { initPaymentSheet, presentPaymentSheet, loading } = usePaymentSheet();
   const [bidAmount, setBidAmount] = useState("");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [licensePlate, setLicensePlate] = useState("");
+  const [error, setPlateError] = useState("");
+
+  const validatePlate = (plate: string) => {
+    const licensePlateRegex = /^[A-Z0-9-]{1,8}$/;
+    return licensePlateRegex.test(plate);
+  };
+
+  const handlePlateSubmit = () => {
+    if (validatePlate(licensePlate)) {
+      console.log("License Plate:", licensePlate);
+      setModalVisible(false);
+    } else {
+      setLicensePlate("");
+      setPlateError("Invalid plate format");
+    }
+  };
+
+  const [startVisible, setStartVisible] = useState(false);
+  const [endVisible, setEndVisible] = useState(false);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+
+  const showStart = () => {
+    setStartVisible(true);
+  };
+  
+  const hideStart = () => {
+    setStartVisible(false);
+  };
+  
+  const handleStartDate = (date: Date) => {
+    setStartDate(date);
+    setDesiredSlot((prev) => prev && { ...prev, start: date });
+    hideStart();
+  };
+  
+  const showEnd = () => {
+    setEndVisible(true);
+  };
+  
+  const hideEnd = () => {
+    setEndVisible(false);
+  };
+  
+  const handleEndDate = (date: Date) => {
+    setEndDate(date);
+    setDesiredSlot((prev) => prev && { ...prev, end: date });
+    hideEnd();
+  };
 
   const stripePublishableKey = Constants.expoConfig?.extra?.stripePublishableKey;
   console.log("Stripe Publishable Key:", stripePublishableKey);
@@ -115,7 +165,7 @@ export default function BidView({
   const navigation = useNavigation();
   const { mode } = useLocalSearchParams<{ mode: string }>();
   const [selection, setSelection] = useState(
-    mode === "buy" ? "Buy now" : "Place bid"
+    mode === "buy" ? "Park now" : "Place bid"
   );
   const highestBid = useHighestBid(listing?.id, desiredSlot);
   const bidCount = useBidCount(listing?.id, desiredSlot);
@@ -147,6 +197,23 @@ export default function BidView({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
+  useEffect(() => {
+    if (!listing) return;
+    if (listing.availability.length > 0) {
+      setDesiredSlot(listing.availability[0]);
+      setStartDate(listing.availability[0].start);
+      setEndDate(listing.availability[0].end);
+    }
+  }, [listing]);
+  
+  useEffect(() => {
+    if (desiredSlot) {
+      desiredSlotRef.current = desiredSlot;
+      setStartDate(desiredSlot.start);
+      setEndDate(desiredSlot.end);
+    }
+  }, [desiredSlot]);
+
   useLayoutEffect(() => {
     if (!listing) return;
     navigation.setOptions({
@@ -168,29 +235,29 @@ export default function BidView({
       calcText: "",
     };
     if (!listing) return spotPrice;
-    if (!desiredSlot) return spotPrice;
+    if (!startDate || !endDate) return spotPrice;
     let diff: number;
     const amount =
       selection === "Place bid" ? Number(bidAmount) : listing.buyPrice;
     switch (listing.duration) {
       case "hour":
-        diff = differenceInHours(desiredSlot.end, desiredSlot.start);
+        diff = differenceInHours(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} hours x ${amount.toFixed(
+        spotPrice.calcText = `(${diff} ${diff === 1 ? "hour" : "hours"} x ${amount.toFixed(
           2
         )} / hour) + 7.5% fee`;
         break;
       case "day":
-        diff = differenceInCalendarDays(desiredSlot.end, desiredSlot.start);
+        diff = differenceInCalendarDays(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} days x ${amount.toFixed(
+        spotPrice.calcText = `(${diff} ${diff === 1 ? "day" : "days"} x ${amount.toFixed(
           2
         )} / day) + 7.5% fee`;
         break;
       case "month":
-        diff = differenceInMonths(desiredSlot.end, desiredSlot.start);
+        diff = differenceInMonths(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} months x ${amount.toFixed(
+        spotPrice.calcText = `(${diff} ${diff === 1 ? "month" : "months"} x ${amount.toFixed(
           2
         )} / month) + 7.5% fee`;
         break;
@@ -236,7 +303,7 @@ export default function BidView({
               <TabRow
                 selection={selection}
                 optOne="Place bid"
-                optTwo="Buy now"
+                optTwo="Park now"
                 setSelection={setSelect}
               />
               <View style={styles.textContainer}>
@@ -296,30 +363,45 @@ export default function BidView({
                         highestBid
                           ? `Highest bid: $${highestBid.amount} /`
                           : "No bids yet!"
-                      } Buy now: $${listing.buyPrice}`
+                      } Park now: $${listing.buyPrice}`
                     : "You're about to instantly reserve this spot."}
                 </Text>
+                {/* edit this code to only display or accept the dates/times when the spot is available based on the intervals set by the seller and when the spot is reserved */}
                 {desiredSlot && (
-                  <View style={styles.textRow}>
-                    <Text style={styles.subheader}>Arrive after</Text>
-                    <Text
-                      weight="semibold"
-                      style={{ fontSize: 16, marginTop: 14 }}
-                    >
-                      {moment(desiredSlot.start).format("h:mm a")}
-                    </Text>
-                  </View>
-                )}
-                {desiredSlot && (
-                  <View style={styles.textRow}>
-                    <Text style={styles.subheader}>Leave Before</Text>
-                    <Text
-                      weight="semibold"
-                      style={{ fontSize: 16, marginTop: 14 }}
-                    >
-                      {moment(desiredSlot.end).format("h:mm a")}
-                    </Text>
-                  </View>
+                  <>
+                    <View style={styles.textRow}>
+                      <Text style={styles.subheader}>Arrive after</Text>
+                      <TouchableOpacity onPress={showStart}>
+                        <View style={{ ...styles.dateContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+                          <Calendar size={16} color={themeColors.secondary} />
+                          <Text weight="semibold" style={{ color: themeColors.secondary, marginTop: 1 }}>{moment(startDate).format("ddd, MMM D, h:mm A")}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.textRow}>
+                      <Text style={styles.subheader}>Leave before</Text>
+                      <TouchableOpacity onPress={showEnd}>
+                        <View style={{ ...styles.dateContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+                          <Calendar size={16} color={themeColors.secondary} />
+                          <Text weight="semibold" style={{ color: themeColors.secondary, marginTop: 1 }}>{moment(endDate).format("ddd, MMM D, h:mm A")}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                    <DateTimePickerModal
+                      isVisible={startVisible}
+                      mode="datetime"
+                      onConfirm={handleStartDate}
+                      onCancel={hideStart}
+                      minimumDate={new Date()}
+                    />
+                    <DateTimePickerModal
+                      isVisible={endVisible}
+                      mode="datetime"
+                      onConfirm={handleEndDate}
+                      onCancel={hideEnd}
+                      minimumDate={startDate}
+                    />
+                  </>
                 )}
                 <View style={styles.textRow}>
                   <Text weight="semibold" style={styles.subheader}>
@@ -341,7 +423,7 @@ export default function BidView({
                   </Text>
                 )}
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={{
                     ...styles.infoRow,
                     borderColor: themeColors.outline,
@@ -362,11 +444,13 @@ export default function BidView({
                     </Text>
                   </View>
                   <Pencil size={14} color={themeColors.primary} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
                   style={{
                     ...styles.infoRow,
                     borderColor: themeColors.outline,
+                    marginTop: 10,
                   }}
                 >
                   <View style={styles.buttonRow}>
@@ -379,7 +463,7 @@ export default function BidView({
                         color: themeColors.secondary,
                       }}
                     >
-                      Vehicle
+                      Vehicle information
                     </Text>
                   </View>
                   <Pencil size={14} color={themeColors.primary} />
@@ -425,14 +509,76 @@ export default function BidView({
                     marginRight: 4,
                   }}
                 />
-                <Button
+                {/* <Button
                   title={`Review ${
                     selection === "Place bid" ? "bid" : "reservation"
                   }`}
                   onPress={handlePayment}
                   disabled={loading || !ready}
-                />
+                /> */}
+                <Text weight="bold" style={{ color: Colors["light"].primary }}>
+                  Review{" "}
+                  {selection === "Place bid" ? "bid" : "reservation"}
+                </Text>
               </TouchableOpacity>
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                <View style={styles.modalBackground}>
+                  <View
+                    style={{
+                      ...styles.modalContainer,
+                      backgroundColor: themeColors.background,
+                      borderColor: themeColors.outline,
+                    }}
+                  >
+                    <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 8 }}>Enter license plate</Text>
+                    <Text style={{ textAlign: "center", color: themeColors.third, fontSize: 12, lineHeight: 14 }}>
+                      This information will be shared with the seller and must match the vehicle you plan to use.
+                    </Text>
+                    <TextInput
+                      style={{ ...styles.modalInput, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
+                      placeholder="License plate"
+                      value={licensePlate}
+                      onChangeText={(text) => {
+                        setLicensePlate(text);
+                        setPlateError("");
+                      }}
+                      autoCorrect={false}
+                      spellCheck={false}
+                      keyboardType="default"
+                      returnKeyType="search"
+                      clearButtonMode="while-editing"
+                    />
+                    {error ? (
+                      <Text italic weight="semibold" style={styles.errorText}>Error: {error}</Text>
+                    ) : null}
+                    <TouchableOpacity
+                      onPress={() => {
+                        handlePlateSubmit()
+                      }}
+                    >
+                      <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 12 }}>
+                        Submit
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalVisible(!modalVisible);
+                      }}
+                    >
+                      <Text weight="semibold" style={{ ...styles.modalText, color: themeColors.secondary }}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
             </>
           )}
         </ScrollView>
@@ -570,5 +716,54 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     textAlign: "center",
+  },
+  dateContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
+    borderWidth: 0.5,
+    borderRadius: 4,
+    // marginBottom: 10,
+    gap: 8,
+    marginTop: 14,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    margin: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+    // paddingVertical: 20,
+    // paddingHorizontal: 1,
+    shadowColor: "#000",
+    width: "80%",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    textAlign: "center",
+    fontSize: 16,
+  },
+  modalInput: {
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    // fontSize: 16,
+    marginVertical: 18,
+  },
+  errorText: {
+    textAlign: "center",
+    marginTop: -4,
+    marginBottom: 16,
   },
 });

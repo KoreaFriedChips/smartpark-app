@@ -19,7 +19,7 @@ export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange:
       setAmenities([...amenities, amenity]);
     }
   }
-  const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized Vehicles","Gated","Lighting","Electric Charging",]
+  const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized","Gated","Lighting","Electric Charging",]
   return (
     <ScrollView
       horizontal
@@ -35,14 +35,15 @@ export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange:
       {allAmenities.map((name: any, index: any) => {
         const TagIcon = getTagIcon(name);
         const color = amenities.includes(name) ? Colors['accent'] : themeColors.header;
+        const text = amenities.includes(name) ? Colors['light'].primary : themeColors.primary;
         return TagIcon ? (
           <TouchableOpacity 
             key={index} 
             style={{ ...styles.amenities, backgroundColor: color, borderColor: themeColors.outline }}
             onPress={()=>handleAmenityPress(name)}  
           >
-            <TagIcon size={24} color={themeColors.primary} />
-            <Text weight="semibold">{name}</Text>
+            <TagIcon size={24} color={text} />
+            <Text weight="semibold" style={{ color: text }}>{name}</Text>
           </TouchableOpacity>
         ) : null;
       })}
@@ -80,11 +81,11 @@ const styles = StyleSheet.create({
   amenities: {
     display: "flex",
     alignItems: "flex-start",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     width: 110,
-    gap: 24,
+    height: 96,
     borderRadius: 8,
     borderWidth: 0.5,
     marginRight: 10,
@@ -101,6 +102,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     // paddingBottom: 10, //6
     paddingTop: 12,
-    marginTop: 8,
+    marginTop: 12,
   },
 });

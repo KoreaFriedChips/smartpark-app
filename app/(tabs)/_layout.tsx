@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, Tabs } from "expo-router";
 import { Pressable, Image } from "react-native";
-import { Home, MapPinned, CirclePlus, Waypoints, CircleUserRound, Send, Bell } from "lucide-react-native";
+import { Home, MapPinned, CirclePlus, Waypoints, CircleUserRound, Send, Bell, WalletCards } from "lucide-react-native";
 
 import Colors from "@/constants/Colors";
 import { View } from "@/components/Themed";
@@ -140,7 +140,7 @@ export default function TabLayout() {
             name="activity"
             options={{
               title: "Activity",
-              tabBarIcon: ({ color }) => <Waypoints size={24} color={color} style={{ marginBottom: -3 }} />,
+              tabBarIcon: ({ color }) => <WalletCards size={24} color={color} style={{ marginBottom: -3 }} />,
             }}
           />
           <Tabs.Screen

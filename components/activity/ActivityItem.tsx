@@ -10,6 +10,7 @@ import { isAfter, isBefore } from "date-fns";
 import moment from "moment";
 import { useListingWithId } from "@/hooks";
 import { imageUriFromKey } from "@/lib/utils";
+import { truncateTitle } from "../utils/ListingUtils";
 
 interface ActivityItemProps {
   reservation: Reservation;
@@ -52,7 +53,7 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
           <Image source={{ uri: imageUriFromKey(listing?.thumbnail || "") }} style={{ ...styles.image, borderColor: themeColors.outline }} />
           <View style={styles.listingText}>
             {listing && <Text weight="semibold" style={{ fontSize: 16 }}>
-              {listing.city}, {listing.state} / {durationText}
+              {truncateTitle(listing.city, listing.state, 20)} / {durationText}
             </Text>}
             <Text italic style={{ color: themeColors.secondary }}>
               {moment(reservation.starts).format('M/D')} @ {moment(reservation.starts).format('h:mm a')} - {moment(reservation.ends).format('M/D')} @ {moment(reservation.ends).format('h:mm a')}

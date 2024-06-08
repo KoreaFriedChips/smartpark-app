@@ -48,7 +48,7 @@ export function ListingGallery({ listing }: { listing: Listing }) {
       </View> */}
       <HeartButton
         id={listing.id}
-        style={{ top: 24, right: 10 }}
+        style={{ top: 24, right: 26 }}
       />
       <DistanceText
         distance={Number(distance)}

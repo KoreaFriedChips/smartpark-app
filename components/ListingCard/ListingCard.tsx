@@ -10,6 +10,7 @@ import HeartButton from "./HeartButton";
 import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
 import { imageUriFromKey } from "@/lib/utils";
+import { truncateTitle } from "../utils/ListingUtils";
 
 export interface Availability {
   day: string;
@@ -70,7 +71,7 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
             justifyContent: "space-between",
           }}
         >
-          <Text weight="semibold" style={styles.location}>{`${item.city}, ${item.state}`}</Text>
+          <Text weight="semibold" style={styles.location}>{truncateTitle(item.city, item.state, 25)}</Text>
           <RatingsText rating={item.rating} reviews={item.reviews} />
         </View>
         <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>

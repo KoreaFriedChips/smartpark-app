@@ -29,7 +29,7 @@ const categories: TagItem[] = [
   { name: "Near Venue", icon: Theater },
   { name: "24/7 Access", icon: CalendarClock },
   { name: "Surveillance", icon: Cctv },
-  { name: "Fits Oversized Vehicles", icon: Truck },
+  { name: "Fits Oversized", icon: Truck },
   { name: "Gated", icon: LockOpen },
   { name: "Lighting", icon: LampDesk },
   { name: "Electric Charging", icon: PlugZap },
@@ -114,7 +114,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
                 setModalVisible(!modalVisible);
               }}
             >
-              <Text weight="semibold" style={styles.modalButtonText}>
+              <Text weight="semibold" style={{ ...styles.modalButtonText, color: themeColors.secondary }}>
                 Reset Filters
               </Text>
             </TouchableOpacity>
@@ -176,6 +176,8 @@ const styles = StyleSheet.create({
     // borderTopWidth: 0.5,
     borderBottomWidth: 0.5,
     display: "flex",
+    paddingTop: 2.5,
+    paddingBottom: 2,
     flexDirection: "column",
     shadowColor: "#000",
     shadowOffset: {

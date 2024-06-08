@@ -49,3 +49,20 @@ export const intervalToStr = (interval: Interval) => {
   const timeRange = `${start}-${end}`;
   return convertToHour(timeRange);
 }
+
+export const truncateTitle = (city: string, state: string, length: number = 20) => {
+  let fullTitle = `${city}, ${state}`;
+  if (fullTitle.length > length) {
+    const cityLength = city.length;
+    const stateLength = state.length;
+    if (cityLength >= length) {
+      return `${city.slice(0, length - 2)}..`;
+    } else if (cityLength + 2 <= length) {
+      const remainingLength = length - cityLength - 2;
+      return `${city}, ${state.slice(0, remainingLength - 2)}..`;
+    } else {
+      return `${city.slice(0, length - 2)}..`;
+    }
+  }
+  return fullTitle;
+};

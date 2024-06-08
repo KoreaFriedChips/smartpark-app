@@ -39,35 +39,37 @@ export function RatingsQuickView({ listing }: { listing: Listing}) {
 
 
 return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ ...styles.sellerContainer }}>
+          <View style={{ ...styles.sellerContainer, marginLeft: reviews.length === 0 ? 0 : -4 }}>
             <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              {reviews.length === reviewers.length && reviews.map((review, index) => {
-                return (
-                  <TouchableOpacity key={index} style={{...styles.reviewContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline, marginHorizontal: 5}}>
-                    <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+            {reviews.length === 0 ? (
+            <Text style={{ color: themeColors.secondary }}>Currently no reviews. Be the first?</Text>
+          ) : (
+            reviews.length === reviewers.length && reviews.map((review, index) => (
+              <TouchableOpacity key={index} style={{ ...styles.reviewContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline, marginHorizontal: 5 }}>
+                <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+                  <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
+                    <Image source={{ uri: imageUriFromKey(reviewers[index].profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
+                    <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
                       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                        <Image source={{ uri: imageUriFromKey(reviewers[index].profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
-                        <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
-                          <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                            <Text weight="semibold" style={{ fontSize: 16 }}>
-                              {reviewers[index].name}
-                            </Text>
-                            <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
-                          </View>
-                          <Text style={{ marginTop: 2 }}>
-                            {reviewers[index].city}, {reviewers[index].state}
-                          </Text>
-                        </View>
+                        <Text weight="semibold" style={{ fontSize: 16 }}>
+                          {reviewers[index].name}
+                        </Text>
+                        <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
                       </View>
-                      <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
-                        <RatingsText rating={review.rating} reviews={seller?.reviews} full={true} />
-                      </View>
+                      <Text style={{ marginTop: 2 }}>
+                        {reviewers[index].city}, {reviewers[index].state}
+                      </Text>
                     </View>
-                    <Text weight="semibold" style={{ marginTop: 13, textAlign: "left" }}>{`Posted ${new Date(review.date).toLocaleDateString()}`}</Text>
-                    <Text style={{ marginTop: 4 }}>{review.review}</Text>
-                  </TouchableOpacity>
-                );
-              })}
+                  </View>
+                  <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
+                    <RatingsText rating={review.rating} reviews={seller?.reviews} full={true} />
+                  </View>
+                </View>
+                <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`Posted ${new Date(review.date).toLocaleDateString()}`}</Text>
+                <Text style={{ marginTop: 8, lineHeight: 18 }}>{review.review}</Text>
+              </TouchableOpacity>
+            ))
+          )}
             </View>
           </View>
         </ScrollView>

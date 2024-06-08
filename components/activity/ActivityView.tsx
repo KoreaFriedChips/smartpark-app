@@ -26,10 +26,10 @@ export default function ActivityView() {
     <FlatList
         data={reservations}
         renderItem={({ item }) => (
-          <ActivityItem  reservation={item} />
+          <ActivityItem reservation={item} />
         )}
         keyExtractor={item => item.id.toString()}
-        ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
+        ListEmptyComponent={<Text style={styles.noListings}>No reservations found.</Text>}
         // onEndReached={loadMoreListings}
         // onEndReachedThreshold={0.5}
         // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No notifications found.</Text> : null}

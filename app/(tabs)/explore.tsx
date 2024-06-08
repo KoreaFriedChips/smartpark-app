@@ -49,6 +49,10 @@ export default function ExploreScreen() {
   useEffect(() => {
     if (mapRef.current && region) {
       const camera = {
+        center: {
+          latitude: region.latitude,
+          longitude: region.longitude,
+        },
         pitch: 35,
         altitude: 500,
       };
@@ -84,7 +88,7 @@ export default function ExploreScreen() {
     <View style={styles.container}>
       <TagsContainer search={true} fetchListings={fetchListings} />
       <View style={{ position: "relative" }}>
-        <MapView ref={mapRef} style={styles.map} region={region} customMapStyle={mapStyle} onRegionChangeComplete={setRegion} showsCompass={false}>
+        <MapView ref={mapRef} style={styles.map} region={region} customMapStyle={mapStyle} showsCompass={false}>
           {listings && <ListingMarkers listings={listings} onMarkerPress={animateToRegion} />}
           {location && <LocationMarker location={location} animateToRegion={animateToRegion} />}
         </MapView>
@@ -100,7 +104,7 @@ const LocationButton = ({ location, animateToRegion }: { location: UserLocationO
   const themeColors = Colors[colorScheme || "light"];
   return (
     <TouchableOpacity
-      onPress={() => { animateToRegion(location.coords, 0, 1500) }}
+      onPress={() => { animateToRegion(location.coords, 0, 2500) }}
       style={{
         backgroundColor: themeColors.header,
         borderColor: themeColors.outline,

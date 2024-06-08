@@ -30,6 +30,8 @@ export default function TabTwoScreen() {
     console.log(transactions);
   }, [transactions]);
 
+  console.log(givenReviews, receivedReviews, transactions);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => signOut()}><Text style={styles.title}>Tab Two</Text></TouchableOpacity>
