@@ -1,5 +1,5 @@
 import { GetToken } from "@clerk/types";
-import { ListingModel } from "@/types";
+import { BidModel, ListingModel } from "@/types";
 import { create, read, update, serverDelete } from "./crud";
 import { z } from "zod";
 import { readPaginated } from "./crud";
@@ -9,6 +9,7 @@ export const getListingFromReservation = async (getToken: GetToken, reservation:
     if (listings.length !== 1) throw new Error("there should only be one listing associated with reservation");
     return listings[0];
 };export const createListing = async (getToken: GetToken, data: any): Promise<Listing> => {
+    console.log("createListing data:", data);
     const res = await create(getToken, "/api/listings", data);
     try {
         return ListingModel.parse(res);
@@ -45,3 +46,9 @@ export const deleteListing = async (getToken: GetToken, id: string) => {
     return await serverDelete(getToken, `/api/listings/${id}`);
 };
 
+export const getListingBids = async (getToken: GetToken, listingId: string) => {
+    const data = { listingId };
+    const res = await read(getToken, `/api/bids/listing`, data );
+    console.log("getListingBids response:", res);
+    return res;
+}

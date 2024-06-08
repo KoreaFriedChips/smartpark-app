@@ -52,9 +52,9 @@ export default function CreateListing() {
 
   const handleSubmitCreateListing = async () => {
     console.log(listingData);
-    if (!listingDataValid()) {
-      return;
-    }
+    //if (!listingDataValid()) {
+    //  return;
+    //}
     const createdListing = await createListing({
       ...listingData.current,
       startingPrice: Number(listingData.current.startingPrice),

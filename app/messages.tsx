@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
       </View>
       <FlatList
         data={notifications}
-        renderItem={({ item }) => <ListItem key={item.id} id={item.id} path={item.path} image={item.image} title={item.title} description={item.description} date={item.date} short={true} read={item.read} />}
+        renderItem={({ item }) => <ListItem key={item.id} id={item.id.toString()} path={item.path} image={item.image} title={item.title} description={item.description} date={item.date} short={true} read={item.read} />}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListEmptyComponent={<Text style={styles.noListings}>No conversations found.</Text>}

@@ -14,12 +14,6 @@ export const connectAccountCreate = async (getToken: GetToken, path: string, dat
   return resData;
 }
 
-export const paymentCreate = async (getToken: GetToken, path: string, data: any) => {
-  const res = await sendToServer(getToken, path, "POST", data, {});
-  const resData = await res.json();
-  return resData;
-}
-
 export const read = async (getToken: GetToken, path: string, searchParams: any) => {
   const res =  await sendToServer(getToken, path, "GET", undefined, searchParams);
   const resData = await res.json();

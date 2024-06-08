@@ -22,7 +22,6 @@ export interface Review {
   rating: number;
   review: string;
   date: string;
-  // reviewer: User;
 }
 // const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -40,7 +39,14 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
     router.push({
       pathname: `/listing/${item.id}/`,
       params: { distance: item.distance },
-    })
+    });
+  }
+
+  const handleViewBidsPress = () => {
+    router.push({
+      pathname: `/listing/${item.id}/view-bids/`,
+      params: { listingId: item.id}
+    });
   }
 
   return (
@@ -57,7 +63,6 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
       >
         <Image
           source={{ uri: imageUriFromKey(item.thumbnail) }}
-          // placeholder={blurhash}
           style={styles.thumbnail}
           cachePolicy={"none"}
         />
@@ -74,7 +79,6 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
           <RatingsText rating={item.rating} reviews={item.reviews} />
         </View>
         <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
-        {/* <Text italic>3:00 - 5:00</Text> */}
         <Link
           href={{
 						pathname: "/listing/[id]/bid/",
@@ -82,7 +86,7 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
 					}}
           asChild
           style={[
-            styles.parkNowButton,
+            styles.button,
             {
               backgroundColor: Colors["accent"],
               borderColor: Colors["accentAlt"],
@@ -104,7 +108,7 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
             <Text
               weight="bold"
               style={{
-                ...styles.parkNowText,
+                ...styles.buttonText,
                 color: Colors["light"].primary,
               }}
             >
@@ -112,6 +116,29 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
             </Text>
           </TouchableOpacity>
         </Link>
+          <TouchableOpacity style={[
+            styles.button,
+            {
+              backgroundColor: themeColors.primary,
+              borderColor: themeColors.primary,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 8,
+            },
+          ]}
+            onPress={handleViewBidsPress}
+          >
+            <Text
+              weight="bold"
+              style={{
+                ...styles.buttonText,
+                color: themeColors.background,
+              }}
+            >
+              View Bids
+            </Text>
+          </TouchableOpacity>
       </TouchableOpacity>
   );
 }
@@ -124,14 +151,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderRadius: 8,
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 1,
-    // },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 3.84,
-    // elevation: 3,
   },
   thumbnail: {
     width: "100%",
@@ -155,7 +174,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 16,
   },
-  parkNowButton: {
+  button: {
     padding: 10,
     borderRadius: 4,
     marginTop: 12,
@@ -164,16 +183,8 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.15,
-    // shadowRadius: 3.84,
-    // elevation: 3,
   },
-  parkNowText: {
+  buttonText: {
     textAlign: "center",
   },
 });

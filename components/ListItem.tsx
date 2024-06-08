@@ -11,7 +11,7 @@ interface ListItemProps {
   image?: string;
   title: string;
   description?: string;
-  date: Date;
+  date: string;
   id: string;
   path?: any;
   short?: boolean;
