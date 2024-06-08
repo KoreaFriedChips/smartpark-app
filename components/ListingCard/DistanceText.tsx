@@ -33,7 +33,7 @@ export default function DistanceText({ distance, style }: DistanceProps) {
         color={Colors["light"].primary}
         strokeWidth={3}
         style={{
-          marginRight: 2,
+          marginRight: 3,
         }}
       />
       <Text

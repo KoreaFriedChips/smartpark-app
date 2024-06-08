@@ -19,7 +19,7 @@ export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange:
       setAmenities([...amenities, amenity]);
     }
   }
-  const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized Vehicles","Gated","Lighting","Electric Charging",]
+  const allAmenities = ["Events", "Concerts", "Sports", "Attractions", "Near Venue", "24/7 Access","Surveillance","Fits Oversized","Gated","Lighting","Electric Charging",]
   return (
     <ScrollView
       horizontal
@@ -35,14 +35,15 @@ export const SelectableSlidingAmenitiesWidget = ({ onChange, init }: { onChange:
       {allAmenities.map((name: any, index: any) => {
         const TagIcon = getTagIcon(name);
         const color = amenities.includes(name) ? Colors['accent'] : themeColors.header;
+        const text = amenities.includes(name) ? Colors['light'].primary : themeColors.primary;
         return TagIcon ? (
           <TouchableOpacity 
             key={index} 
             style={{ ...styles.amenities, backgroundColor: color, borderColor: themeColors.outline }}
             onPress={()=>handleAmenityPress(name)}  
           >
-            <TagIcon size={24} color={themeColors.primary} />
-            <Text weight="semibold">{name}</Text>
+            <TagIcon size={24} color={text} />
+            <Text weight="semibold" style={{ color: text }}>{name}</Text>
           </TouchableOpacity>
         ) : null;
       })}

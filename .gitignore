@@ -54,3 +54,6 @@ ios/
 .expo
 dist/
 web-build/
+
+# local
+components/ListingInput/ListingTemp.tsx

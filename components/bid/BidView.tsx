@@ -9,6 +9,7 @@ import {
   useColorScheme,
   Alert,
   Button,
+  Modal,
 } from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
@@ -30,7 +31,7 @@ import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
 import moment from "moment";
-import { differenceInCalendarDays, differenceInHours, differenceInMonths, intervalToDuration } from "date-fns";
+import { differenceInCalendarDays, differenceInHours, differenceInMonths, intervalToDuration, set } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
@@ -60,6 +61,25 @@ export default function BidView({
   const { initPaymentSheet, presentPaymentSheet, loading } = usePaymentSheet();
   const [bidAmount, setBidAmount] = useState("");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [licensePlate, setLicensePlate] = useState("");
+  const [error, setPlateError] = useState("");
+
+  const validatePlate = (plate: string) => {
+    const licensePlateRegex = /^[A-Z0-9-]{1,8}$/;
+    return licensePlateRegex.test(plate);
+  };
+
+  const handlePlateSubmit = () => {
+    if (validatePlate(licensePlate)) {
+      console.log("License Plate:", licensePlate);
+      setModalVisible(false);
+    } else {
+      setLicensePlate("");
+      setPlateError("Invalid plate format");
+    }
+  };
 
   const [startVisible, setStartVisible] = useState(false);
   const [endVisible, setEndVisible] = useState(false);
@@ -426,6 +446,7 @@ export default function BidView({
                   <Pencil size={14} color={themeColors.primary} />
                 </TouchableOpacity> */}
                 <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
                   style={{
                     ...styles.infoRow,
                     borderColor: themeColors.outline,
@@ -442,7 +463,7 @@ export default function BidView({
                         color: themeColors.secondary,
                       }}
                     >
-                      License plate
+                      Vehicle information
                     </Text>
                   </View>
                   <Pencil size={14} color={themeColors.primary} />
@@ -500,6 +521,64 @@ export default function BidView({
                   {selection === "Place bid" ? "bid" : "reservation"}
                 </Text>
               </TouchableOpacity>
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                <View style={styles.modalBackground}>
+                  <View
+                    style={{
+                      ...styles.modalContainer,
+                      backgroundColor: themeColors.background,
+                      borderColor: themeColors.outline,
+                    }}
+                  >
+                    <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 8 }}>Enter license plate</Text>
+                    <Text style={{ textAlign: "center", color: themeColors.third, fontSize: 12, lineHeight: 14 }}>
+                      This information will be shared with the seller and must match the vehicle you plan to use.
+                    </Text>
+                    <TextInput
+                      style={{ ...styles.modalInput, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
+                      placeholder="License plate"
+                      value={licensePlate}
+                      onChangeText={(text) => {
+                        setLicensePlate(text);
+                        setPlateError("");
+                      }}
+                      autoCorrect={false}
+                      spellCheck={false}
+                      keyboardType="default"
+                      returnKeyType="search"
+                      clearButtonMode="while-editing"
+                    />
+                    {error ? (
+                      <Text italic weight="semibold" style={styles.errorText}>Error: {error}</Text>
+                    ) : null}
+                    <TouchableOpacity
+                      onPress={() => {
+                        handlePlateSubmit()
+                      }}
+                    >
+                      <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 12 }}>
+                        Submit
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalVisible(!modalVisible);
+                      }}
+                    >
+                      <Text weight="semibold" style={{ ...styles.modalText, color: themeColors.secondary }}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
             </>
           )}
         </ScrollView>
@@ -649,5 +728,42 @@ const styles = StyleSheet.create({
     // marginBottom: 10,
     gap: 8,
     marginTop: 14,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    margin: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+    // paddingVertical: 20,
+    // paddingHorizontal: 1,
+    shadowColor: "#000",
+    width: "80%",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    textAlign: "center",
+    fontSize: 16,
+  },
+  modalInput: {
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    // fontSize: 16,
+    marginVertical: 18,
+  },
+  errorText: {
+    textAlign: "center",
+    marginTop: -4,
+    marginBottom: 16,
   },
 });
