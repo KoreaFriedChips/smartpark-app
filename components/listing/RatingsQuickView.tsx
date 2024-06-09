@@ -62,7 +62,7 @@ return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     </View>
                   </View>
                   <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
-                    <RatingsText rating={review.rating} reviews={seller?.reviews} full={true} />
+                    <RatingsText rating={review.rating} reviews={seller?.reviews} full={false} />
                   </View>
                 </View>
                 <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`Posted ${new Date(review.date).toLocaleDateString()}`}</Text>

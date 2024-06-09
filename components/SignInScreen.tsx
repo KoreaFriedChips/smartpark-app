@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     padding: 16,
-    paddingBottom: 64,
+    paddingBottom: 44,
   },
   logoImg: {
     aspectRatio: 875 / 130,
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   termsText: {
-    marginTop: 4,
+    marginTop: 8,
     fontSize: 12,
     lineHeight: 18,
     padding: 4,

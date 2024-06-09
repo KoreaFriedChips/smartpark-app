@@ -31,7 +31,7 @@ import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
 import moment from "moment";
-import { differenceInCalendarDays, differenceInHours, differenceInMonths, intervalToDuration, set } from "date-fns";
+import { differenceInCalendarDays, differenceInHours, differenceInMonths, differenceInWeeks, intervalToDuration, set } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
@@ -253,6 +253,13 @@ export default function BidView({
         spotPrice.calcText = `(${diff} ${diff === 1 ? "day" : "days"} x ${amount.toFixed(
           2
         )} / day) + 7.5% fee`;
+        break;
+      case "week":
+        diff = differenceInWeeks(endDate, startDate);
+        spotPrice.price = diff * amount * 1.075;
+        spotPrice.calcText = `(${diff} ${diff === 1 ? "week" : "weeks"} x ${amount.toFixed(
+          2
+        )} / week) + 7.5% fee`;
         break;
       case "month":
         diff = differenceInMonths(endDate, startDate);

@@ -144,7 +144,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               marginRight: 4,
             }}
           />
-          <Text weight="semibold" italic style={{ color: themeColors.secondary }}>
+          <Text weight="semibold" style={{ color: themeColors.secondary }}>
             Ends in: {timeRemaining}
           </Text>
         </View>
@@ -168,7 +168,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
 
 const styles = StyleSheet.create({
   bidContainer: {
-    padding: 14,
+    padding: 16,
     borderRadius: 8,
     borderWidth: 1,
     marginVertical: 12,

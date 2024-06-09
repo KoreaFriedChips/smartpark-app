@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 22,
-    marginTop: 4,
+    marginTop: 2,
   },
   thumbnail: {
     width: "100%",
