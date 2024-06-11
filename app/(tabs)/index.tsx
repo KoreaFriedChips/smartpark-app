@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, FlatList, ScrollViewComponent, Animated, useColorScheme } from "react-native";
+import { StyleSheet, FlatList, Animated, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
 import ListingCard from "@/components/ListingCard/ListingCard";
 import TagsContainer from "@/components/TagsContainer";
@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import { ListingSearchOptions, useBackend, useListings, useLocationContext } from "@/hooks";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
+import { useUserContext } from "@/hooks";
 
 export default function HomeScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -15,6 +16,8 @@ export default function HomeScreen() {
   const { location } = useLocationContext();
   const [title, setTitle] = useState("Set location");
   const { readCityStateFromCoordinates } = useBackend();
+  const user = useUserContext(); 
+  const userId = user?.id;
 
   useEffect(() => {
     if (!location) return;
@@ -35,6 +38,8 @@ export default function HomeScreen() {
     if (listRef.current && listings && listings.length > 0) listRef.current.scrollToIndex({index: 0});
   }
 
+  const filteredListings = listings?.filter(listing => listing.userId !== userId);
+  console.log(filteredListings);
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const diffClamp = Animated.diffClamp(scrollY, 0, 100);
 
@@ -62,12 +67,6 @@ export default function HomeScreen() {
     extrapolate: 'clamp',
   });
   const navigation = useNavigation();
-
-  // location will be set/loaded here
-
-  useEffect(() => {
-    if (!location) return;
-  }, [location]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -98,14 +97,13 @@ export default function HomeScreen() {
               scrollY.setValue(e.nativeEvent.contentOffset.y);
           }}
           ref={listRef}
-          data={listings}
+          data={filteredListings}
           refreshing={isRefreshing}
           renderItem={({ item }) => <ListingCard item={item} />}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
           onEndReached={fetchNextPage}
           onEndReachedThreshold={0.5}
-          // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No spots found.</Text> : null}
         />
       </Animated.View>
     </View>
