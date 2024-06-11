@@ -12,6 +12,12 @@ export const getSeller = async (getToken: GetToken, listing: Listing) => {
     return users[0];
 };
 
+export const getUserFromUserId = async (getToken: GetToken, userId: string) => {
+    const users: User[] = await readUsers(getToken, { id: userId });
+    if (users.length === 0) throw new Error("userId not found");
+    return users[0];
+}
+
 export const getUserFromClerkId = async (getToken: GetToken, clerkId: string) => {
     const users: User[] = await readUsers(getToken, { clerkId: clerkId });
     if (users.length === 0) throw new Error("clerkId not found");
@@ -29,6 +35,7 @@ export const createUser = async (getToken: GetToken, data: any): Promise<User> =
 };
 
 export const readUsers = async (getToken: GetToken, searchParams: any): Promise<User[]> => {
+    console.log("readUsers searchParams:", searchParams);
     const res = await read(getToken, "/api/users", searchParams);
     return res.map(UserModel.parse);
 };

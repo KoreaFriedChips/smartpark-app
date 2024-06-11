@@ -28,21 +28,28 @@ export const useBidCount = (listingId: string | undefined, desiredSlot: Interval
 export const useHighestBid = (listingId: string | undefined, desiredSlot: Interval | undefined) => {
   const { getToken } = useAuth();
   const [highestBid, setHighestBid] = useState<Bid>();
+
   const fetchHighestBid = async () => {
     try {
+      console.log("listingId: ", listingId, "desiredSlot: ", desiredSlot);
       if (!listingId || !desiredSlot) return;
       const bid = await getHighestBid(getToken, listingId, desiredSlot.start, desiredSlot.end);
+      console.log("bid: ", bid);
       setHighestBid(bid);
-      return;
     } catch (err: any) {
       console.log(err.message);
-      return;
     }
   }
-  useEffect(() => {
-    fetchHighestBid();
-  }, []);
-  setInterval(async () =>  fetchHighestBid(), minutesToMilliseconds(5));
 
+  useEffect(() => {
+    if (listingId && desiredSlot) {
+      fetchHighestBid();
+      const intervalId = setInterval(fetchHighestBid, minutesToMilliseconds(5));
+      return () => clearInterval(intervalId);
+    }
+  }, [listingId, desiredSlot]);
+  
+  setInterval(async () =>  fetchHighestBid(), minutesToMilliseconds(5));
+  console.log("use highest bid: ", highestBid);
   return highestBid;
 }

@@ -28,7 +28,7 @@ import DistanceText from "@/components/ListingCard/DistanceText";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
-import { useListing } from "@/hooks";
+import { useListing, useUserContext } from "@/hooks";
 import moment from "moment";
 import {
   differenceInCalendarDays,
@@ -63,14 +63,14 @@ export default function BidView({
   const { initPaymentSheet, presentPaymentSheet, loading } = usePaymentSheet();
   const [bidAmount, setBidAmount] = useState("");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
+  const user = useUserContext();
 
   const stripePublishableKey =
     Constants.expoConfig?.extra?.stripePublishableKey;
-  console.log("Stripe Publishable Key:", stripePublishableKey);
-
+  //console.log("Stripe Publishable Key:", stripePublishableKey);
   const initializePaymentSheet = async () => {
     const paymentIntent = await fetchPaymentSheetParams();
-    console.log(paymentIntent);
+    //console.log(paymentIntent);
     const { error: paymentSheetError } = await initPaymentSheet({
       merchantDisplayName: "SmartPark",
       paymentIntentClientSecret: paymentIntent.client_secret,
@@ -86,7 +86,7 @@ export default function BidView({
 
   const fetchPaymentSheetParams = async () => {
     try {
-      console.log("bidAmount: ", bidAmount);
+      //console.log("bidAmount: ", bidAmount);
       const paymentIntent = await createPaymentIntent(
         getToken,
         Number(bidAmount) * 100,
@@ -114,6 +114,7 @@ export default function BidView({
       );
       return;
     }
+
     await initializePaymentSheet();
     const { error: paymentError } = await presentPaymentSheet();
 
@@ -138,8 +139,6 @@ export default function BidView({
   const [selection, setSelection] = useState(
     mode === "buy" ? "Buy now" : "Place bid"
   );
-  const highestBid = useHighestBid(listing?.id, desiredSlot);
-  const bidCount = useBidCount(listing?.id, desiredSlot);
 
   useEffect(() => {
     if (!listing) return;
@@ -150,7 +149,7 @@ export default function BidView({
 
   useEffect(() => {
     if (listing) listingIdRef.current = listing.id;
-    console.log(listing);
+    //console.log(listing);
   }, [listing]);
 
   useEffect(() => {
@@ -161,8 +160,13 @@ export default function BidView({
     if (desiredSlot) desiredSlotRef.current = desiredSlot;
   }, [desiredSlot]);
 
+  const highestBid = useHighestBid(listing?.id, desiredSlot);
+  const bidCount = useBidCount(listing?.id, desiredSlot);
+
   useEffect(() => {
+    console.log("highestBidRef: ", highestBidRef)
     if (highestBid) highestBidRef.current = highestBid;
+    console.log("highest Bid: ", highestBid);
   }, [highestBid]);
 
   const setSelect = (selection: string) => {
@@ -347,6 +351,20 @@ Processing fee: $${processingFee.toFixed(2)}`;
                           : "No bids yet!"
                       } Buy now: $${listing.buyPrice}`
                     : "You're about to instantly reserve this spot."}
+                </Text>
+                <Text
+                  style={{
+                    color: themeColors.secondary,
+                    marginTop: 4,
+                    marginBottom: 4,
+                  }}
+                >
+                  {selection === "Place bid"
+                    ? 
+                      highestBid && highestBid.userId === user?.id
+                        ? "You're the highest bidder!"
+                        : "You're not the highest bidder!"
+                    : ""}
                 </Text>
                 {desiredSlot && (
                   <View style={styles.textRow}>

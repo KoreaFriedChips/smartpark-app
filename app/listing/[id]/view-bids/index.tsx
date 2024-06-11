@@ -8,17 +8,27 @@ import {
   Alert,
 } from "react-native";
 import axios from "axios";
-import { getListingBids } from "@/serverconn/listing";
+import { getListingBids, readListings } from "@/serverconn/listing";
 import { useAuth } from "@clerk/clerk-expo";
-import { useLocalSearchParams, useRouter, useSearchParams } from "expo-router";
-import { cancelPaymentIntent, capturePaymentIntent } from "@/serverconn/payments";
+import { useLocalSearchParams, useNavigation, useRouter, useSearchParams } from "expo-router";
+import {
+  cancelPaymentIntent,
+  capturePaymentIntent,
+} from "@/serverconn/payments";
+import { getUserFromClerkId, getUserFromUserId, readUsers } from "@/serverconn";
 
 interface Bid {
   id: string;
   amount: number;
   createdAt: string;
+  userId: string;
   paymentIntentId: string;
   status: string;
+}
+
+interface User {
+  id: string;
+  name: string;
 }
 
 export default function ListingBids() {
@@ -26,15 +36,27 @@ export default function ListingBids() {
   const [error, setError] = useState<string | null>(null);
   const { getToken } = useAuth();
   const { listingId } = useLocalSearchParams();
-
+  const [listing, setListing] = useState<any>({});
+  const [users, setUsers] = useState<{ [key: string]: User }>({});
+    const navigation = useNavigation();
   useEffect(() => {
     
     const fetchBids = async () => {
       try {
-        console.log(listingId)
+        const res = await readListings(getToken, { id: listingId });
+        setListing(res[0]);
+        //console.log(listingId);
         const response = await getListingBids(getToken, listingId as string);
-        console.log(response);
+        //console.log(response);
         setBids(response);
+        const usersData = await Promise.all(
+          response.map(async (bid: Bid) => {
+            const user = await fetchUser(bid.userId);
+            return { [bid.userId]: user };
+          })
+        );
+        const usersMap = Object.assign({}, ...usersData);
+        setUsers(usersMap);
       } catch (error: any) {
         console.log(error);
         Alert.alert("Error", error.message);
@@ -43,7 +65,15 @@ export default function ListingBids() {
     };
 
     fetchBids();
+    navigation.setOptions({ title: 'Bids for ' + listing.address });
+    console.log("users: ", users);
   }, [listingId]);
+
+  const fetchUser = async (userId: string): Promise<User> => {
+    const response = await getUserFromUserId(getToken, userId);
+    //console.log(response);
+    return response;
+  };
 
   const acceptBid = async (bidId: string) => {
     try {
@@ -53,7 +83,7 @@ export default function ListingBids() {
         const otherBids = bids.filter((bid) => bid.id !== bidId);
         for (const bid of otherBids) {
           await cancelPaymentIntent(getToken, bid.id);
-        }        
+        }
       } else {
         setError(response.data.error);
       }
@@ -74,7 +104,14 @@ export default function ListingBids() {
 
   return (
     <View style={styles.container}>
+        <Text style={styles.heading}>Listing Details:</Text>
+        <Text>{listing.address}, {listing.city}</Text>
+        <Text>Spots left: {listing.spotsLeft}</Text>
+        <Text>Starting Bid Price: ${listing.startingPrice}</Text>
+        <Text>Buy Now Price: ${listing.buyPrice}</Text>
+
       <Text style={styles.heading}>Bids</Text>
+
       <FlatList
         data={bids}
         keyExtractor={(item) => item.id}
@@ -82,6 +119,7 @@ export default function ListingBids() {
           <View style={styles.bidContainer}>
             <Text>Amount: {item.amount}</Text>
             <Text>Created At: {new Date(item.createdAt).toLocaleString()}</Text>
+            <Text>From: {users[item.userId]?.name|| 'Loading...'}</Text>
             <TouchableOpacity
               onPress={() => acceptBid(item.id)}
               style={styles.button}
@@ -93,7 +131,7 @@ export default function ListingBids() {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -134,4 +172,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

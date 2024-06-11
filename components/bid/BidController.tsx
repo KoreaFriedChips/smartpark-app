@@ -76,7 +76,7 @@ export default function BidController(){
     }
 
   }
-
-  return (BidView({listingId, amount, desiredSlot, highestBid, handleSubmitBid, handleSubmitBuy}));
+  console.log("highest bid: ", highestBid);
+  return (BidView({listingId: listingId, amount: amount, desiredSlot: desiredSlot, highestBid: highestBid, handleSubmitBid, handleSubmitBuy}));
 
 }
