@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, Pressable, Image, useColorScheme, Modal } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { useOAuth, useAuth, useSignUp, useSignIn } from "@clerk/clerk-expo";
-import type { SignUpResource, SignInResource, SetActive } from "@clerk/types";
+import type { SignUpResource, SignInResource, SetActive, PhoneCodeFactor, SignInFirstFactor, } from "@clerk/types";
 import { Text, View } from "@/components/Themed";
 import { signin, signup } from "@/serverconn";
 import Colors from "@/constants/Colors";
@@ -78,68 +78,102 @@ export default function SignInScreen() {
 
   let { signUp: sUp, setActive: sActiveU } = useSignUp();
   let { signIn: sIn, setActive: sActiveI } = useSignIn();
-  let isSigningIn = false;
+  let isSigningIn = true;
   const [csi, setCSI] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date());
 
-
-
   type RSP = (...args: any[]) => Promise<keyof RootStackParamList>;
   const setGlobalPhone: RSP = async (p: string) => {
     setPhone(p);
+    const isPhoneCodeFactor = (factor: SignInFirstFactor): factor is PhoneCodeFactor => {
+      return factor.strategy === "phone_code";
+    };
+  
     try {
-      await sIn?.create({ identifier: p, strategy: "phone_code" });
-      isSigningIn = true;
-    } catch (err: any) {
-      console.log(err.errors[0]);
-      try {
-        await sUp?.update({ phoneNumber: p });
-        await sUp?.preparePhoneNumberVerification({
-          strategy: "phone_code",
+      if (sIn) {
+        const { supportedFirstFactors } = await sIn.create({
+          identifier: p,
         });
-      } catch (err: any) {
-        throw Error(err.errors[0].longMessage);
+        console.log("supportedFirstFactors after signIn.create: ", supportedFirstFactors);
+  
+        const phoneCodeFactor = supportedFirstFactors?.find(isPhoneCodeFactor);
+  
+        if (phoneCodeFactor) {
+          const { phoneNumberId } = phoneCodeFactor;
+          console.log("phoneNumberId: ", phoneNumberId);
+          await sIn.prepareFirstFactor({
+            strategy: "phone_code",
+            phoneNumberId,
+          });
+          isSigningIn = true;
+        }
+      }
+    } catch (signInError: any) {
+      console.error("SignIn Error: ", signInError.errors[0]);
+  
+      try {
+        if (sUp) {
+          const { supportedFirstFactors } = await sUp.create({ phoneNumber: p }) as any;
+          const phoneCodeFactor = supportedFirstFactors?.find(isPhoneCodeFactor);
+          if (phoneCodeFactor) {
+            const { phoneNumberId } = phoneCodeFactor;
+            console.log("phoneNumberId for signUp: ", phoneNumberId);
+            await sUp.preparePhoneNumberVerification({
+              strategy: "phone_code",
+            });
+            isSigningIn = false;
+          }
+        }
+      } catch (signUpError: any) {
+        console.error("SignUp Error: ", signUpError.errors[0].longMessage);
+        throw new Error(signUpError.errors[0].longMessage);
       }
     }
     return "CodeVerification";
   };
+  
   const setGlobalCode: RSP = async (code: string) => {
     if (isSigningIn) {
-      let s;
       try {
-        s = await sIn?.attemptFirstFactor({
-          code,
+        if (!sIn) throw new Error("SignIn resource is undefined");
+        const signInAttempt = await sIn.attemptFirstFactor({
           strategy: "phone_code",
+          code,
         });
+        console.log("signInAttempt: ", signInAttempt);
+        if (signInAttempt.status === "complete" && signInAttempt.createdSessionId) {
+          if (!sActiveI) throw new Error("sActiveI is undefined");
+          await sActiveI({ session: signInAttempt.createdSessionId });
+          completeSignUp(signInAttempt.createdSessionId, sActiveI!);
+          return "CodeVerification";
+        } else {
+          throw new Error("Your code is invalid.");
+        }
       } catch (err: any) {
-        throw Error(err.errors[0].longMessage);
-      }
-      if (s?.createdSessionId) {
-        completeSignUp(s.createdSessionId, sActiveI!);
-        return "CodeVerification";
-      } else {
-        throw Error("Your code is invalid.");
+        console.error("Verification Error for signIn: ", err.message || err.errors[0].longMessage);
+        throw new Error(err.message || err.errors[0].longMessage);
       }
     } else {
-      let s;
       try {
-        s = await sUp?.attemptPhoneNumberVerification({ code });
-      } catch (err: any) {
-        throw Error(err.errors[0].longMessage);
-      }
-      if (s!.missingFields.indexOf("phone_number") < 0) {
-        if (s?.createdSessionId) {
-          setCSI(s.createdSessionId);
+        if (!sUp) throw new Error("SignUp resource is undefined");
+        const signUpAttempt = await sUp.attemptPhoneNumberVerification({ code });
+        console.log("signUpAttempt: ", signUpAttempt);
+        if (signUpAttempt.status === "complete" && signUpAttempt.createdSessionId) {
+          setCSI(signUpAttempt.createdSessionId);
+          return email ? (name ? "BirthdayInput" : "NameInput") : "EmailInput";
+        } else {
+          throw new Error("Your code is invalid.");
         }
-        return email ? (name ? "BirthdayInput" : "NameInput") : "EmailInput";
-      } else {
-        throw Error("Your code is invalid.");
+      } catch (err: any) {
+        console.error("Verification Error for signUp: ", err.message || err.errors[0].longMessage);
+        throw new Error(err.message || err.errors[0].longMessage);
       }
     }
-  };
+  };  
+  
   const setGlobalEmail: RSP = async (e: string) => {
     setEmail(e);
     try {
@@ -203,8 +237,6 @@ export default function SignInScreen() {
     }
   };
 
-
-
   const completeSignUp = async (csi: string, setA: SetActive) => {
     try {
       await setA({ session: csi });
@@ -216,7 +248,6 @@ export default function SignInScreen() {
   };
 
   const MainScreen = (props: { navigation: StackNavigationProp<RootStackParamList, "Main"> }) => {
-
     const handleSignIn = async (provider: string) => {
       try {
         const startFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
@@ -246,139 +277,138 @@ export default function SignInScreen() {
       props.navigation.push("PhoneInput", {});
     };
 
-    return (<View style={styles.container}>
-      <Image source={logoImg} style={[styles.logoImg]} />
-      <View style={styles.textContainer}>
-        <Text weight="bold" style={styles.title}>
-          Sign up or log in to continue.
-        </Text>
+    return (
+      <View style={styles.container}>
+        <Image source={logoImg} style={[styles.logoImg]} />
+        <View style={styles.textContainer}>
+          <Text weight="bold" style={styles.title}>
+            Sign up or log in to continue.
+          </Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => startSignUp()}
+            style={[
+              styles.button,
+              {
+                backgroundColor: Colors["accent"],
+                borderColor: Colors["accentAlt"],
+              },
+            ]}>
+            <Phone size={16} color={Colors["light"].primary} strokeWidth={3} style={[styles.buttonIcon, { marginRight: 4 }]} />
+            <Text
+              weight="bold"
+              style={{
+                ...styles.buttonText,
+                color: Colors["light"].primary,
+              }}>
+              Continue with Number
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSignIn("google")}
+            style={[
+              styles.button,
+              {
+                backgroundColor: "transparent",
+                borderColor: themeColors.outline,
+              },
+            ]}>
+            <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
+            <Text
+              weight="bold"
+              style={{
+                ...styles.buttonText,
+                color: themeColors.secondary,
+              }}>
+              Continue with Google
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSignIn("facebook")}
+            style={[
+              styles.button,
+              {
+                backgroundColor: "transparent",
+                borderColor: themeColors.outline,
+              },
+            ]}>
+            <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
+            <Text
+              weight="bold"
+              style={{
+                ...styles.buttonText,
+                color: themeColors.secondary,
+              }}>
+              Continue with Facebook
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleSignIn("apple")}
+            style={[
+              styles.button,
+              {
+                backgroundColor: "transparent",
+                borderColor: themeColors.outline,
+              },
+            ]}>
+            <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
+            <Text
+              weight="bold"
+              style={{
+                ...styles.buttonText,
+                color: themeColors.secondary,
+              }}>
+              Continue with Apple
+            </Text>
+          </TouchableOpacity>
+          <Text style={{ ...styles.termsText, color: themeColors.third }}>
+            By signing up or logging in you agree to SmartPark's Terms of Service and Privacy Policy.
+          </Text>
+        </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={() => startSignUp()}
-          style={[
-            styles.button,
-            {
-              backgroundColor: Colors["accent"],
-              borderColor: Colors["accentAlt"],
-            },
-          ]}
-        >
-          <Phone size={16} color={Colors["light"].primary} strokeWidth={3} style={[styles.buttonIcon, { marginRight: 4 }]} />
-          <Text
-            weight="bold"
-            style={{
-              ...styles.buttonText,
-              color: Colors["light"].primary,
-            }}
-          >
-            Continue with Number
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleSignIn("google")}
-          style={[
-            styles.button,
-            {
-              backgroundColor: "transparent",
-              borderColor: themeColors.outline,
-            },
-          ]}
-        >
-          <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
-          <Text
-            weight="bold"
-            style={{
-              ...styles.buttonText,
-              color: themeColors.secondary,
-            }}
-          >
-            Continue with Google
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleSignIn("facebook")}
-          style={[
-            styles.button,
-            {
-              backgroundColor: "transparent",
-              borderColor: themeColors.outline,
-            },
-          ]}
-        >
-          <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
-          <Text
-            weight="bold"
-            style={{
-              ...styles.buttonText,
-              color: themeColors.secondary,
-            }}
-          >
-            Continue with Facebook
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleSignIn("apple")}
-          style={[
-            styles.button,
-            {
-              backgroundColor: "transparent",
-              borderColor: themeColors.outline,
-            },
-          ]}
-        >
-          <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
-          <Text
-            weight="bold"
-            style={{
-              ...styles.buttonText,
-              color: themeColors.secondary,
-            }}
-          >
-            Continue with Apple
-          </Text>
-        </TouchableOpacity>
-        <Text style={{ ...styles.termsText, color: themeColors.third }}>By signing up or logging in you agree to SmartPark's Terms of Service and Privacy Policy.</Text>
-      </View>
-
-    </View>)
-  }
+    );
+  };
 
   return (
     <NavigationContainer independent={true}>
-      <Stack.Navigator initialRouteName="Main" >
+      <Stack.Navigator initialRouteName="Main">
         <Stack.Group screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Main" component={MainScreen} />
         </Stack.Group>
-        <Stack.Group screenOptions={{
-          headerShown: true,
-          presentation: "modal",
-          headerStyle: {
-            backgroundColor: themeColors.background,
-          },
-          // headerLeft: () => <HeaderLeft />,
-          headerTitle: () => <HeaderTitle name="Next steps" />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => setModalVisible(false)}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-                flexDirection: "row",
-                alignItems: "center",
-              })}
-            >
-              <X size={22} color={themeColors.primary} />
-            </Pressable>
-          ),
-          headerBackTitle: "Back",
-          headerBackTitleStyle: {
-            fontFamily: "Soliden-SemiBold",
-          },
-        }}>
+        <Stack.Group
+          screenOptions={{
+            headerShown: true,
+            presentation: "modal",
+            headerStyle: {
+              backgroundColor: themeColors.background,
+            },
+            // headerLeft: () => <HeaderLeft />,
+            headerTitle: () => <HeaderTitle name="Next steps" />,
+            headerRight: () => (
+              <Pressable
+                onPress={() => null}
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.5 : 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                })}>
+                <X size={22} color={themeColors.primary} />
+              </Pressable>
+            ),
+            headerBackTitle: "Back",
+            headerBackTitleStyle: {
+              fontFamily: "Soliden-SemiBold",
+            },
+          }}>
           <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
-          <Stack.Screen name="CodeVerification">{(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}</Stack.Screen>
+          <Stack.Screen name="CodeVerification">
+            {(props) => <CodeVerification {...props} setGlobal={setGlobalCode} resend={resendCode} />}
+          </Stack.Screen>
           <Stack.Screen name="EmailInput">{(props) => <EmailInput {...props} setGlobal={setGlobalEmail} />}</Stack.Screen>
-          <Stack.Screen name="EmailVerification">{(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}</Stack.Screen>
+          <Stack.Screen name="EmailVerification">
+            {(props) => <EmailVerification {...props} setGlobal={setGlobalEmailVerify} resend={resendEmail} />}
+          </Stack.Screen>
           <Stack.Screen name="NameInput">{(props) => <NameInput {...props} setGlobal={setGlobalName} />}</Stack.Screen>
           <Stack.Screen name="BirthdayInput">{(props) => <BirthdayInput {...props} setGlobal={setGlobalBirthday} />}</Stack.Screen>
         </Stack.Group>

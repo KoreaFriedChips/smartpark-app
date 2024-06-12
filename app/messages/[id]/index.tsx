@@ -16,6 +16,7 @@ import messaging from "@react-native-firebase/messaging";
 import * as ImagePicker from "expo-image-picker";
 import { fetchImageFromUri } from "@/lib/utils";
 import SideSwipe from 'react-native-sideswipe';
+import ProfilePicture from "@/components/user/ProfilePicture";
 
 interface AggregatedMessage extends Message {
   messages: string[]
@@ -133,12 +134,13 @@ export default function MessagesScreen() {
       <FlatList
         inverted={true}
         data={aggregatedMessages}
-        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture="https://source.unsplash.com/random?person" messages={item.messages} imageLists={item.attachmentLists}/>}
+        // shouldn't still have random picture
+        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture={otherUser?.profilePicture} messages={item.messages} imageLists={item.attachmentLists}/>}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={
           otherUser && <View style={styles.messageInfo}>
-            {otherUser.profilePicture && <Image source={{ uri: otherUser?.profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
+            {otherUser.profilePicture && <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 12 }} hasKey/>}
             {otherUser.city && otherUser.state && <Text weight="semibold" style={styles.cityText}>
               {`${otherUser.city}, ${otherUser.state}`}
             </Text>}
@@ -236,14 +238,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 2,
     marginBottom: 12,
-  },
-  profilePicture: {
-    aspectRatio: 1 / 1,
-    width: 90,
-    borderRadius: 90,
-    borderWidth: 1,
-    marginBottom: 12,
-    // position: "absolute",
   },
   cityText: {
     fontSize: 16,

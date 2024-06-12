@@ -429,29 +429,6 @@ export default function BidView({
                     {spotPrice().calcText}
                   </Text>
                 )}
-
-                {/* <TouchableOpacity
-                  style={{
-                    ...styles.infoRow,
-                    borderColor: themeColors.outline,
-                    marginTop: 10,
-                  }}
-                >
-                  <View style={styles.buttonRow}>
-                    <Calendar size={16} color={themeColors.secondary} />
-                    <Text
-                      weight="semibold"
-                      style={{
-                        ...styles.subtitle,
-                        fontSize: 14,
-                        color: themeColors.secondary,
-                      }}
-                    >
-                      Date: {moment(desiredSlot?.start).calendar()}
-                    </Text>
-                  </View>
-                  <Pencil size={14} color={themeColors.primary} />
-                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => setModalVisible(true)}
                   style={{

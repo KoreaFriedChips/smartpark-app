@@ -129,7 +129,7 @@ export function LocationInputWidget({
   return (
     <View>
       <Text weight="semibold" style={{ fontSize: 18, marginTop: 16 }}>Location</Text>
-      <Text style={{ color: themeColors.secondary, lineHeight: 18, marginTop: 4, marginBottom: 0 }}>Add your spot's location by clicking the map or inputting your address</Text>
+      <Text style={{ color: themeColors.secondary, lineHeight: 18, marginTop: 4, marginBottom: 0 }}>Add your spot's location by clicking on the map or inputting your address</Text>
       <View
         style={{
           display: "flex",

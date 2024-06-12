@@ -7,6 +7,7 @@ import { imageUriFromKey } from "@/lib/utils";
 import { useMemo } from "react";
 import RatingsText from "@/components/ListingCard/RatingsText";
 import { useBackend } from "@/hooks";
+import ProfilePicture from "../user/ProfilePicture";
 
 export function RatingsQuickView({ listing }: { listing: Listing}) {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -48,13 +49,13 @@ return (<ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <TouchableOpacity key={index} style={{ ...styles.reviewContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline, marginHorizontal: 5 }}>
                 <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
                   <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-                    <Image source={{ uri: imageUriFromKey(reviewers[index].profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
+                  <ProfilePicture image={reviewers[index].profilePicture} hasKey/>
                     <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
                       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
                         <Text weight="semibold" style={{ fontSize: 16 }}>
                           {reviewers[index].name}
                         </Text>
-                        <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
+                        {reviewers[index].verified && <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 4 }} />}
                       </View>
                       <Text style={{ marginTop: 2 }}>
                         {reviewers[index].city}, {reviewers[index].state}
@@ -84,11 +85,5 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     borderWidth: 1
-  },
-  profilePicture: {
-    aspectRatio: 1 / 1,
-    width: 40,
-    borderRadius: 40,
-    borderWidth: 1,
   },
 });

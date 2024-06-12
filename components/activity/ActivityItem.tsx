@@ -19,7 +19,8 @@ interface ActivityItemProps {
 
 export default function ActivityItem({ reservation, onPress }: ActivityItemProps) {
   const themeColors = Colors[useColorScheme() || "light"];
-  const active = isAfter(reservation.ends, Date.now());
+  // const active = isAfter(reservation.ends, Date.now());
+  const [active, setIsActive] = useState(false);
   const listing = useListingWithId(reservation.listingId);
   const durationText = useMemo(() => {
     if (!listing) return "";
@@ -32,11 +33,29 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
         return "Weekly";
       case "month":
         return "Monthly";
-      default: 
+      default:
         return "";
     }
   }, [listing]);
-  
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!reservation) return;
+
+      const now = moment();
+      const start = moment(reservation.starts);
+      const end = moment(reservation.ends);
+
+      if (now.isBetween(start, end)) {
+        setIsActive(true);
+      } else {
+        setIsActive(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [reservation]);
+
   return (
     // link to add spot page with the data from the spot inserted when opening owned spots
     <Link
@@ -45,18 +64,20 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
         params: { id: reservation.id },
       }}
       asChild
-      style={{ ...styles.listingContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}
-    >
+      style={{ ...styles.listingContainer, backgroundColor: themeColors.header, borderColor: themeColors.outline }}>
       <TouchableOpacity>
-        <View style={{ ...styles.listingInfo, opacity: !active ? 0.7 : 1, }}>
+        <View style={{ ...styles.listingInfo, opacity: !active ? 0.7 : 1 }}>
           {active && <View style={{ ...styles.notificationIcon, borderColor: themeColors.outline }}></View>}
           <Image source={{ uri: imageUriFromKey(listing?.thumbnail || "") }} style={{ ...styles.image, borderColor: themeColors.outline }} />
           <View style={styles.listingText}>
-            {listing && <Text weight="semibold" style={{ fontSize: 16 }}>
-              {truncateTitle(listing.city, listing.state, 20)} / {durationText}
-            </Text>}
+            {listing && (
+              <Text weight="semibold" style={{ fontSize: 16 }}>
+                {truncateTitle(listing.city, listing.state, 20)} / {durationText}
+              </Text>
+            )}
             <Text italic style={{ color: themeColors.secondary }}>
-              {moment(reservation.starts).format('M/D')} @ {moment(reservation.starts).format('h:mm a')} - {moment(reservation.ends).format('M/D')} @ {moment(reservation.ends).format('h:mm a')}
+              {moment(reservation.starts).format("M/D")} @ {moment(reservation.starts).format("h:mm a").toUpperCase()} -{" "}
+              {moment(reservation.ends).format("M/D")} @ {moment(reservation.ends).format("h:mm a").toUpperCase()}
             </Text>
           </View>
         </View>
@@ -64,8 +85,7 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
           onPress={onPress}
           style={({ pressed }) => ({
             opacity: pressed ? 0.5 : 1,
-          })}
-        >
+          })}>
           <Pencil size={18} color={themeColors.secondary} />
         </Pressable>
       </TouchableOpacity>

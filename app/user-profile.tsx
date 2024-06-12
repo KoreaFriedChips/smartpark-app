@@ -3,8 +3,12 @@ import { Platform, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useUserContext, useOtherUser } from '@/hooks';
 
-export default function MessagesScreen() {
+export default function UserProfile() {
+  const user = useOtherUser();
+  console.log(user);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Messages</Text>
