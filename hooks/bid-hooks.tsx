@@ -31,10 +31,10 @@ export const useHighestBid = (listingId: string | undefined, desiredSlot: Interv
 
   const fetchHighestBid = async () => {
     try {
-      console.log("listingId: ", listingId, "desiredSlot: ", desiredSlot);
+      //console.log("listingId: ", listingId, "desiredSlot: ", desiredSlot);
       if (!listingId || !desiredSlot) return;
       const bid = await getHighestBid(getToken, listingId, desiredSlot.start, desiredSlot.end);
-      console.log("bid: ", bid);
+     //console.log("bid: ", bid);
       setHighestBid(bid);
     } catch (err: any) {
       console.log(err.message);
@@ -48,8 +48,8 @@ export const useHighestBid = (listingId: string | undefined, desiredSlot: Interv
       return () => clearInterval(intervalId);
     }
   }, [listingId, desiredSlot]);
-  
+
   setInterval(async () =>  fetchHighestBid(), minutesToMilliseconds(5));
-  console.log("use highest bid: ", highestBid);
+  //console.log("use highest bid: ", highestBid);
   return highestBid;
 }

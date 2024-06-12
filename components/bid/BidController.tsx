@@ -3,6 +3,9 @@ import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import BidView from "./BidView";
 import { useBackend } from "@/hooks";
+import { readBids } from "@/serverconn";
+import { useAuth } from "@clerk/clerk-expo";
+import { cancelPaymentIntent } from "@/serverconn/payments";
 
 export default function BidController(){
   const { createBid, createReservation } = useBackend();
@@ -10,9 +13,10 @@ export default function BidController(){
   const amount = useRef<number>();
   const desiredSlot = useRef<Interval>();
   const highestBid = useRef<Bid>();
+  const { getToken } = useAuth();
 
 
-  const handleSubmitBid = async () => {
+  const handleSubmitBid = async (paymentIntentId: string) => {
 
     if (!amount.current) {
       showErrorPage("must put a bid amount");
@@ -39,7 +43,8 @@ export default function BidController(){
         amount: amount.current,
         starts: desiredSlot.current.start,
         ends: desiredSlot.current.end,
-        listingId: listingId.current
+        listingId: listingId.current, 
+        stripePaymentIntentId: paymentIntentId
       });
       router.replace({pathname: "/message-screen", params: {id: "bid-placed"}});
       console.log(bid);
@@ -70,13 +75,20 @@ export default function BidController(){
       console.log(reservation);
       router.replace({pathname: "/message-screen", params: {id: "bid-won"}});
       desiredSlot.current = undefined;
+
+      // cancel all bids for this listing interval
+      const bids = await readBids(getToken, { listingId: listingId.current, starts: desiredSlot.current!.start, ends: desiredSlot.current!.end} );
+      for (const bid of bids) {
+        await cancelPaymentIntent(getToken, bid.id);
+      }
+        
     } catch (err: any) {
       console.log(err);
       router.push({pathname: "/message-screen", params: {id: "order-error"}});
     }
 
   }
-  console.log("highest bid: ", highestBid);
+  //console.log("highest bid: ", highestBid);
   return (BidView({listingId: listingId, amount: amount, desiredSlot: desiredSlot, highestBid: highestBid, handleSubmitBid, handleSubmitBuy}));
 
 }

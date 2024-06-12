@@ -1,4 +1,4 @@
-import React, { useEffect, useState, MutableRefObject } from "react";
+import React, { useEffect, useState, MutableRefObject, useRef } from "react";
 import {
   Platform,
   StyleSheet,
@@ -46,7 +46,7 @@ export interface BidViewProps {
   amount: MutableRefObject<number | undefined>;
   desiredSlot: MutableRefObject<Interval | undefined>;
   highestBid: MutableRefObject<Bid | undefined>;
-  handleSubmitBid: () => Promise<void>;
+  handleSubmitBid: (paymentIntentId : string) => Promise<void>;
   handleSubmitBuy: () => Promise<void>;
 }
 
@@ -64,6 +64,8 @@ export default function BidView({
   const [bidAmount, setBidAmount] = useState("");
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
   const user = useUserContext();
+  const [paymentIntentId, setPaymentIntentId] = useState("");
+  const paymentIntentIdRef = useRef<string>();
 
   const stripePublishableKey =
     Constants.expoConfig?.extra?.stripePublishableKey;
@@ -78,6 +80,9 @@ export default function BidView({
         name: "Jane Doe",
       },
     });
+    paymentIntentIdRef.current = paymentIntent.id;
+    setPaymentIntentId(paymentIntent.id);
+
     if (paymentSheetError) {
       Alert.alert("Something went wrong", paymentSheetError.message);
       return;
@@ -94,6 +99,7 @@ export default function BidView({
         listing?.userId ?? ""
       );
       console.log("payment intent: ", paymentIntent);
+
       return paymentIntent;
     } catch (error: any) {
       console.error("Error fetching payment sheet params:", error);
@@ -122,10 +128,10 @@ export default function BidView({
       Alert.alert(`Error code: ${paymentError.code}`, paymentError.message);
       return;
     }
-
+    console.log(paymentIntentIdRef.current);
     // Call handleSubmitBid or handleSubmitBuy based on the selection
     if (selection === "Place bid") {
-      await handleSubmitBid();
+      await handleSubmitBid(paymentIntentIdRef.current ?? "");
     } else {
       await handleSubmitBuy();
     }
@@ -164,9 +170,9 @@ export default function BidView({
   const bidCount = useBidCount(listing?.id, desiredSlot);
 
   useEffect(() => {
-    console.log("highestBidRef: ", highestBidRef)
+    //console.log("highestBidRef: ", highestBidRef)
     if (highestBid) highestBidRef.current = highestBid;
-    console.log("highest Bid: ", highestBid);
+    //console.log("highest Bid: ", highestBid);
   }, [highestBid]);
 
   const setSelect = (selection: string) => {

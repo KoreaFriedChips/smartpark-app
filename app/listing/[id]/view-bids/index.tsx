@@ -45,7 +45,7 @@ export default function ListingBids() {
       try {
         const res = await readListings(getToken, { id: listingId });
         setListing(res[0]);
-        //console.log(listingId);
+        console.log(listingId);
         const response = await getListingBids(getToken, listingId as string);
         //console.log(response);
         setBids(response);
