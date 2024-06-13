@@ -12,6 +12,7 @@ import Colors from "@/constants/Colors";
 import SettingsItem from "@/components/SettingsItem";
 import {
   ArrowDownUp,
+  BadgeCheck,
   Bell,
   BellRing,
   ChevronRight,
@@ -27,50 +28,62 @@ import {
 export default function Profile() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
-  const { signOut } = useAuth();
-  const givenReviews = useGivenReviews();
-  const receivedReviews = useReceivedReviews();
-  const transactions = useTransactions();
   const user = useUser();
   console.log(user);
+  // const { signOut } = useAuth();
+  // const givenReviews = useGivenReviews();
+  // const receivedReviews = useReceivedReviews();
+  // const transactions = useTransactions();
 
-  useEffect(() => {
-    if (!givenReviews) return;
-    console.log(givenReviews);
-  }, [givenReviews]);
+  // useEffect(() => {
+  //   if (!givenReviews) return;
+  //   console.log(givenReviews);
+  // }, [givenReviews]);
 
-  useEffect(() => {
-    if (!receivedReviews) return;
-    console.log(receivedReviews);
-  }, [receivedReviews]);
+  // useEffect(() => {
+  //   if (!receivedReviews) return;
+  //   console.log(receivedReviews);
+  // }, [receivedReviews]);
 
-  useEffect(() => {
-    if (!transactions) return;
-    console.log(transactions);
-  }, [transactions]);
+  // useEffect(() => {
+  //   if (!transactions) return;
+  //   console.log(transactions);
+  // }, [transactions]);
 
-  console.log(givenReviews, receivedReviews, transactions);
+  // console.log(givenReviews, receivedReviews, transactions);
 
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity onPress={() => signOut()}><Text style={styles.title}>Tab Two</Text></TouchableOpacity> */}
       <ScrollView style={styles.scroll}>
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
           <ProfilePicture image={user?.profilePicture} width={48} borderWidth={1} hasKey />
           <View style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "flex-start" }}>
-            <Text weight="semibold" style={{ fontSize: 20 }}>
-              {user?.name}
-            </Text>
+            <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 4 }}>
+              <Text weight="semibold" style={{ fontSize: 20 }}>
+                {user?.name}
+              </Text>
+              {user?.verified && <BadgeCheck size={16} color={themeColors.secondary} strokeWidth={2} style={{ marginBottom: 2 }} />}
+            </View>
             <Text italic style={{ color: themeColors.secondary, fontSize: 12, marginTop: 2 }}>{`Joined ${new Date(
               user?.activeSince ?? ""
             ).toLocaleDateString()}`}</Text>
           </View>
         </View>
-        <TouchableOpacity style={{ marginTop: 12, marginLeft: 4 }}>
-          <Text weight="semibold" style={{ color: themeColors.primary, marginBottom: -6 }}>
-            View profile
-          </Text>
-        </TouchableOpacity>
+        {user && (
+          <Link
+            href={{
+              pathname: "/user-profile",
+              params: { id: user.id },
+            }}
+            style={{ marginTop: 12, marginLeft: 4 }}
+            asChild>
+            <TouchableOpacity>
+              <Text weight="semibold" style={{ color: themeColors.primary, marginBottom: -6 }}>
+                View profile
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        )}
         <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
         {!user?.verified && (
           <TouchableOpacity style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
@@ -111,8 +124,8 @@ export default function Profile() {
             <Text weight="semibold" style={{ fontSize: 18, marginTop: 28, marginBottom: 8 }}>
               Seller tools
             </Text>
-            <SettingsItem path="/messages/" text="Payouts" Icon={PiggyBank} />
             <SettingsItem path="/messages/" text="Incoming bids" Icon={ArrowDownUp} />
+            <SettingsItem path="/messages/" text="Payouts" Icon={PiggyBank} />
             <SettingsItem path="/messages/" text="Scan QR code" Icon={Heart} />
           </>
         )}

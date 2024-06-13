@@ -45,6 +45,7 @@ const darkLogo = require("../assets/images/SMARTPARK-WEB-LOGO-DARK.png");
 
 export default function SignInScreen() {
   useWarmUpBrowser();
+  // modal does nothing?
   const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
   const themeColors = Colors[useColorScheme() || "light"];
@@ -148,7 +149,8 @@ export default function SignInScreen() {
           if (!sActiveI) throw new Error("sActiveI is undefined");
           await sActiveI({ session: signInAttempt.createdSessionId });
           completeSignUp(signInAttempt.createdSessionId, sActiveI!);
-          return "CodeVerification";
+          // changed from "CodeVerification"
+          return "Main";
         } else {
           throw new Error("Your code is invalid.");
         }
@@ -207,7 +209,6 @@ export default function SignInScreen() {
   const setGlobalBirthday: RSP = async (b: Date) => {
     setDate(b);
     completeSignUp(csi, sActiveU!);
-    setModalVisible(false);
     return "PhoneInput";
   };
 
@@ -237,6 +238,7 @@ export default function SignInScreen() {
     }
   };
 
+  // only use of signin function (no signup?)
   const completeSignUp = async (csi: string, setA: SetActive) => {
     try {
       await setA({ session: csi });
@@ -273,6 +275,7 @@ export default function SignInScreen() {
       }
     };
 
+    // push navigation
     const startSignUp = () => {
       props.navigation.push("PhoneInput", {});
     };
@@ -383,10 +386,10 @@ export default function SignInScreen() {
             headerStyle: {
               backgroundColor: themeColors.background,
             },
-            // headerLeft: () => <HeaderLeft />,
             headerTitle: () => <HeaderTitle name="Next steps" />,
             headerRight: () => (
               <Pressable
+              // doesn't do anything - should go back
                 onPress={() => null}
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.5 : 1,
@@ -455,14 +458,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.15,
-    // shadowRadius: 3.84,
-    // elevation: 3,
   },
   buttonText: {
     textAlign: "center",

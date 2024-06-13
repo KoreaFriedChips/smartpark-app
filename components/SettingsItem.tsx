@@ -12,27 +12,34 @@ interface SettingsItemProps {
   id?: string;
   text: string;
   Icon: React.ElementType;
+  onPress?: () => void;
   style?: ViewStyle;
 }
 
-export default function SettingsItem({ path, id = "/", text, Icon, style }: SettingsItemProps) {
+export default function SettingsItem({ path, id = "/", text, Icon, onPress, style }: SettingsItemProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
-  return (
+  const content = (
+    <View style={[styles.settingsItem, { borderColor: themeColors.outline }, style]}>
+      <View style={styles.itemContainer}>
+        <Icon size={22} color={themeColors.secondary} strokeWidth={2} />
+        <Text style={{ fontSize: 16, color: themeColors.secondary }}>{text}</Text>
+      </View>
+      <ChevronRight size={22} color={themeColors.third} strokeWidth={2} />
+    </View>
+  );
+
+  return onPress ? (
+    <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity>
+  ) : (
     <Link
       href={{
         pathname: path,
         params: { id: id },
       }}
-      style={[styles.settingsItem, { borderColor: themeColors.outline }, style]}
-      asChild>
-      <TouchableOpacity>
-        <View style={styles.itemContainer}>
-          <Icon size={22} color={themeColors.secondary} strokeWidth={2} />
-          <Text style={{ fontSize: 16, color: themeColors.secondary }}>{text}</Text>
-        </View>
-        <ChevronRight size={22} color={themeColors.third} strokeWidth={2} />
-      </TouchableOpacity>
+      asChild
+    >
+      <TouchableOpacity>{content}</TouchableOpacity>
     </Link>
   );
 }

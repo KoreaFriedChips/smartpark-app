@@ -151,7 +151,7 @@ export default function Reservation() {
       headerTitle: () => <HeaderTitle name={isActive ? "Active" : "Inactive"} text={`(${remainingTime})`} active={isActive} />,
       headerLeft: () => <HeaderLeft text={false} />,
       headerRight: () => (
-        <Link href={`/reservation/${id}/qr-code`} asChild>
+        <Link href={`/reservation/${id}/settings`} asChild>
           <Pressable>
             {({ pressed }) => (
               <Pencil

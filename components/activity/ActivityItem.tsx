@@ -81,13 +81,19 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
             </Text>
           </View>
         </View>
-        <Pressable
-          onPress={onPress}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.5 : 1,
-          })}>
-          <Pencil size={18} color={themeColors.secondary} />
-        </Pressable>
+        <Link href={`/reservation/${reservation.id}/settings`} asChild>
+          <Pressable>
+            {({ pressed }) => (
+              <Pencil
+                size={18}
+                color={themeColors.secondary}
+                style={{
+                  opacity: pressed ? 0.5 : 1,
+                }}
+              />
+            )}
+          </Pressable>
+        </Link>
       </TouchableOpacity>
     </Link>
   );

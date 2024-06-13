@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    lineHeight: 20,
     // marginTop: -2,
   },
   verifyContainer: {
