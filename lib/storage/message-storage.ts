@@ -58,7 +58,7 @@ export const storeLatestMessages = async (latestMessages: LatestMessage[]) => {
       userKeys[i],
       JSON.stringify({
         ...value,
-        read: currentLatestMessages[i] && value.message === currentLatestMessages[i].message ? currentLatestMessages[i].read : value.read
+        read: currentLatestMessages[i] && value.message === currentLatestMessages[i]?.message ? currentLatestMessages[i]?.read : value.read
       }),
     ]);
     await AsyncStorage.setItem(latestMessageKeyTag, JSON.stringify(userKeys));

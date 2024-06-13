@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors";
 import { Image } from "expo-image";
 import MessageText from "@/components/MessageText";
 import moment from "moment";
+import ProfilePicture from "./user/ProfilePicture";
 
 // interface MessageProps {
 //   sent?: boolean;
@@ -15,7 +16,7 @@ import moment from "moment";
 
 interface MessageProps {
   sent?: boolean,
-  profilePicture?: string,
+  profilePicture?: string | null,
   date: Date,
   reaction?: boolean
   messages: string[]
@@ -27,7 +28,7 @@ export default function Message({ sent = true, profilePicture, date, reaction = 
 
   return (
     <View style={{ ...styles.messageContainer, flexDirection: sent ? "row-reverse" : "row" }}>
-      {!sent && <Image source={{ uri: profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
+      {!sent && <ProfilePicture image={profilePicture} hasKey width={30} styles={{ marginBottom: 20 }} />}
       <View style={{ ...styles.mContainer, alignItems: sent ? "flex-end" : "flex-start" }}>
           {messages.flatMap((message, i) => (
           <MessageText key={i} sent={sent} message={message} reaction={reaction} images={imageLists[i]} />

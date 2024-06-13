@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Platform, Dimensions, useColorScheme, TouchableOpacity, ScrollView, Pressable, KeyboardAvoidingView } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";

@@ -31,7 +31,7 @@ import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing } from "@/hooks";
 import moment from "moment";
-import { differenceInCalendarDays, differenceInHours, differenceInMonths, intervalToDuration, set } from "date-fns";
+import { differenceInCalendarDays, differenceInHours, differenceInMonths, differenceInWeeks, intervalToDuration, set } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
@@ -63,21 +63,20 @@ export default function BidView({
   const [desiredSlot, setDesiredSlot] = useState<Interval>();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [licensePlate, setLicensePlate] = useState("");
-  const [error, setPlateError] = useState("");
+  const [vehicleInfo, setvehicleInfo] = useState("");
+  const [error, setInfoError] = useState("");
 
-  const validatePlate = (plate: string) => {
-    const licensePlateRegex = /^[A-Z0-9-]{1,8}$/;
-    return licensePlateRegex.test(plate);
+  const validateInfo = (info: string) => {
+    return info.length >= 6 && info.length <= 20;
   };
 
-  const handlePlateSubmit = () => {
-    if (validatePlate(licensePlate)) {
-      console.log("License Plate:", licensePlate);
+  const handleInfoSubmit = () => {
+    if (validateInfo(vehicleInfo)) {
+      console.log("Vehicle info:", vehicleInfo);
       setModalVisible(false);
     } else {
-      setLicensePlate("");
-      setPlateError("Invalid plate format");
+      setvehicleInfo("");
+      setInfoError("Must be between 6 and 20 characters");
     }
   };
 
@@ -254,6 +253,13 @@ export default function BidView({
           2
         )} / day) + 7.5% fee`;
         break;
+      case "week":
+        diff = differenceInWeeks(endDate, startDate);
+        spotPrice.price = diff * amount * 1.075;
+        spotPrice.calcText = `(${diff} ${diff === 1 ? "week" : "weeks"} x ${amount.toFixed(
+          2
+        )} / week) + 7.5% fee`;
+        break;
       case "month":
         diff = differenceInMonths(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
@@ -346,9 +352,9 @@ export default function BidView({
                     autoComplete="off"
                     autoCorrect={false}
                     spellCheck={false}
-                    keyboardType="numbers-and-punctuation"
-                    returnKeyType="go"
-                    clearButtonMode="while-editing"
+                    keyboardType="numeric"
+                    returnKeyType="done"
+                    clearButtonMode="always"
                   />
                 </View>
                 <Text
@@ -422,29 +428,6 @@ export default function BidView({
                     {spotPrice().calcText}
                   </Text>
                 )}
-
-                {/* <TouchableOpacity
-                  style={{
-                    ...styles.infoRow,
-                    borderColor: themeColors.outline,
-                    marginTop: 10,
-                  }}
-                >
-                  <View style={styles.buttonRow}>
-                    <Calendar size={16} color={themeColors.secondary} />
-                    <Text
-                      weight="semibold"
-                      style={{
-                        ...styles.subtitle,
-                        fontSize: 14,
-                        color: themeColors.secondary,
-                      }}
-                    >
-                      Date: {moment(desiredSlot?.start).calendar()}
-                    </Text>
-                  </View>
-                  <Pencil size={14} color={themeColors.primary} />
-                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => setModalVisible(true)}
                   style={{
@@ -537,17 +520,17 @@ export default function BidView({
                       borderColor: themeColors.outline,
                     }}
                   >
-                    <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 8 }}>Enter license plate</Text>
+                    <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 8 }}>Enter vehicle information</Text>
                     <Text style={{ textAlign: "center", color: themeColors.third, fontSize: 12, lineHeight: 14 }}>
                       This information will be shared with the seller and must match the vehicle you plan to use.
                     </Text>
                     <TextInput
                       style={{ ...styles.modalInput, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
-                      placeholder="License plate"
-                      value={licensePlate}
+                      placeholder="Red Model S"
+                      value={vehicleInfo}
                       onChangeText={(text) => {
-                        setLicensePlate(text);
-                        setPlateError("");
+                        setvehicleInfo(text);
+                        setInfoError("");
                       }}
                       autoCorrect={false}
                       spellCheck={false}
@@ -560,7 +543,7 @@ export default function BidView({
                     ) : null}
                     <TouchableOpacity
                       onPress={() => {
-                        handlePlateSubmit()
+                        handleInfoSubmit()
                       }}
                     >
                       <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 12 }}>

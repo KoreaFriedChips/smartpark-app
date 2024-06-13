@@ -66,7 +66,7 @@ const SpotImage = ({
             >
               <ImageUp size={78} color={themeColors.primary} strokeWidth={2} />
               <Text weight="semibold" style={{ color: themeColors.secondary }}>
-                Upload up to 4 images
+                Upload a cover image
               </Text>
             </View>
           ) : (
@@ -114,7 +114,7 @@ export function ImageInputWidget({
   return (
     <>
       <Text weight="semibold" style={{ fontSize: 18 }}>Spot images</Text>
-      <Text style={{ color: themeColors.secondary, lineHeight: 18, marginTop: 4, marginBottom: 10 }}>Add high-quality images to your listing</Text>
+      <Text style={{ color: themeColors.secondary, lineHeight: 18, marginTop: 4, marginBottom: 10 }}>Add up to 4 high-quality images to your listing</Text>
       <View style={styles.spotImageContainer}>
         <View style={styles.largeSpotImageContainer}>
           <SpotImage

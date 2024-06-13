@@ -120,22 +120,27 @@ export const useListings = () => {
   return { listings, fetchListings, fetchNextPage, isRefreshing }
 }
 
-export const useUserListings = () => {
+export const useUserListings = (userId?: string) => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { id: paramId } = useLocalSearchParams<{ id: string }>();
   const user = useUserContext();
   const [listings, setListings] = useState<Listing[]>();
+
   useEffect(() => {
     const fetchListings = async () => {
-      if (!isLoaded || !isSignedIn || !user) return;
-      const listings = await readListings(getToken, { userId: user.id });
-      setListings(listings);
+      if (!isLoaded || !isSignedIn || (!user && !userId && !paramId)) return;
+      const actualUserId = userId || paramId || user?.id;
+      if (actualUserId) {
+        const listings = await readListings(getToken, { userId: actualUserId });
+        setListings(listings);
+      }
     };
     try {
       fetchListings();
     } catch (err) {
       console.log(err);
     }
-  }, [isLoaded, isSignedIn, getToken, user]);
+  }, [isLoaded, isSignedIn, getToken, user, userId, paramId]);
+
   return listings;
 };
-

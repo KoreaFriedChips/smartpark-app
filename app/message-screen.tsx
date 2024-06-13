@@ -5,7 +5,7 @@ import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { PartyPopper, Home, Wrench, Undo2, SquareParking, ShieldCheck, Timer, Search, Camera, PlusCircle, Handshake, LineChart, Send, MessagesSquare, BadgeCheck, LucideIcon } from "lucide-react-native";
+import { PartyPopper, Home, Wrench, Undo2, SquareParking, ShieldCheck, Timer, Search, Camera, PlusCircle, Handshake, LineChart, Send, MessagesSquare, BadgeCheck, LucideIcon, Star } from "lucide-react-native";
 import { Link } from "expo-router";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderRightClose from "@/components/Headers/HeaderRightClose";
@@ -46,6 +46,30 @@ const messages: MessagesItem[] = [
     subtitle: `Pleace check the "Activity" page for more information on your reservation.`,
     LinkIcon: SquareParking,
     linkText: "View my spot",
+    path: "/activity",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "spot-ended",
+    Icon: Timer,
+    header: "Spot expired",
+    title: "Your reservation has ended.",
+    subtitle: "We hope you had a great experience. Check out other spots for your next reservation!",
+    LinkIcon: Search,
+    linkText: "Find new spots",
+    path: "/",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "review-added",
+    Icon: Star,
+    header: "Review added",
+    title: "Thanks for your review!",
+    subtitle: "Your feedback helps the community. Check out other spots for your next reservation!",
+    LinkIcon: Undo2,
+    linkText: "Go back",
     path: "/activity",
     id: "",
     verify: false,
@@ -151,7 +175,7 @@ const messages: MessagesItem[] = [
 export default function MessageScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
-  const { id, path, pathId } = useLocalSearchParams<{id: string, path: AllRoutes, pathId: string}>();
+  const { id, path, pathId, subtitle } = useLocalSearchParams<{id: string, path: AllRoutes, pathId: string, subtitle?: string }>();
   const message = messages.find((item) => item.messageId === id) || messages.find((item) => item.messageId === "error");
 
   useEffect(() => {
@@ -176,7 +200,7 @@ export default function MessageScreen() {
         <MessagesScreen
           Icon={message.Icon}
           title={message.title}
-          subtitle={message.subtitle}
+          subtitle={subtitle || message.subtitle}
           LinkIcon={message.LinkIcon}
           linkText={message.linkText}
           path={path ? path : message.path}

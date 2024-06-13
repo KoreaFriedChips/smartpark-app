@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 import { View, Text } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -11,9 +11,10 @@ interface HeaderTitleProps {
   text?: string;
   stacked?: boolean;
   arrow?: boolean;
+  active?: boolean;
 }
 
-export default function HeaderTitle({ name, text, stacked, arrow = false }: HeaderTitleProps) {
+export default function HeaderTitle({ name, text, stacked, arrow = false, active }: HeaderTitleProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
@@ -30,6 +31,7 @@ export default function HeaderTitle({ name, text, stacked, arrow = false }: Head
       onPress={() => arrow && router.push("/set-location")}
     >
       {/* {arrow && <MapPin size={18} color={themeColors.primary} strokeWidth={2} style={{ marginRight: -2 }} />} */}
+      {active && <View style={{ ...styles.notificationIcon, borderColor: themeColors.outline }}></View>}
       <Text
         style={{
           fontFamily: "Soliden-SemiBold",
@@ -58,3 +60,13 @@ export default function HeaderTitle({ name, text, stacked, arrow = false }: Head
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  notificationIcon: {
+    aspectRatio: 1 / 1,
+    width: 10,
+    borderRadius: 10,
+    backgroundColor: Colors["accent"],
+    borderWidth: 0.5,
+  },
+});

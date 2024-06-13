@@ -18,6 +18,7 @@ import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-reac
 import * as Linking from 'expo-linking';
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import "react-native-reanimated";
+import HeaderLeft from '@/components/Headers/HeaderLeft';
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListing, UserContext, useUser } from "@/hooks";
@@ -292,10 +293,40 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="reservation/[id]/settings"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Settings" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
           name="messages/index"
           options={{
             title: "",
             headerTitle: () => <HeaderTitle name="Messages" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="listing/[id]/create-review"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Add review" />,
+            headerLeft: () => <HeaderLeft text={false} />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="user-profile"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Profile" />,
             headerLeft: () => headerLeft(),
             headerBackVisible: false,
             headerTitleAlign: "center",

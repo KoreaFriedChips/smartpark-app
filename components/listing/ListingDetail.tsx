@@ -14,13 +14,13 @@ export function ListingDetail({ title, description, Icon }: ListingDetailProps) 
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
-    <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start", marginTop: 20, marginLeft: 4 }}>
+    <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start", marginTop: 16, marginLeft: 4 }}>
       <Icon
         size={24}
         // color={ themeColors.primary}
         color={useColorScheme() === "light" ? themeColors.primary : Colors.accent}
         strokeWidth={2}
-        style={{ marginRight: 16, marginTop: 16 }}
+        style={{ marginRight: 14, marginTop: 16 }}
       />
       <View style={{ backgroundColor: "transparent", display: "flex", justifyContent: "flex-start", alignItems: "flex-start", flexShrink: 1 }}>
         <Text

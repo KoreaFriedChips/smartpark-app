@@ -21,6 +21,7 @@ export default function ActivityView() {
   const refRBSheet = useRef<ReactElement>(null);
   const listings = useUserListings();
   const { reservations, refreshReservations } = useReservations();
+  console.log(reservations);
 
   const reservationList = useMemo(() => (
     <FlatList

@@ -3,7 +3,20 @@ import { StyleSheet, FlatList, Modal, ScrollView, TouchableOpacity, useColorSche
 import { Picker } from "@react-native-picker/picker";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { PartyPopper, Music, Trophy, FerrisWheel, SlidersHorizontal, Theater, CalendarClock, Cctv, Truck, LockOpen, LampDesk, PlugZap } from "lucide-react-native";
+import {
+  PartyPopper,
+  Music,
+  Trophy,
+  FerrisWheel,
+  SlidersHorizontal,
+  Theater,
+  CalendarClock,
+  Cctv,
+  Truck,
+  LockOpen,
+  LampDesk,
+  PlugZap,
+} from "lucide-react-native";
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import { ListingSearchOptions, useSearchContext } from "@/hooks";
@@ -17,8 +30,8 @@ interface TagItem {
 }
 
 interface TagsContainerProps {
-  search: boolean,
-  fetchListings: (props: ListingSearchOptions) => any
+  search: boolean;
+  fetchListings: (props: ListingSearchOptions) => any;
 }
 
 const categories: TagItem[] = [
@@ -44,23 +57,25 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
 
-  const {
-    selectedCategories, setSelectedCategories,
-    sortOption, setSortOption,
-    searchQuery, setSearchQuery,
-  } = useSearchContext();
+  const { selectedCategories, setSelectedCategories, sortOption, setSortOption, searchQuery, setSearchQuery } = useSearchContext();
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [sortOptionState, setSortOptionState] = useState(sortOption);
 
+  useEffect(() => {
+    setSortOptionState(sortOption);
+  }, [sortOption]);
 
   const handlePressCategory = (category: string) => {
-    setSelectedCategories(selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category]);
+    setSelectedCategories(
+      selectedCategories.includes(category) ? selectedCategories.filter((c) => c !== category) : [...selectedCategories, category]
+    );
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const submitSearch = () => {
     fetchListings({ amenities: selectedCategories, searchQuery, sortOption: sortOption.value });
-  }
+  };
 
   useEffect(() => {
     submitSearch();
@@ -74,35 +89,31 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(!modalVisible);
-        }}
-      >
+        }}>
         <View style={styles.modalBackground}>
           <View
             style={{
               ...styles.modalContainer,
               backgroundColor: themeColors.background,
               borderColor: themeColors.outline,
-            }}
-          >
+            }}>
             <Text weight="semibold" style={{ textAlign: "center", color: themeColors.third }}>
               Sort by:
             </Text>
             <Picker
               itemStyle={{ color: themeColors.primary, fontFamily: "Soliden-Medium", letterSpacing: -0.5, fontSize: 18 }}
-              selectedValue={sortOption}
-              onValueChange={(itemValue) => setSortOption(itemValue)}
-            >
+              selectedValue={sortOptionState}
+              onValueChange={(itemValue) => setSortOptionState(itemValue)}>
               {Object.values(SortOptions).flatMap((option, index) => (
                 <Picker.Item label={option.label} value={option} key={index} />
               ))}
             </Picker>
             <TouchableOpacity
               onPress={() => {
-                setSortOption(sortOption);
+                setSortOption(sortOptionState);
                 submitSearch();
                 setModalVisible(!modalVisible);
-              }}
-            >
+              }}>
               <Text weight="semibold" style={{ ...styles.modalButtonText, marginBottom: 12 }}>
                 Apply
               </Text>
@@ -112,8 +123,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
                 setSortOption(SortOptions.distanceLowHigh);
                 setSelectedCategories([]);
                 setModalVisible(!modalVisible);
-              }}
-            >
+              }}>
               <Text weight="semibold" style={{ ...styles.modalButtonText, color: themeColors.secondary }}>
                 Reset Filters
               </Text>
@@ -126,14 +136,12 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
           ...styles.headerContainer,
           borderColor: themeColors.outline,
           backgroundColor: themeColors.header,
-        }}
-      >
+        }}>
         {search && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSubmitEditing={submitSearch} />}
         <View
           style={{
             backgroundColor: "transparent",
-          }}
-        >
+          }}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -145,8 +153,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
                 paddingTop: 2,
               },
               !search && styles.tagsPadded,
-            ]}
-          >
+            ]}>
             <Tag
               name={sortOption.label}
               // style={{ backgroundColor: themeColors.background }}

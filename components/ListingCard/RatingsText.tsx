@@ -8,10 +8,11 @@ interface RatingsProps {
   reviews?: number;
   rating?: number;
   full?: boolean;
+  fontSize?: number;
   style?: TextStyle | TextStyle[];
 }
 
-export default function RatingsText({ reviews, rating, full = false, style }: RatingsProps) {
+export default function RatingsText({ reviews, rating, full = false, fontSize = 16, style }: RatingsProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
@@ -20,11 +21,11 @@ export default function RatingsText({ reviews, rating, full = false, style }: Ra
         ...styles.rating,
       }}
     >
-      <Star size={14} color={Colors.accentAlt} fill={Colors.accent} strokeWidth={2} style={{ marginRight: 3 }} />
+      <Star size={fontSize - 2} color={Colors.accentAlt} fill={Colors.accent} strokeWidth={2} style={{ marginRight: 3 }} />
       <Text
         weight="semibold"
         style={{
-          ...styles.ratingText,
+          fontSize: fontSize,
           ...style,
         }}
       >
@@ -33,7 +34,7 @@ export default function RatingsText({ reviews, rating, full = false, style }: Ra
       <Text
         italic
         style={{
-          ...styles.ratingText,
+          fontSize: fontSize,
           color: themeColors.secondary,
           ...style,
         }}
@@ -51,8 +52,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "transparent",
-  },
-  ratingText: {
-    fontSize: 16,
   },
 });

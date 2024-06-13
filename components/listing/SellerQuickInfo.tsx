@@ -6,16 +6,16 @@ import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import Colors from "@/constants/Colors";
 import { MessageCircleMore, BadgeCheck } from "lucide-react-native";
-
+import ProfilePicture from "@/components/user/ProfilePicture";
 import RatingsText from "@/components/ListingCard/RatingsText";
-import { imageUriFromKey } from "@/lib/utils";
+import { getRandomLocation } from "@/components/utils/utils";
 
 export function SellerQuickInfo({seller }: {seller: User}) {
   const themeColors = Colors[useColorScheme() || "light"];
   return (
   <Link
     href={{
-      pathname: "/seller-profile",
+      pathname: "/user-profile",
       params: { id: seller.id },
     }}
     asChild
@@ -24,16 +24,16 @@ export function SellerQuickInfo({seller }: {seller: User}) {
     <TouchableOpacity>
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
         <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
-          <Image source={{ uri: imageUriFromKey(seller.profilePicture ?? "") }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />
+          <ProfilePicture image={seller.profilePicture} hasKey />
           <View style={{ backgroundColor: "transparent", display: "flex", alignItems: "flex-start", marginLeft: 8 }}>
             <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
               <Text weight="semibold" style={{ fontSize: 16 }}>
                 {seller.name}
               </Text>
-              <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 3 }} />
+              {seller.verified && <BadgeCheck size={14} color={themeColors.secondary} strokeWidth={2} style={{ marginLeft: 4 }} />}
             </View>
             <Text style={{ marginTop: 2 }}>
-              {seller.city}, {seller.state}
+              {seller.city ? `${seller.city}, ${seller.state}` : getRandomLocation()}
             </Text>
           </View>
         </View>
@@ -41,8 +41,8 @@ export function SellerQuickInfo({seller }: {seller: User}) {
           <RatingsText rating={seller.rating} reviews={seller.reviews} full={true} />
         </View>
       </View>
-      <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`Verified since ${new Date(seller.activeSince).toLocaleDateString()}`}</Text>
-      <Text style={{ marginTop: 8, lineHeight: 18 }}>{seller.description}</Text>
+      <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`${seller.verified ? "Verified since" : "Active since"} ${new Date(seller.activeSince).toLocaleDateString()}`}</Text>
+      {seller.description && <Text style={{ marginTop: 8, lineHeight: 18 }}>{seller.description}</Text>}
       <Link
         href={{
           pathname: `/messages/${seller.id}/`,

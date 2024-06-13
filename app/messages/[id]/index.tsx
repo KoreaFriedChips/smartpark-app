@@ -1,4 +1,14 @@
-import { Platform, FlatList, StyleSheet, useColorScheme, TouchableOpacity, Pressable, ScrollView, Dimensions, KeyboardAvoidingView } from "react-native";
+import {
+  Platform,
+  FlatList,
+  StyleSheet,
+  useColorScheme,
+  TouchableOpacity,
+  Pressable,
+  ScrollView,
+  Dimensions,
+  KeyboardAvoidingView,
+} from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import React, { useEffect, useMemo, useState } from "react";
 import Colors from "@/constants/Colors";
@@ -15,12 +25,14 @@ import { Message } from "@/types";
 import messaging from "@react-native-firebase/messaging";
 import * as ImagePicker from "expo-image-picker";
 import { fetchImageFromUri } from "@/lib/utils";
-import SideSwipe from 'react-native-sideswipe';
+import SideSwipe from "react-native-sideswipe";
+import ProfilePicture from "@/components/user/ProfilePicture";
+import { getRandomLocation } from "@/components/utils/utils";
 
 interface AggregatedMessage extends Message {
-  messages: string[]
-  attachmentLists: string[][]
-  message: "",
+  messages: string[];
+  attachmentLists: string[][];
+  message: "";
 }
 
 export default function MessagesScreen() {
@@ -29,34 +41,31 @@ export default function MessagesScreen() {
   const [message, setMessage] = useState("");
   const { messages, sendMessage, refresh } = useMessages();
   const otherUser = useOtherUser();
-  const { id: otherUserId } = useLocalSearchParams<{id: string}>();
+  const { id: otherUserId } = useLocalSearchParams<{ id: string }>();
   const [attachments, setAttachments] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const { uploadImage } = useBackend();
 
   useEffect(() => {
     const unsubscribe = messaging().onMessage((remoteMessage) => {
-      if (remoteMessage.data?.title === 'New message received' && remoteMessage.data?.fromUserId === otherUserId) 
-        refresh();
+      if (remoteMessage.data?.title === "New message received" && remoteMessage.data?.fromUserId === otherUserId) refresh();
     });
-    
-    return unsubscribe;
-  }, [])
 
+    return unsubscribe;
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "",
-      headerTitle: () => <HeaderTitle name={otherUser?.name} text={`(${otherUser?.rating.toFixed(2)} stars)`} />,
+      headerTitle: () => <HeaderTitle name={otherUser?.name} text={`${otherUser?.rating && otherUser?.rating > 0 ? `(${otherUser.rating.toFixed(2)})` : "(Unrated)"} `} />,
       headerLeft: () => <HeaderLeft text={false} />,
       headerBackVisible: false,
       headerTitleAlign: "center",
     });
   }, [navigation, themeColors, otherUser]);
 
-
   const handleMessageSend = async () => {
     if (message === "" && attachments.length === 0) return;
-    console.log('sent');
+    console.log("sent");
     try {
       let uris: string[] = [];
       for (const attachment of attachments) {
@@ -70,14 +79,14 @@ export default function MessagesScreen() {
       setMessage("");
       setAttachments([]);
     } catch (e) {
-      console.log('message send failed');
+      console.log("message send failed");
       console.log(e);
     }
-  }
+  };
 
   useEffect(() => {
     if (attachments.length === 0) return;
-    console.log('attachment added');
+    console.log("attachment added");
     console.log(attachments);
   }, [attachments]);
 
@@ -88,12 +97,12 @@ export default function MessagesScreen() {
       aspect: [4, 3],
       quality: 1,
     });
-    
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setAttachments([...attachments, result.assets[0]]);
     }
-  }
+  };
 
   const aggregatedMessages: AggregatedMessage[] = useMemo(() => {
     if (messages.length === 0) return [];
@@ -101,61 +110,69 @@ export default function MessagesScreen() {
     const msgs: AggregatedMessage[] = [];
     let currentGroup: AggregatedMessage = {
       ...messages[0],
-      messages: [ messages[0].message ],
+      messages: [messages[0].message],
       attachmentLists: [messages[0].attachments],
       message: "",
-    }
+    };
 
     for (const message of messages.filter((_, i) => i !== 0)) {
       if (message.toUserId === currentGroup.toUserId) {
         currentGroup.messages = [message.message, ...currentGroup.messages];
-        currentGroup.attachmentLists = [message.attachments, ...currentGroup.attachmentLists]
+        currentGroup.attachmentLists = [message.attachments, ...currentGroup.attachmentLists];
       } else {
-        msgs.push({...currentGroup});
+        msgs.push({ ...currentGroup });
         currentGroup = {
           ...message,
           messages: [message.message],
           attachmentLists: [message.attachments],
-          message: ""
-        }
+          message: "",
+        };
       }
     }
-    msgs.push({...currentGroup});
-    return msgs
-
+    msgs.push({ ...currentGroup });
+    return msgs;
   }, [messages]);
   return (
     <KeyboardAvoidingView
       style={{ ...styles.container, backgroundColor: themeColors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 54}
-    >
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 54}>
       <FlatList
         inverted={true}
         data={aggregatedMessages}
-        renderItem={({ item }) => <MessageComponent sent={item.toUserId === otherUserId} date={item.date} profilePicture="https://source.unsplash.com/random?person" messages={item.messages} imageLists={item.attachmentLists}/>}
+        // shouldn't still have random picture
+        renderItem={({ item }) => (
+          <MessageComponent
+            sent={item.toUserId === otherUserId}
+            date={item.date}
+            profilePicture={otherUser?.profilePicture}
+            messages={item.messages}
+            imageLists={item.attachmentLists}
+          />
+        )}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scroll}
         ListFooterComponent={
-          otherUser && <View style={styles.messageInfo}>
-            {otherUser.profilePicture && <Image source={{ uri: otherUser?.profilePicture }} style={[styles.profilePicture, { borderColor: themeColors.outline }]} />}
-            {otherUser.city && otherUser.state && <Text weight="semibold" style={styles.cityText}>
-              {`${otherUser.city}, ${otherUser.state}`}
-            </Text>}
-            <Text italic style={{ ...styles.dateText, color: themeColors.secondary }}>
-              {`Joined ${otherUser.activeSince.getFullYear()}`}
-            </Text>
-            <Link
-              href={{
-                pathname: "/user-profile",
-                params: { id: otherUser.id },
-              }}
-              asChild
-              style={styles.profileText}
-            >
-              <Text weight="semibold">View profile</Text>
-            </Link>
-          </View>
+          otherUser && (
+            <View style={styles.messageInfo}>
+              <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 12 }} hasKey />
+              <Text weight="semibold" style={styles.cityText}>
+                {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : getRandomLocation()}
+              </Text>
+              <Text italic style={{ ...styles.dateText, color: themeColors.secondary }}>
+                {`Joined ${otherUser.activeSince.getFullYear()}`}
+              </Text>
+              <Link
+                href={{
+                  pathname: "/user-profile",
+                  params: { id: otherUser.id },
+                }}
+                asChild
+                style={styles.profileText}>
+                <Text weight="semibold">View profile</Text>
+              </Link>
+            </View>
+          )
         }
         ListEmptyComponent={<Text style={styles.noListings}>No messages found.</Text>}
         // onEndReached={loadMoreListings}
@@ -164,20 +181,10 @@ export default function MessagesScreen() {
       />
       <View style={[styles.outerSearchContainer, { backgroundColor: themeColors.header, borderColor: themeColors.outline }]}>
         {attachments.length !== 0 && (
-        
           <SideSwipe
             style={styles.imageContainer}
             data={attachments}
-            renderItem={({itemIndex, currentIndex, item}) => (
-              <Image
-                key={itemIndex}
-                source={item}
-                style={styles.image}
-              />
-            )}
-          >
-
-          </SideSwipe>
+            renderItem={({ itemIndex, currentIndex, item }) => <Image key={itemIndex} source={item} style={styles.image} />}></SideSwipe>
           // <FlatList
           //   data={attachments}
           //   renderItem={({item}) => <Image source={item} style={styles.image}/>}
@@ -193,8 +200,7 @@ export default function MessagesScreen() {
               {
                 opacity: pressed ? 0.5 : 1,
               },
-            ]}
-          >
+            ]}>
             <PlusCircle size={22} color={themeColors.primary} strokeWidth={2} />
           </Pressable>
           <Pressable onPress={handleMessageSend} style={({ pressed }) => [styles.sendButton, { opacity: pressed ? 0.5 : 1 }]}>
@@ -237,19 +243,14 @@ const styles = StyleSheet.create({
     gap: 2,
     marginBottom: 12,
   },
-  profilePicture: {
-    aspectRatio: 1 / 1,
-    width: 90,
-    borderRadius: 90,
-    borderWidth: 1,
-    marginBottom: 12,
-    // position: "absolute",
-  },
   cityText: {
+    marginTop: 2,
     fontSize: 16,
   },
   dateText: {
     fontSize: 14,
+    marginTop: 2,
+    marginBottom: 6,
     opacity: 0.8,
   },
   profileText: {
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginBottom: 40,
     borderRadius: 8,
-    zIndex: 3
+    zIndex: 3,
     // shadowColor: "#000",
     // shadowOffset: {
     //   width: 0,
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 8,
-    marginVertical: 5
+    marginVertical: 5,
   },
   image: {
     width: 150,
