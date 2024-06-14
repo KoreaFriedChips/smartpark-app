@@ -25,11 +25,12 @@ export interface Review {
   date: string;
   // reviewer: User;
 }
-// const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
 function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, imgHeight = 250, hideButton, hideDistance }: {item: Listing, onPress?: ()=>void, locationLength?: number, marginRight?: number, imgHeight?: number, hideButton?: boolean, hideDistance?: boolean }) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
+
+  const blurhash = useColorScheme() === "light" ? "KaJbHpROD*T#jXRQ.9xtRl" : "CEEfl-0400?b?wI90K?b";
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -59,9 +60,8 @@ function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, img
       >
         <Image
           source={{ uri: imageUriFromKey(item.thumbnail) }}
-          // placeholder={blurhash}
+          placeholder={blurhash}
           style={{ ...styles.thumbnail, height: imgHeight }}
-          // cachePolicy={"none"}
         />
         <HeartButton id={item.id} />
         {!hideDistance && <DistanceText distance={item.distance} />}

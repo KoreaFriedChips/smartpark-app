@@ -20,7 +20,7 @@ import { router } from "expo-router";
 import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";
 import Colors from "@/constants/Colors";
 import Tag from "@/components/Tag";
-import { Compass, MapPin, MessageCircleMore, Navigation, Pencil, QrCode, Settings } from "lucide-react-native";
+import { CircleEllipsis, Compass, EllipsisVertical, MapPin, MessageCircleMore, Navigation, Pencil, QrCode, Settings } from "lucide-react-native";
 import moment from "moment";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderLeft from "@/components/Headers/HeaderLeft";
@@ -154,8 +154,8 @@ export default function Reservation() {
         <Link href={`/reservation/${id}/settings`} asChild>
           <Pressable>
             {({ pressed }) => (
-              <Pencil
-                size={20}
+              <CircleEllipsis
+                size={22}
                 color={themeColors.primary}
                 style={{
                   opacity: pressed ? 0.5 : 1,

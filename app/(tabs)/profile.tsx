@@ -19,6 +19,7 @@ import {
   CircleUserRound,
   HandCoins,
   Heart,
+  LogOut,
   Mail,
   MessageSquareShare,
   PiggyBank,
@@ -30,7 +31,7 @@ export default function Profile() {
   const themeColors = Colors[colorScheme || "light"];
   const user = useUser();
   console.log(user);
-  // const { signOut } = useAuth();
+  const { signOut } = useAuth();
   // const givenReviews = useGivenReviews();
   // const receivedReviews = useReceivedReviews();
   // const transactions = useTransactions();
@@ -113,20 +114,21 @@ export default function Profile() {
         <Text weight="semibold" style={{ fontSize: 18, marginBottom: 8 }}>
           Account settings
         </Text>
-        <SettingsItem path="/messages/" text="Personal information" Icon={CircleUserRound} />
-        <SettingsItem path="/messages/" text="Payment history" Icon={ReceiptText} />
-        <SettingsItem path="/messages/" text="Favorites" Icon={Heart} />
-        <SettingsItem path="/messages/" text="Notifications" Icon={BellRing} />
-        <SettingsItem path="/messages/" text="Feedback & bug report" Icon={MessageSquareShare} />
-        <SettingsItem path="/messages/" text="Contact support" Icon={Mail} />
+        <SettingsItem path="/" text="Personal information" Icon={CircleUserRound} />
+        <SettingsItem path="/" text="Payment history" Icon={ReceiptText} />
+        <SettingsItem path="/" text="Favorites" Icon={Heart} />
+        <SettingsItem path="/" text="Notifications" Icon={BellRing} />
+        <SettingsItem path="/" text="Feedback & bug report" Icon={MessageSquareShare} />
+        <SettingsItem path="/" text="Contact support" Icon={Mail} />
+        <SettingsItem path="/" onPress={signOut} text="Sign out" Icon={LogOut} />
         {user?.verified && (
           <>
             <Text weight="semibold" style={{ fontSize: 18, marginTop: 28, marginBottom: 8 }}>
               Seller tools
             </Text>
-            <SettingsItem path="/messages/" text="Incoming bids" Icon={ArrowDownUp} />
-            <SettingsItem path="/messages/" text="Payouts" Icon={PiggyBank} />
-            <SettingsItem path="/messages/" text="Scan QR code" Icon={Heart} />
+            <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
+            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} />
+            <SettingsItem path="/" text="Scan QR code" Icon={Heart} />
           </>
         )}
         <View style={{ backgroundColor: "transparent", height: 64 }}></View>

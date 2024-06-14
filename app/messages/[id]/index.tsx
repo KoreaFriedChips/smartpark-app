@@ -40,6 +40,7 @@ export default function MessagesScreen() {
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
   const { messages, sendMessage, refresh } = useMessages();
+  const [location, setLocation] = useState("");
   const otherUser = useOtherUser();
   const { id: otherUserId } = useLocalSearchParams<{ id: string }>();
   const [attachments, setAttachments] = useState<ImagePicker.ImagePickerAsset[]>([]);
@@ -52,6 +53,10 @@ export default function MessagesScreen() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    setLocation(getRandomLocation())
+  }, [location]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -157,7 +162,7 @@ export default function MessagesScreen() {
             <View style={styles.messageInfo}>
               <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 12 }} hasKey />
               <Text weight="semibold" style={styles.cityText}>
-                {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : getRandomLocation()}
+                {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : location}
               </Text>
               <Text italic style={{ ...styles.dateText, color: themeColors.secondary }}>
                 {`Joined ${otherUser.activeSince.getFullYear()}`}

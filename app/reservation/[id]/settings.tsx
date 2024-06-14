@@ -19,6 +19,7 @@ import {
   BellRing,
   ChevronRight,
   CircleUserRound,
+  DoorOpen,
   HandCoins,
   Heart,
   History,
@@ -87,7 +88,7 @@ export default function Profile() {
         <SettingsItem path="/" onPress={handleCreateReview} text="Add review" Icon={SquarePen} />
         <SettingsItem path="/" onPress={handleExtendReservation} text="Extend reservation" Icon={TimerReset} />
         <SettingsItem path="/" onPress={handleRereserve} text="Re-reserve spot" Icon={History} />
-        {/* <SettingsItem path="/messages/" onPress={handleEndReservation} text="Cancel reservation" Icon={LogOut} /> */}
+        {/* <SettingsItem path="/messages/" onPress={handleEndReservation} text="End reservation" Icon={DoorOpen} /> */}
         <View style={{ backgroundColor: "transparent", height: 64 }}></View>
       </ScrollView>
     </View>

@@ -66,6 +66,11 @@ export const SortOptions = {
   }
 }
 
+export const getLabel = (value: string): string => {
+  const option = Object.values(SortOptions).find(opt => opt.value === value);
+  return option ? option.label : "";
+};
+
 export const getRandomLocation = () => {
   const locationsText = [
     "No location",
