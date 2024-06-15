@@ -178,6 +178,7 @@ export default function SetLocation() {
           keyboardType="default"
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100}
         />
       </View>
 

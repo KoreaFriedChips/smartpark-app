@@ -20,7 +20,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import { ListingSearchOptions, useSearchContext } from "@/hooks";
-import { SortOptions, SortOption, getLabel } from "@/components/utils/utils";
+import { SortOptions, SortOption } from "@/components/utils/utils";
 import * as Haptics from "expo-haptics";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
@@ -60,10 +60,10 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const { selectedCategories, setSelectedCategories, sortOption, setSortOption, searchQuery, setSearchQuery } = useSearchContext();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [sortOptionState, setSortOptionState] = useState("distanceLowHigh");
+  const [sortOptionState, setSortOptionState] = useState(() => sortOption.value);
 
   useEffect(() => {
-    setSortOptionState(sortOption as unknown as string);
+    setSortOptionState(sortOption.value);
   }, [sortOption]);
 
   const handlePressCategory = (category: string) => {
@@ -80,7 +80,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   useEffect(() => {
     submitSearch();
   }, [selectedCategories]);
-
+  
   return (
     <View>
       <Modal
@@ -155,7 +155,7 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
               !search && styles.tagsPadded,
             ]}>
             <Tag
-              name={getLabel(sortOptionState as unknown as string)}
+              name={sortOption.label}
               // style={{ backgroundColor: themeColors.background }}
               Icon={SlidersHorizontal}
               isSelected={selectedCategories.includes("Filter")}

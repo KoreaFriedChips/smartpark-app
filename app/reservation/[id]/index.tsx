@@ -15,12 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import { Text, View } from "@/components/Themed";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useBackend, useReservation } from "@/hooks";
-import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";
 import Colors from "@/constants/Colors";
 import Tag from "@/components/Tag";
-import { CircleEllipsis, Compass, EllipsisVertical, MapPin, MessageCircleMore, Navigation, Pencil, QrCode, Settings } from "lucide-react-native";
+import { CircleEllipsis, Compass, Ellipsis, EllipsisVertical, MapPin, MessageCircleMore, Navigation, Pencil, QrCode, Settings } from "lucide-react-native";
 import moment from "moment";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderLeft from "@/components/Headers/HeaderLeft";
@@ -49,7 +48,10 @@ export default function Reservation() {
         params: { id: "bid-won" },
       });
     } catch (err: any) {
-      showErrorPage(err.message);
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: err.message },
+      });
     }
   };
 
@@ -154,7 +156,7 @@ export default function Reservation() {
         <Link href={`/reservation/${id}/settings`} asChild>
           <Pressable>
             {({ pressed }) => (
-              <CircleEllipsis
+              <Ellipsis
                 size={22}
                 color={themeColors.primary}
                 style={{
@@ -212,7 +214,7 @@ export default function Reservation() {
                 paddingVertical: 12,
               }}>
               <View style={{ ...styles.flexContainer }}>
-                <View style={{ backgroundColor: "transparent", width: (Dimensions.get("window").width - 64) / 2 - 4 }}>
+                <View style={{ backgroundColor: "transparent", width: (Dimensions.get("window").width - 64) / 2 - 18, borderRightWidth: 0.5, borderColor: themeColors.outline }}>
                   <Text weight="bold" style={{ fontSize: 16, marginBottom: 2 }}>
                     {moment(reservation?.starts).format("M/D")} @ {moment(reservation?.starts).format("h:mm a").toUpperCase()}
                   </Text>

@@ -45,11 +45,12 @@ export const NameInput = (props: NameInputProps) => {
                 <Text style={styles.subText}>What's your name?</Text>
                 <TextInput
                     style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
-                    placeholder="Joe Smith"
+                    placeholder="John Park"
                     onChangeText={setName}
                     value={name}
                     keyboardType="default"
                     clearButtonMode="while-editing"
+                    maxLength={30}
                 />
                 <TouchableOpacity
                     style={[

@@ -10,7 +10,6 @@ import { useTransactions } from "@/hooks/transaction-hooks";
 import ProfilePicture from "@/components/user/ProfilePicture";
 import Colors from "@/constants/Colors";
 import SettingsItem from "@/components/SettingsItem";
-import { showErrorPage } from "@/components/utils/utils";
 import { useNavigation } from "@react-navigation/native";
 import {
   ArrowDownUp,
@@ -54,7 +53,10 @@ export default function Profile() {
         params: { id: "spot-ended" },
       });
     } catch (err: any) {
-      showErrorPage(err.message);
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: err.message },
+      });
     }
   };
 

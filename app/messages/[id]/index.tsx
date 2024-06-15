@@ -70,7 +70,6 @@ export default function MessagesScreen() {
 
   const handleMessageSend = async () => {
     if (message === "" && attachments.length === 0) return;
-    console.log("sent");
     try {
       let uris: string[] = [];
       for (const attachment of attachments) {
@@ -81,6 +80,7 @@ export default function MessagesScreen() {
         uris.push(uri);
       }
       await sendMessage(message, uris);
+      console.log("sent");
       setMessage("");
       setAttachments([]);
     } catch (e) {
@@ -160,7 +160,7 @@ export default function MessagesScreen() {
         ListFooterComponent={
           otherUser && (
             <View style={styles.messageInfo}>
-              <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 12 }} hasKey />
+              <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 14 }} hasKey />
               <Text weight="semibold" style={styles.cityText}>
                 {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : location}
               </Text>

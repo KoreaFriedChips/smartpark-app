@@ -1,21 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { StyleSheet, Platform, Dimensions, useColorScheme, TouchableOpacity, Pressable } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker, Region, Callout, LatLng } from "react-native-maps";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import { useNavigation } from "@react-navigation/native";
 import Tag from "@/components/Tag";
 import TagsContainer, { getTagIcon } from "@/components/TagsContainer";
 import { Link, router } from "expo-router";
 import { MapPin, Navigation, ParkingCircle } from "lucide-react-native";
 import { useListings, useLocationContext, UserLocationObject, useSearchContext } from "@/hooks";
-
-
+import HeaderTitle from "@/components/Headers/HeaderTitle";
 
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const { listings, fetchListings, fetchNextPage, isRefreshing } = useListings();
+  // const navigation = useNavigation();
+  // const [title, setTitle] = useState("Set location");
+
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: () => <HeaderTitle name={title} arrow={true} />,
+  //   });
+  // }, [navigation, themeColors, title]);
 
   const { location } = useLocationContext();
   const [region, setRegion] = useState<Region>();

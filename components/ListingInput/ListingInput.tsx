@@ -164,6 +164,7 @@ const DescriptionInput = ({
         keyboardType="default"
         returnKeyType="next"
         clearButtonMode="always"
+        maxLength={250}
       />
     </View>
   );
@@ -247,6 +248,7 @@ const PriceInput = ({
         keyboardType="decimal-pad"
         returnKeyType="next"
         clearButtonMode="always"
+        maxLength={10}
       />
     </View>
   );

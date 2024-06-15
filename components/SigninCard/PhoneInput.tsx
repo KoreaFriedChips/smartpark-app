@@ -67,6 +67,7 @@ export const PhoneInput = (props: PhoneInputProps) => {
           keyboardType="phone-pad"
           returnKeyType="done"
           clearButtonMode="always"
+          maxLength={15}
         />
         <TouchableOpacity
           style={[

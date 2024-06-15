@@ -17,7 +17,6 @@ export const showErrorPage = (errorMsg: string) => {
   router.push({pathname: "/error", params: {errorMsg}});
 }
 
-
 export interface SortOption {
   value: string,
   label: string

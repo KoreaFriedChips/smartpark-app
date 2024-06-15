@@ -19,7 +19,7 @@ const defaultNotifications = [
   {
     id: "1",
     title: "New message received",
-    description: "You have received a new message from John Doe regarding your parking spot at 1414 Cedar St.",
+    description: "You have received a new message from John Park regarding your parking spot at 1414 Cedar St.",
     date: subHours(Date.now(), 1),
     path: "/messages/",
     read: false,
