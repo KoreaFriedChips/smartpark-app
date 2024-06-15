@@ -74,6 +74,7 @@ export const EmailVerification = (props: EmailVerificationProps) => {
                     value={code}
                     keyboardType="default"
                     clearButtonMode="while-editing"
+                    maxLength={6}
                 />
                 <TouchableOpacity onPressOut={resend}>
                     <Text weight="bold">{resendT}</Text>

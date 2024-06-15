@@ -43,7 +43,7 @@ export default function MessageText({ sent = true, message, reaction = false, im
             renderItem={({item}) => (
               <Image
                 source={{ uri: imageUriFromKey(item)}}
-                style={styles.image}
+                style={{ ...styles.image, borderColor: themeColors.outline }}
               />
             )}
 
@@ -59,8 +59,8 @@ export default function MessageText({ sent = true, message, reaction = false, im
 const styles = StyleSheet.create({
   message: {
     display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     justifyContent: "flex-start",
     padding: 12,
     paddingBottom: 10,
@@ -88,16 +88,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   imageContainer: {
-    width: 150,
+    // width: 150,
+    width: "100%",
     gap: 10,
     borderRadius: 8,
-    marginVertical: 5
+    marginVertical: 4
   },
   image: {
     width: 150,
     height: 150,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0.5,
     zIndex: 5,
   },
 });

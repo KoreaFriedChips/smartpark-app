@@ -64,8 +64,10 @@ export const PhoneInput = (props: PhoneInputProps) => {
           placeholder="(123) 456-7890"
           onChangeText={setPhone}
           value={phone}
-          keyboardType="default"
-          clearButtonMode="while-editing"
+          keyboardType="phone-pad"
+          returnKeyType="done"
+          clearButtonMode="always"
+          maxLength={15}
         />
         <TouchableOpacity
           style={[

@@ -313,6 +313,16 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="(settings)/create-feedback"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Add feedback" />,
+            headerLeft: () => <HeaderLeft />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
           name="listing/[id]/create-review"
           options={{
             title: "",

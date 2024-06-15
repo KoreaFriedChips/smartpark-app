@@ -1,11 +1,11 @@
-import { StyleSheet, TouchableOpacity, Dimensions, ScrollView, useColorScheme } from "react-native";
+import { StyleSheet, TouchableOpacity, Dimensions, ScrollView, useColorScheme, Linking } from "react-native";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import { useAuth } from "@clerk/clerk-expo";
 import { useUserContext, useUser, useUserListings } from "@/hooks";
 import { useGivenReviews, useReceivedReviews } from "@/hooks/review-hooks";
 import { useEffect } from "react";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useTransactions } from "@/hooks/transaction-hooks";
 import ProfilePicture from "@/components/user/ProfilePicture";
 import Colors from "@/constants/Colors";
@@ -19,6 +19,7 @@ import {
   CircleUserRound,
   HandCoins,
   Heart,
+  LogOut,
   Mail,
   MessageSquareShare,
   PiggyBank,
@@ -29,8 +30,7 @@ export default function Profile() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const user = useUser();
-  console.log(user);
-  // const { signOut } = useAuth();
+  const { signOut } = useAuth();
   // const givenReviews = useGivenReviews();
   // const receivedReviews = useReceivedReviews();
   // const transactions = useTransactions();
@@ -58,7 +58,15 @@ export default function Profile() {
         <View style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 8 }}>
           <ProfilePicture image={user?.profilePicture} width={48} borderWidth={1} hasKey />
           <View style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "flex-start" }}>
-            <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 4 }}>
+            <View
+              style={{
+                backgroundColor: "transparent",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                gap: 4,
+              }}>
               <Text weight="semibold" style={{ fontSize: 20 }}>
                 {user?.name}
               </Text>
@@ -86,47 +94,60 @@ export default function Profile() {
         )}
         <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
         {!user?.verified && (
-          <TouchableOpacity style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
-            <HandCoins size={32} color={themeColors.primary} strokeWidth={2} />
-            <View
-              style={{
-                backgroundColor: "transparent",
-                width: "100%",
-                flexWrap: "wrap",
-                flexShrink: 1,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-                gap: 4,
-              }}>
-              <Text weight="semibold" style={{ fontSize: 16 }}>
-                Get paid on SmartPark
-              </Text>
-              <Text style={{ color: themeColors.secondary, lineHeight: 16 }}>Start earning money from your extra space in less than 5 minutes</Text>
-              {/* <Text weight="semibold" style={{ color: themeColors.third }}>
-                Learn more
-              </Text> */}
-            </View>
-          </TouchableOpacity>
+          <Link href={`/add`} asChild>
+            <TouchableOpacity style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+              <HandCoins size={32} color={themeColors.primary} strokeWidth={2} />
+              <View
+                style={{
+                  backgroundColor: "transparent",
+                  width: "100%",
+                  flexWrap: "wrap",
+                  flexShrink: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  alignItems: "flex-start",
+                  gap: 4,
+                }}>
+                <Text weight="semibold" style={{ fontSize: 16 }}>
+                  Get paid on SmartPark
+                </Text>
+                <Text style={{ color: themeColors.secondary, lineHeight: 16 }}>Start earning money from your extra space in less than 5 minutes</Text>
+                {/* <Text weight="semibold" style={{ color: themeColors.third }}>
+                  Learn more
+                </Text> */}
+              </View>
+            </TouchableOpacity>
+          </Link>
         )}
         <Text weight="semibold" style={{ fontSize: 18, marginBottom: 8 }}>
           Account settings
         </Text>
-        <SettingsItem path="/messages/" text="Personal information" Icon={CircleUserRound} />
-        <SettingsItem path="/messages/" text="Payment history" Icon={ReceiptText} />
-        <SettingsItem path="/messages/" text="Favorites" Icon={Heart} />
-        <SettingsItem path="/messages/" text="Notifications" Icon={BellRing} />
-        <SettingsItem path="/messages/" text="Feedback & bug report" Icon={MessageSquareShare} />
-        <SettingsItem path="/messages/" text="Contact support" Icon={Mail} />
+        <SettingsItem path="/" text="Personal information" Icon={CircleUserRound} />
+        <SettingsItem path="/" text="Payment history" Icon={ReceiptText} />
+        <SettingsItem
+          path="/"
+          onPress={() => {
+            router.replace({
+              pathname: "/message-screen",
+              params: { id: "feature-beta" },
+            });
+          }}
+          text="Favorites"
+          Icon={Heart}
+        />
+        {/* <SettingsItem path="/" text="Notifications" Icon={BellRing} /> */}
+        <SettingsItem path="/create-feedback" text="Feedback & bug report" Icon={MessageSquareShare} />
+        <SettingsItem path="/" text="Contact support" onPress={() => Linking.openURL("https://trysmartpark.com/contact")} Icon={Mail} />
+        <SettingsItem path="/" onPress={signOut} text="Sign out" Icon={LogOut} />
         {user?.verified && (
           <>
             <Text weight="semibold" style={{ fontSize: 18, marginTop: 28, marginBottom: 8 }}>
               Seller tools
             </Text>
-            <SettingsItem path="/messages/" text="Incoming bids" Icon={ArrowDownUp} />
-            <SettingsItem path="/messages/" text="Payouts" Icon={PiggyBank} />
-            <SettingsItem path="/messages/" text="Scan QR code" Icon={Heart} />
+            <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
+            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} />
+            <SettingsItem path="/" text="Scan QR code" Icon={Heart} />
           </>
         )}
         <View style={{ backgroundColor: "transparent", height: 64 }}></View>

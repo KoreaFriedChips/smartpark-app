@@ -7,7 +7,7 @@ export default {
     "version": "1.0.0",
     "owner": "smartpark",
     "orientation": "portrait",
-    "icon": "./assets/images/smartpark-icon.png",
+    "icon": "./assets/images/SMARTPARK-APP-ICON.png",
     "scheme": "smartpark",
     "userInterfaceStyle": "automatic",
     "experiments": {

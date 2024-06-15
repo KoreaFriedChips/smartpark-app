@@ -4,6 +4,7 @@ import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useNavigation } from "@react-navigation/native";
 import { X } from "lucide-react-native";
+import { router } from "expo-router";
 
 interface HeaderRightProps {
   home?: boolean;
@@ -16,13 +17,18 @@ export default function HeaderRightClose({ home = true }: HeaderRightProps) {
 
   return (
     <Pressable
-      onPress={() => home ? navigation.navigate("index" as never) : navigation.goBack()}
+      onPress={() => {
+        home
+          ? router.replace({
+              pathname: "/",
+            })
+          : navigation.goBack();
+      }}
       style={({ pressed }) => ({
         opacity: pressed ? 0.5 : 1,
         flexDirection: "row",
         alignItems: "center",
-      })}
-    >
+      })}>
       <X size={22} color={themeColors.primary} />
     </Pressable>
   );

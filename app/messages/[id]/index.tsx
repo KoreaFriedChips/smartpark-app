@@ -40,6 +40,7 @@ export default function MessagesScreen() {
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
   const { messages, sendMessage, refresh } = useMessages();
+  const [location, setLocation] = useState("");
   const otherUser = useOtherUser();
   const { id: otherUserId } = useLocalSearchParams<{ id: string }>();
   const [attachments, setAttachments] = useState<ImagePicker.ImagePickerAsset[]>([]);
@@ -53,6 +54,10 @@ export default function MessagesScreen() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    setLocation(getRandomLocation())
+  }, [location]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "",
@@ -65,7 +70,6 @@ export default function MessagesScreen() {
 
   const handleMessageSend = async () => {
     if (message === "" && attachments.length === 0) return;
-    console.log("sent");
     try {
       let uris: string[] = [];
       for (const attachment of attachments) {
@@ -76,6 +80,7 @@ export default function MessagesScreen() {
         uris.push(uri);
       }
       await sendMessage(message, uris);
+      console.log("sent");
       setMessage("");
       setAttachments([]);
     } catch (e) {
@@ -155,9 +160,9 @@ export default function MessagesScreen() {
         ListFooterComponent={
           otherUser && (
             <View style={styles.messageInfo}>
-              <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 12 }} hasKey />
+              <ProfilePicture image={otherUser.profilePicture} width={90} borderWidth={1} styles={{ marginBottom: 14 }} hasKey />
               <Text weight="semibold" style={styles.cityText}>
-                {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : getRandomLocation()}
+                {otherUser.city ? `${otherUser.city}, ${otherUser.state}` : location}
               </Text>
               <Text italic style={{ ...styles.dateText, color: themeColors.secondary }}>
                 {`Joined ${otherUser.activeSince.getFullYear()}`}

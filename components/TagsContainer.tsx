@@ -20,7 +20,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import Tag from "@/components/Tag";
 import { ListingSearchOptions, useSearchContext } from "@/hooks";
-import { SortOptions } from "@/components/utils/utils";
+import { SortOptions, SortOption } from "@/components/utils/utils";
 import * as Haptics from "expo-haptics";
 
 // const categories = ["Events", "Concerts", "Sports", "Attractions", "Shows",  "Schools", "Festivals", "City", "Outdoors", "Food", "Landmarks"];
@@ -60,10 +60,10 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   const { selectedCategories, setSelectedCategories, sortOption, setSortOption, searchQuery, setSearchQuery } = useSearchContext();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [sortOptionState, setSortOptionState] = useState(sortOption);
+  const [sortOptionState, setSortOptionState] = useState(() => sortOption.value);
 
   useEffect(() => {
-    setSortOptionState(sortOption);
+    setSortOptionState(sortOption.value);
   }, [sortOption]);
 
   const handlePressCategory = (category: string) => {
@@ -74,13 +74,13 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
   };
 
   const submitSearch = () => {
-    fetchListings({ amenities: selectedCategories, searchQuery, sortOption: sortOption.value });
+    fetchListings({ amenities: selectedCategories, searchQuery, sortOption: sortOptionState });
   };
 
   useEffect(() => {
     submitSearch();
   }, [selectedCategories]);
-
+  
   return (
     <View>
       <Modal
@@ -103,14 +103,14 @@ function TagsContainer({ search, fetchListings }: TagsContainerProps) {
             <Picker
               itemStyle={{ color: themeColors.primary, fontFamily: "Soliden-Medium", letterSpacing: -0.5, fontSize: 18 }}
               selectedValue={sortOptionState}
-              onValueChange={(itemValue) => setSortOptionState(itemValue)}>
+              onValueChange={(itemValue) => {setSortOptionState(itemValue)}}>
               {Object.values(SortOptions).flatMap((option, index) => (
-                <Picker.Item label={option.label} value={option} key={index} />
+                <Picker.Item label={option.label} value={option.value} key={index} />
               ))}
             </Picker>
             <TouchableOpacity
               onPress={() => {
-                setSortOption(sortOptionState);
+                setSortOption(sortOptionState as unknown as SortOption);
                 submitSearch();
                 setModalVisible(!modalVisible);
               }}>

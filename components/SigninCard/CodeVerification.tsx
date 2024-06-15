@@ -74,8 +74,10 @@ export const CodeVerification = (props: CodeVerificationProps) => {
           placeholder="123456"
           onChangeText={setCode}
           value={code}
-          keyboardType="default"
-          clearButtonMode="while-editing"
+          keyboardType="numeric"
+          returnKeyType="done"
+          clearButtonMode="always"
+          maxLength={6}
         />
         <TouchableOpacity style={{ marginTop: -6 }} onPressOut={resend}>
           <Text weight="bold">{resendT}</Text>

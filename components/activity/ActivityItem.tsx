@@ -3,7 +3,7 @@ import { Text, View } from "@/components/Themed";
 import { StyleSheet, useColorScheme, TouchableOpacity, Pressable } from "react-native";
 import Colors from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
-import { Pencil } from "lucide-react-native";
+import { EllipsisVertical, Pencil } from "lucide-react-native";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { isAfter, isBefore } from "date-fns";
@@ -16,6 +16,8 @@ interface ActivityItemProps {
   reservation: Reservation;
   onPress?: () => void;
 }
+
+const blurhash = useColorScheme() === "light" ? "KaJbHpROD*T#jXRQ.9xtRl" : "CEEfl-0400?b?wI90K?b";
 
 export default function ActivityItem({ reservation, onPress }: ActivityItemProps) {
   const themeColors = Colors[useColorScheme() || "light"];
@@ -68,7 +70,7 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
       <TouchableOpacity>
         <View style={{ ...styles.listingInfo, opacity: !active ? 0.7 : 1 }}>
           {active && <View style={{ ...styles.notificationIcon, borderColor: themeColors.outline }}></View>}
-          <Image source={{ uri: imageUriFromKey(listing?.thumbnail || "") }} style={{ ...styles.image, borderColor: themeColors.outline }} />
+          <Image source={{ uri: imageUriFromKey(listing?.thumbnail || "") }} style={{ ...styles.image, borderColor: themeColors.outline }} placeholder={blurhash} />
           <View style={styles.listingText}>
             {listing && (
               <Text weight="semibold" style={{ fontSize: 16 }}>
@@ -84,7 +86,7 @@ export default function ActivityItem({ reservation, onPress }: ActivityItemProps
         <Link href={`/reservation/${reservation.id}/settings`} asChild>
           <Pressable>
             {({ pressed }) => (
-              <Pencil
+              <EllipsisVertical
                 size={18}
                 color={themeColors.secondary}
                 style={{

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity, Pressable, Image, useColorScheme, Modal } from "react-native";
+import { Linking, StyleSheet, TouchableOpacity, Pressable, Image, useColorScheme, Modal, Dimensions } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { router } from "expo-router";
 import { useOAuth, useAuth, useSignUp, useSignIn } from "@clerk/clerk-expo";
-import type { SignUpResource, SignInResource, SetActive, PhoneCodeFactor, SignInFirstFactor, } from "@clerk/types";
+import type { SignUpResource, SignInResource, SetActive, PhoneCodeFactor, SignInFirstFactor } from "@clerk/types";
 import { Text, View } from "@/components/Themed";
 import { signin, signup } from "@/serverconn";
 import Colors from "@/constants/Colors";
@@ -10,6 +11,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PhoneInput } from "./SigninCard/PhoneInput";
 import { CodeVerification } from "./SigninCard/CodeVerification";
 import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { EmailInput } from "./SigninCard/EmailInput";
 import { EmailVerification } from "./SigninCard/EmailVerification";
 import { BirthdayInput } from "./SigninCard/BirthdayInput";
@@ -18,6 +20,7 @@ import { Phone, X } from "lucide-react-native";
 import HeaderTitle from "./Headers/HeaderTitle";
 import HeaderLeft from "./Headers/HeaderLeft";
 import { StackNavigationProp } from "@react-navigation/stack";
+import HeaderRightClose from "./Headers/HeaderRightClose";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -45,22 +48,9 @@ const darkLogo = require("../assets/images/SMARTPARK-WEB-LOGO-DARK.png");
 
 export default function SignInScreen() {
   useWarmUpBrowser();
-  // modal does nothing?
-  const [modalVisible, setModalVisible] = useState(false);
   const colorScheme = useColorScheme();
   const themeColors = Colors[useColorScheme() || "light"];
-  const buttonStyle = {
-    ...styles.button,
-    ...(colorScheme === "light" ? styles.buttonWhite : null),
-  };
-  const buttonTextStyle = {
-    ...styles.buttonText,
-    ...(colorScheme === "light" ? styles.buttonTextWhite : null),
-  };
-  const poundStyle = {
-    ...styles.pound,
-    ...(colorScheme === "light" ? styles.poundWhite : null),
-  };
+
   const logoImg = colorScheme === "light" ? lightLogo : darkLogo;
 
   const Stack = createNativeStackNavigator();
@@ -80,6 +70,7 @@ export default function SignInScreen() {
   let { signUp: sUp, setActive: sActiveU } = useSignUp();
   let { signIn: sIn, setActive: sActiveI } = useSignIn();
   let isSigningIn = true;
+  const navigation = useNavigation();
   const [csi, setCSI] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -92,16 +83,16 @@ export default function SignInScreen() {
     const isPhoneCodeFactor = (factor: SignInFirstFactor): factor is PhoneCodeFactor => {
       return factor.strategy === "phone_code";
     };
-  
+
     try {
       if (sIn) {
         const { supportedFirstFactors } = await sIn.create({
           identifier: p,
         });
         console.log("supportedFirstFactors after signIn.create: ", supportedFirstFactors);
-  
+
         const phoneCodeFactor = supportedFirstFactors?.find(isPhoneCodeFactor);
-  
+
         if (phoneCodeFactor) {
           const { phoneNumberId } = phoneCodeFactor;
           console.log("phoneNumberId: ", phoneNumberId);
@@ -114,10 +105,10 @@ export default function SignInScreen() {
       }
     } catch (signInError: any) {
       console.error("SignIn Error: ", signInError.errors[0]);
-  
+
       try {
         if (sUp) {
-          const { supportedFirstFactors } = await sUp.create({ phoneNumber: p }) as any;
+          const { supportedFirstFactors } = (await sUp.create({ phoneNumber: p })) as any;
           const phoneCodeFactor = supportedFirstFactors?.find(isPhoneCodeFactor);
           if (phoneCodeFactor) {
             const { phoneNumberId } = phoneCodeFactor;
@@ -135,7 +126,7 @@ export default function SignInScreen() {
     }
     return "CodeVerification";
   };
-  
+
   const setGlobalCode: RSP = async (code: string) => {
     if (isSigningIn) {
       try {
@@ -148,7 +139,7 @@ export default function SignInScreen() {
         if (signInAttempt.status === "complete" && signInAttempt.createdSessionId) {
           if (!sActiveI) throw new Error("sActiveI is undefined");
           await sActiveI({ session: signInAttempt.createdSessionId });
-          completeSignUp(signInAttempt.createdSessionId, sActiveI!);
+          await signin(getToken);
           // changed from "CodeVerification"
           return "Main";
         } else {
@@ -174,8 +165,8 @@ export default function SignInScreen() {
         throw new Error(err.message || err.errors[0].longMessage);
       }
     }
-  };  
-  
+  };
+
   const setGlobalEmail: RSP = async (e: string) => {
     setEmail(e);
     try {
@@ -208,7 +199,8 @@ export default function SignInScreen() {
   };
   const setGlobalBirthday: RSP = async (b: Date) => {
     setDate(b);
-    completeSignUp(csi, sActiveU!);
+    await signup(getToken, email, b, phone, name);
+    await completeSignUp(csi, sActiveU!);
     return "PhoneInput";
   };
 
@@ -255,19 +247,18 @@ export default function SignInScreen() {
         const startFlow = provider === "google" ? startGoogleOAuthFlow : provider === "facebook" ? startFacebookOAuthFlow : startAppleOAuthFlow;
 
         const { createdSessionId, signUp, setActive } = await startFlow();
-        if (createdSessionId) {
-          await completeSignUp(createdSessionId, setActive!);
+        if (signUp) {
+          sUp = signUp;
+          if (sUp.emailAddress) {
+            setEmail(sUp.emailAddress);
+          }
+          if (sUp.firstName && sUp.lastName) {
+            setName(sUp.firstName + " " + sUp.lastName);
+          }
+          startSignUp();
         } else {
-          if (signUp) {
-            sUp = signUp;
-            console.log(signUp);
-            if (sUp.emailAddress) {
-              setEmail(sUp.emailAddress);
-            }
-            if (sUp.firstName && sUp.lastName) {
-              setName(sUp.firstName + " " + sUp.lastName);
-            }
-            startSignUp();
+          if (createdSessionId) {
+            await completeSignUp(createdSessionId, setActive!);
           }
         }
       } catch (err: any) {
@@ -313,13 +304,13 @@ export default function SignInScreen() {
             style={[
               styles.button,
               {
-                backgroundColor: "transparent",
+                backgroundColor: themeColors.header,
                 borderColor: themeColors.outline,
               },
             ]}>
             <Image source={require("../assets/images/google.webp")} style={styles.logoImage} />
             <Text
-              weight="bold"
+              weight="semibold"
               style={{
                 ...styles.buttonText,
                 color: themeColors.secondary,
@@ -332,13 +323,13 @@ export default function SignInScreen() {
             style={[
               styles.button,
               {
-                backgroundColor: "transparent",
+                backgroundColor: themeColors.header,
                 borderColor: themeColors.outline,
               },
             ]}>
             <Image source={require("../assets/images/facebook.png")} style={styles.logoImage} />
             <Text
-              weight="bold"
+              weight="semibold"
               style={{
                 ...styles.buttonText,
                 color: themeColors.secondary,
@@ -351,13 +342,13 @@ export default function SignInScreen() {
             style={[
               styles.button,
               {
-                backgroundColor: "transparent",
+                backgroundColor: themeColors.header,
                 borderColor: themeColors.outline,
               },
             ]}>
             <Image source={require("../assets/images/apple.png")} style={styles.logoImage} />
             <Text
-              weight="bold"
+              weight="semibold"
               style={{
                 ...styles.buttonText,
                 color: themeColors.secondary,
@@ -365,9 +356,15 @@ export default function SignInScreen() {
               Continue with Apple
             </Text>
           </TouchableOpacity>
-          <Text style={{ ...styles.termsText, color: themeColors.third }}>
-            By signing up or logging in you agree to SmartPark's Terms of Service and Privacy Policy.
-          </Text>
+          <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
+            <Text style={{ ...styles.termsText, color: themeColors.third }}>
+              By signing up or logging in you agree to SmartPark's
+              <Text weight="semibold" onPress={() => Linking.openURL("https://trysmartpark.com/terms-of-service")}>{" Terms of Service "}</Text>
+              {"and "}
+              <Text weight="semibold" onPress={() => Linking.openURL("https://trysmartpark.com/privacy-policy")}>Privacy Policy.</Text>
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -382,27 +379,12 @@ export default function SignInScreen() {
         <Stack.Group
           screenOptions={{
             headerShown: true,
-            presentation: "modal",
             headerStyle: {
               backgroundColor: themeColors.background,
             },
             headerTitle: () => <HeaderTitle name="Next steps" />,
-            headerRight: () => (
-              <Pressable
-              // doesn't do anything - should go back
-                onPress={() => null}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                })}>
-                <X size={22} color={themeColors.primary} />
-              </Pressable>
-            ),
-            headerBackTitle: "Back",
-            headerBackTitleStyle: {
-              fontFamily: "Soliden-SemiBold",
-            },
+            headerLeft: () => <HeaderLeft />,
+            headerBackVisible: false,
           }}>
           <Stack.Screen name="PhoneInput">{(props) => <PhoneInput {...props} setGlobal={setGlobalPhone} />}</Stack.Screen>
           <Stack.Screen name="CodeVerification">
@@ -426,7 +408,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     padding: 16,
-    paddingBottom: 44,
+    paddingBottom: 52,
+  },
+  separator: {
+    height: 1,
+    width: Dimensions.get("window").width - 32,
+    opacity: 0.5,
+    marginBottom: 14,
+    marginTop: 12,
   },
   logoImg: {
     aspectRatio: 875 / 130,
@@ -440,7 +429,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginBottom: 22,
     fontSize: 28,
-    // letterSpacing: -1.5,
   },
   buttonContainer: {
     width: "100%",
@@ -505,10 +493,8 @@ const styles = StyleSheet.create({
     color: "black",
   },
   termsText: {
-    marginTop: 8,
     fontSize: 12,
     lineHeight: 18,
-    padding: 4,
     textAlign: "center",
   },
   logoImage: {

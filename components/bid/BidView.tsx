@@ -355,6 +355,7 @@ export default function BidView({
                     keyboardType="numeric"
                     returnKeyType="done"
                     clearButtonMode="always"
+                    maxLength={10}
                   />
                 </View>
                 <Text
@@ -532,6 +533,7 @@ export default function BidView({
                         setvehicleInfo(text);
                         setInfoError("");
                       }}
+                      maxLength={30}
                       autoCorrect={false}
                       spellCheck={false}
                       keyboardType="default"

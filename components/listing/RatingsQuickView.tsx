@@ -77,8 +77,8 @@ export function RatingsQuickView({ listing }: { listing: Listing }) {
                       </Text>
                     </View>
                   </View>
-                  <View style={{ marginTop: -8, backgroundColor: "transparent" }}>
-                    <RatingsText rating={review.rating} reviews={seller?.reviews} full={false} />
+                  <View style={{ marginTop: -10, backgroundColor: "transparent" }}>
+                    <RatingsText rating={review.rating} reviews={seller?.reviews} hidden={true} full={false} />
                   </View>
                 </View>
                 <Text weight="semibold" style={{ marginTop: 10, textAlign: "left" }}>{`Posted ${new Date(review.date).toLocaleDateString()}`}</Text>

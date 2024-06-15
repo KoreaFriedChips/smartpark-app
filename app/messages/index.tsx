@@ -14,7 +14,7 @@ const messages = [
   {
     id: "10",
     image: "https://source.unsplash.com/random?person",
-    title: "John Doe",
+    title: "John Park",
     description: "Hey! Is your parking spot still available for today?",
     date: subMinutes(Date.now(), 2),
     path: "/messages/10/",
@@ -100,6 +100,7 @@ export default function NotificationsScreen() {
           keyboardType="default"
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100}
         />
       </View>
       <FlatList

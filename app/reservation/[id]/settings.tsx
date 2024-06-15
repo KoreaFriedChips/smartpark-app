@@ -10,7 +10,6 @@ import { useTransactions } from "@/hooks/transaction-hooks";
 import ProfilePicture from "@/components/user/ProfilePicture";
 import Colors from "@/constants/Colors";
 import SettingsItem from "@/components/SettingsItem";
-import { showErrorPage } from "@/components/utils/utils";
 import { useNavigation } from "@react-navigation/native";
 import {
   ArrowDownUp,
@@ -19,6 +18,7 @@ import {
   BellRing,
   ChevronRight,
   CircleUserRound,
+  DoorOpen,
   HandCoins,
   Heart,
   History,
@@ -53,7 +53,10 @@ export default function Profile() {
         params: { id: "spot-ended" },
       });
     } catch (err: any) {
-      showErrorPage(err.message);
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: err.message },
+      });
     }
   };
 
@@ -87,7 +90,7 @@ export default function Profile() {
         <SettingsItem path="/" onPress={handleCreateReview} text="Add review" Icon={SquarePen} />
         <SettingsItem path="/" onPress={handleExtendReservation} text="Extend reservation" Icon={TimerReset} />
         <SettingsItem path="/" onPress={handleRereserve} text="Re-reserve spot" Icon={History} />
-        {/* <SettingsItem path="/messages/" onPress={handleEndReservation} text="Cancel reservation" Icon={LogOut} /> */}
+        {/* <SettingsItem path="/messages/" onPress={handleEndReservation} text="End reservation" Icon={DoorOpen} /> */}
         <View style={{ backgroundColor: "transparent", height: 64 }}></View>
       </ScrollView>
     </View>

@@ -45,11 +45,14 @@ export const EmailInput = (props: EmailInputProps) => {
                 <Text style={styles.subText}>Please enter your email.</Text>
                 <TextInput
                     style={{...styles.textInput, color: colorScheme === "light" ? "black" : "white"}}
-                    placeholder="joe@trysmartpark.com"
+                    placeholder="john@trysmartpark.com"
                     onChangeText={setEmail}
                     value={email}
-                    keyboardType="default"
+                    autoCorrect={false}
+                    spellCheck={false}
+                    keyboardType="email-address"
                     clearButtonMode="while-editing"
+                    maxLength={100}
                 />
                 <TouchableOpacity
                     style={[

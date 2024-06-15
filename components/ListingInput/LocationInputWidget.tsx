@@ -174,6 +174,7 @@ export function LocationInputWidget({
         keyboardType="default"
         returnKeyType="next"
         clearButtonMode="always"
+        maxLength={100}
       />
       <Text weight="semibold" style={{ marginLeft: 2.5 }}>
         City
@@ -186,6 +187,7 @@ export function LocationInputWidget({
         keyboardType="default"
         returnKeyType="next"
         clearButtonMode="always"
+        maxLength={100}
       />
       <Text weight="semibold" style={{ marginLeft: 2.5 }}>
         State
@@ -198,6 +200,7 @@ export function LocationInputWidget({
         keyboardType="default"
         returnKeyType="next"
         clearButtonMode="always"
+        maxLength={100}
       />
       <TouchableOpacity
           style={[

@@ -75,6 +75,7 @@ export default function SearchBar({
           keyboardType="default"
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100}
         />
       </View>
       {showPrevSearches && (

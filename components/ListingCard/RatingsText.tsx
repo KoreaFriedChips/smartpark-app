@@ -8,11 +8,12 @@ interface RatingsProps {
   reviews?: number;
   rating?: number;
   full?: boolean;
+  hidden?: boolean;
   fontSize?: number;
   style?: TextStyle | TextStyle[];
 }
 
-export default function RatingsText({ reviews, rating, full = false, fontSize = 16, style }: RatingsProps) {
+export default function RatingsText({ reviews, rating, full = false, hidden = false, fontSize = 16, style }: RatingsProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
@@ -29,17 +30,18 @@ export default function RatingsText({ reviews, rating, full = false, fontSize = 
           ...style,
         }}
       >
-        {`${reviews && reviews > 0 ? rating?.toFixed(2) : "Unrated"} `}
+        {`${reviews && reviews > 0 ? rating?.toFixed(2) : "Unrated"}`}
       </Text>
       <Text
         italic
         style={{
           fontSize: fontSize,
           color: themeColors.secondary,
+          position: hidden ? "absolute" : "relative",
           ...style,
         }}
       >
-        ({full ? `${reviews} reviews` : reviews})
+        {!hidden && ` (${full ? `${reviews} reviews` : reviews})`}
       </Text>
     </View>
   );

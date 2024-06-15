@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Image, useColorScheme, Dimensions } from "react-native";
+import { StyleSheet, useColorScheme, Dimensions } from "react-native";
+import { Image } from "expo-image";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import HeartButton from "@/components/ListingCard/HeartButton";
@@ -16,6 +17,8 @@ export function ListingGallery({ listing }: { listing: Listing }) {
   const [index, setIndex] = useState(0);
   const carouselRef = useRef(null);
 
+  const blurhash = useColorScheme() === "light" ? "KaJbHpROD*T#jXRQ.9xtRl" : "CEEfl-0400?b?wI90K?b";
+
   return (
     <View>
       <Carousel
@@ -26,6 +29,7 @@ export function ListingGallery({ listing }: { listing: Listing }) {
         renderItem={({ item }) => (
           <Image
             source={{ uri: imageUriFromKey(item) }}
+            placeholder={blurhash}
             style={[styles.thumbnail, { width: width, marginRight: 8, borderColor: themeColors.outline }]}
           />
         )}

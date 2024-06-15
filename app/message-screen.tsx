@@ -1,11 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { AllRoutes, useLocalSearchParams } from "expo-router";
-import { Platform, StyleSheet, KeyboardAvoidingView, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, useColorScheme, Touchable } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  KeyboardAvoidingView,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  useColorScheme,
+  Touchable,
+} from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { PartyPopper, Home, Wrench, Undo2, SquareParking, ShieldCheck, Timer, Search, Camera, PlusCircle, Handshake, LineChart, Send, MessagesSquare, BadgeCheck, LucideIcon, Star } from "lucide-react-native";
+import {
+  PartyPopper,
+  Home,
+  Wrench,
+  Undo2,
+  SquareParking,
+  ShieldCheck,
+  Timer,
+  Search,
+  Camera,
+  PlusCircle,
+  Handshake,
+  LineChart,
+  Send,
+  MessagesSquare,
+  BadgeCheck,
+  LucideIcon,
+  Star,
+  Lock,
+} from "lucide-react-native";
 import { Link } from "expo-router";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderRightClose from "@/components/Headers/HeaderRightClose";
@@ -71,6 +101,30 @@ const messages: MessagesItem[] = [
     LinkIcon: Undo2,
     linkText: "Go back",
     path: "/activity",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "feedback-submitted",
+    Icon: Star,
+    header: "Feedback submitted",
+    title: "Thanks for your submission!",
+    subtitle: "We appreciate your input.",
+    LinkIcon: Undo2,
+    linkText: "Go back",
+    path: "/profile",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "feature-beta",
+    Icon: Lock,
+    header: "Work in progress",
+    title: "Feature unavailable in beta.",
+    subtitle: "We're working on bringing this feature to you in a future update. Stay tuned!",
+    LinkIcon: Home,
+    linkText: "Return home",
+    path: "/",
     id: "",
     verify: false,
   },
@@ -175,7 +229,7 @@ const messages: MessagesItem[] = [
 export default function MessageScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
-  const { id, path, pathId, subtitle } = useLocalSearchParams<{id: string, path: AllRoutes, pathId: string, subtitle?: string }>();
+  const { id, path, pathId, subtitle } = useLocalSearchParams<{ id: string; path: AllRoutes; pathId: string; subtitle?: string }>();
   const message = messages.find((item) => item.messageId === id) || messages.find((item) => item.messageId === "error");
 
   useEffect(() => {
