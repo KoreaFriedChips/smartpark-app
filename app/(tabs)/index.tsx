@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 import { ListingSearchOptions, useBackend, useListings, useLocationContext } from "@/hooks";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
+import { truncateTitle } from "@/components/utils/ListingUtils";
 import { useUserContext } from "@/hooks";
 
 export default function HomeScreen() {
@@ -21,14 +22,15 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!location) return;
+
     if (!location.city || !location.state) {
       const fetchCityState = async () => {
         const cityState = await readCityStateFromCoordinates(location.coords);
-        setTitle(`${cityState.city}, ${cityState.state}`);
+        setTitle(truncateTitle(cityState.city, cityState.state));
       }
       fetchCityState();
     } else {
-      setTitle(`${location.city}, ${location.state}`);
+      setTitle(truncateTitle(location.city, location.state));
     }
   }, [location]);
 
@@ -78,19 +80,20 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Animated.View
         style={{
-          zIndex: 100,
+          // zIndex: 100,
           paddingBottom: 10,
           transform: [{translateY}]
         }}
       >
-        <Animated.View style={{opacity}}>
+        <Animated.View style={{opacity, zIndex: 100 }}>
           <TagsContainer
             search={true}
             fetchListings={handleSubmit}
           />
         </Animated.View>
         <Animated.FlatList
-          style={{marginTop, paddingTop}}
+          style={{marginTop, paddingTop }}
+          ListFooterComponent={<View style={{ height: 164 }}></View>}
           bounces={true}
           onScroll={(e) => {
             if (e.nativeEvent.contentOffset.y > 0)

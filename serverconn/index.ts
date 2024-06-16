@@ -12,3 +12,4 @@ export * from "./favorite";
 export * from "./confirmation";
 export * from './notification';
 export * from './maps';
+export * from './message';

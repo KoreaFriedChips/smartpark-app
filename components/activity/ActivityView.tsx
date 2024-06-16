@@ -15,23 +15,26 @@ export default function ActivityView() {
  const themeColors = Colors[useColorScheme() || "light"];
 
 
- const [selection, setSelection] = useState("Your spots");
- const listings = useUserListings();
- const { reservations } = useReservations();
- const transactions = useTransactions();
+  const [selection, setSelection] = useState("Your spots");
+  const [open, setOpen] = useState(true);
+  const refRBSheet = useRef<ReactElement>(null);
+  const listings = useUserListings();
+  const { reservations, refreshReservations } = useReservations();
+  const transactions = useTransactions();
 
-
- const reservationList = useMemo(() => (
-   <FlatList
-     data={reservations}
-     renderItem={({ item }) => (
-       <ActivityItem reservation={item} />
-     )}
-     keyExtractor={item => item.id.toString()}
-     ListEmptyComponent={<Text style={styles.noListings}>No spots found.</Text>}
-   />
- ), [reservations]);
-
+  const reservationList = useMemo(() => (
+    <FlatList
+        data={reservations}
+        renderItem={({ item }) => (
+          <ActivityItem reservation={item} />
+        )}
+        keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={<Text style={styles.noListings}>No reservations found.</Text>}
+        // onEndReached={loadMoreListings}
+        // onEndReachedThreshold={0.5}
+        // ListFooterComponent={isFetching ? <Text style={styles.noListings}>No notifications found.</Text> : null}
+      />
+  ), [reservations]);
 
  const handleListingCardPress = (listingId: string) => {
    router.push({

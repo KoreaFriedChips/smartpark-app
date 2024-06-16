@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { showErrorPage } from "@/components/utils/utils";
 import { router } from "expo-router";
 import BidView from "./BidView";
 import { useBackend } from "@/hooks";
@@ -19,22 +18,34 @@ export default function BidController(){
   const handleSubmitBid = async (paymentIntentId: string) => {
 
     if (!amount.current) {
-      showErrorPage("must put a bid amount");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must input a bid amount." },
+      });
       return;
     }
 
     if (!listingId.current) {
-      showErrorPage("listingId not loaded");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Listing not loaded!" },
+      });
       return;
     }
 
     if (!desiredSlot.current) {
-      showErrorPage("must select a timeslot");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must select a valid timeslot." },
+      });
       return;
     }
 
     if (highestBid.current && amount.current < highestBid.current.amount) {
-      showErrorPage("bid must be higher than current highest");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "New bid amount must be greater than current highest bid!" },
+      });
       return;
     }
 
@@ -60,12 +71,18 @@ export default function BidController(){
   
   const handleSubmitBuy = async () => {
     if (!listingId.current) {
-      showErrorPage("listingId not loaded");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Listing not loaded!" },
+      });
       return;
     }
 
     if (!desiredSlot.current) {
-      showErrorPage("you must select a timeslot");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must select a valid timeslot." },
+      });
       return;
     }
 

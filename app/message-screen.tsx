@@ -1,11 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { AllRoutes, useLocalSearchParams } from "expo-router";
-import { Platform, StyleSheet, KeyboardAvoidingView, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, useColorScheme, Touchable } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  KeyboardAvoidingView,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  useColorScheme,
+  Touchable,
+} from "react-native";
 import { Text, View, TextInput } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { PartyPopper, Home, Wrench, Undo2, SquareParking, ShieldCheck, Timer, Search, Camera, PlusCircle, Handshake, LineChart, Send, MessagesSquare, BadgeCheck, LucideIcon } from "lucide-react-native";
+import {
+  PartyPopper,
+  Home,
+  Wrench,
+  Undo2,
+  SquareParking,
+  ShieldCheck,
+  Timer,
+  Search,
+  Camera,
+  PlusCircle,
+  Handshake,
+  LineChart,
+  Send,
+  MessagesSquare,
+  BadgeCheck,
+  LucideIcon,
+  Star,
+  Lock,
+} from "lucide-react-native";
 import { Link } from "expo-router";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import HeaderRightClose from "@/components/Headers/HeaderRightClose";
@@ -47,6 +77,54 @@ const messages: MessagesItem[] = [
     LinkIcon: SquareParking,
     linkText: "View my spot",
     path: "/activity",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "spot-ended",
+    Icon: Timer,
+    header: "Spot expired",
+    title: "Your reservation has ended.",
+    subtitle: "We hope you had a great experience. Check out other spots for your next reservation!",
+    LinkIcon: Search,
+    linkText: "Find new spots",
+    path: "/",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "review-added",
+    Icon: Star,
+    header: "Review added",
+    title: "Thanks for your review!",
+    subtitle: "Your feedback helps the community. Check out other spots for your next reservation!",
+    LinkIcon: Undo2,
+    linkText: "Go back",
+    path: "/activity",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "feedback-submitted",
+    Icon: Star,
+    header: "Feedback submitted",
+    title: "Thanks for your submission!",
+    subtitle: "We appreciate your input.",
+    LinkIcon: Undo2,
+    linkText: "Go back",
+    path: "/profile",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "feature-beta",
+    Icon: Lock,
+    header: "Work in progress",
+    title: "Feature unavailable in beta.",
+    subtitle: "We're working on bringing this feature to you in a future update. Stay tuned!",
+    LinkIcon: Home,
+    linkText: "Return home",
+    path: "/",
     id: "",
     verify: false,
   },
@@ -151,7 +229,7 @@ const messages: MessagesItem[] = [
 export default function MessageScreen() {
   const themeColors = Colors[useColorScheme() || "light"];
   const navigation = useNavigation();
-  const { id, path, pathId } = useLocalSearchParams<{id: string, path: AllRoutes, pathId: string}>();
+  const { id, path, pathId, subtitle } = useLocalSearchParams<{ id: string; path: AllRoutes; pathId: string; subtitle?: string }>();
   const message = messages.find((item) => item.messageId === id) || messages.find((item) => item.messageId === "error");
 
   useEffect(() => {
@@ -176,7 +254,7 @@ export default function MessageScreen() {
         <MessagesScreen
           Icon={message.Icon}
           title={message.title}
-          subtitle={message.subtitle}
+          subtitle={subtitle || message.subtitle}
           LinkIcon={message.LinkIcon}
           linkText={message.linkText}
           path={path ? path : message.path}

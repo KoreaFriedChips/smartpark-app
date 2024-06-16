@@ -13,7 +13,7 @@ export default function ReservationQRCode() {
     <View style={styles.container}>
       <QRCode
             value={Linking.createURL(`/reservation/${id}/`)}
-            logo={require("@/assets/images/SMARTPARK-SOCIAL-ICON-SMALL.png")}
+            logo={require("@/assets/images/SMARTPARK-MAIN-ICON.png")}
             logoSize={50}
             size={300}
             logoBackgroundColor="transparent"

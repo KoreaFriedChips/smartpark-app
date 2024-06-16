@@ -10,6 +10,7 @@ import HeartButton from "./HeartButton";
 import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
 import { imageUriFromKey } from "@/lib/utils";
+import { truncateTitle } from "../utils/ListingUtils";
 
 export interface Availability {
   day: string;
@@ -23,11 +24,12 @@ export interface Review {
   review: string;
   date: string;
 }
-// const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
+function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, imgHeight = 250, hideButton, hideDistance }: {item: Listing, onPress?: ()=>void, locationLength?: number, marginRight?: number, imgHeight?: number, hideButton?: boolean, hideDistance?: boolean }) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
+
+  const blurhash = useColorScheme() === "light" ? "KaJbHpROD*T#jXRQ.9xtRl" : "CEEfl-0400?b?wI90K?b";
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -57,29 +59,32 @@ function ListingCard({ item, onPress }: {item: Listing, onPress?: ()=>void}) {
           {
             borderColor: themeColors.outline,
             backgroundColor: themeColors.header,
+            marginRight: marginRight,
             position: "relative",
           },
         ]}
       >
         <Image
           source={{ uri: imageUriFromKey(item.thumbnail) }}
-          style={styles.thumbnail}
-          cachePolicy={"none"}
+          placeholder={blurhash}
+          style={{ ...styles.thumbnail, height: imgHeight }}
         />
         <HeartButton id={item.id} />
-        <DistanceText distance={item.distance} />
+        {!hideDistance && <DistanceText distance={item.distance} />}
         <View
           style={{
             backgroundColor: "transparent",
             flexDirection: "row",
             justifyContent: "space-between",
+            gap: 22,
           }}
         >
-          <Text weight="semibold" style={styles.location}>{`${item.city}, ${item.state}`}</Text>
+          <Text weight="semibold" style={styles.location}>{truncateTitle(item.city, item.state, locationLength)}</Text>
           <RatingsText rating={item.rating} reviews={item.reviews} />
         </View>
         <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
-        <Link
+        {/* <Text italic>3:00 - 5:00</Text> */}
+        {!hideButton && <Link
           href={{
 						pathname: "/listing/[id]/bid/",
 						params: { id: item.id },
@@ -154,7 +159,6 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     width: "100%",
-    height: 250,
     borderRadius: 8,
   },
   location: {

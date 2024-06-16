@@ -3,7 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, ScrollView, Image, Dimensions, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { FolderLock, Car, ShieldCheck } from "lucide-react-native";
+import { FolderLock, Car, ShieldCheck, LockIcon, ParkingSquare, Handshake } from "lucide-react-native";
 import HeartButton from "@/components/ListingCard/HeartButton";
 import DistanceText from "@/components/ListingCard/DistanceText";
 import RatingsText from "@/components/ListingCard/RatingsText";
@@ -40,45 +40,42 @@ export default function Listing() {
     fetchSeller();
   }, [listing]);
 
-  const handleReport = () => console.log("Report");
-  const handleShare = () => console.log("Share");
-  const handleMessageSeller = () => console.log("Message Seller");
-
   return (
     <View style={styles.container}>
       {listing && (
         <ScrollView style={styles.scroll}>
           <ListingGallery listing={listing}/>
-          <View style={{ marginTop: 12 }}>
+          <View style={{ marginTop: 10 }}>
             <RatingsText rating={listing.rating} reviews={listing.reviews} full={true} style={{ fontSize: 16, color: themeColors.primary }} />
             <Text weight="semibold" style={styles.location}>{`${listing.city}, ${listing.state}`}</Text>
           </View>
           {listing && <ListingBidWidget listing={listing}  />}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
-            Spot amenities
+            Spot description
           </Text>
           {listing && <SlidingAmenitiesWidget amenities={listing.amenities}/>}
-          <Text style={{ marginTop: 16 }}>{listing.description}</Text>
-          <Text italic style={{ color: themeColors.third, marginTop: 8 }}>{`Posted ${listing.date.toLocaleDateString()} at ${listing.date.toLocaleTimeString()}`}</Text>
+          {listing.description && <Text style={{ marginTop: 24, lineHeight: 18, paddingRight: 16 }}>{listing.description}</Text>}
+          <Text weight="semibold" style={{ color: themeColors.third, marginTop: listing.description ? 12 : 24 }}>{`Posted ${listing.date.toLocaleDateString()} at ${listing.date.toLocaleTimeString()}`}</Text>
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Meet the owner
           </Text>
           {seller && <SellerQuickInfo seller={seller} />}
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
-          <Text weight="semibold" style={{ fontSize: 18, marginBottom: 16 }}>
-            What you should know
+          <Text weight="semibold" style={{ fontSize: 18, marginBottom: 4 }}>
+            About SmartPark
           </Text>
-          <ListingDetail title={"Verified listing"} Icon={FolderLock} description={"All SmartPark listings are verified to ensure the safety and security of the platform."} />
+          <ListingDetail title={"Verified listing"} Icon={ShieldCheck} description={"All SmartPark listings are verified to ensure the safety and security of the platform."} />
           <ListingDetail
-            title={"About SmartPark"}
-            Icon={Car}
-            description={"After your bid is placed, submit information on your vehicle to unlock the exact location and extend your reservation as needed."}
+            title={"How it works"}
+            Icon={LockIcon}
+            description={"Submit information on your vehicle to unlock the spot location, including a scannable QR code."}
           />
-          <ListingDetail title={"Buyer & Seller protection"} Icon={ShieldCheck} description={"Cancel up to 2 hours before your reservation for a hassle-free full refund."} />
+          <ListingDetail title={"Buyer & Seller protection"} Icon={Handshake} description={"Cancel up to 2 hours before your reservation for a hassle-free full refund."} />
+          <Text style={{ color: themeColors.third, marginLeft: 44, fontSize: 12 }}>(Feature currently unavailable)</Text>
           <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
-          <Text weight="semibold" style={{ fontSize: 18 }}>
+          <Text weight="semibold" style={{ fontSize: 18, marginBottom: -2 }}>
             What people are saying
           </Text>
           {listing && <RatingsQuickView listing={listing}/>}
@@ -86,7 +83,10 @@ export default function Listing() {
           <Text weight="semibold" style={{ fontSize: 18 }}>
             Where you'll be parked
           </Text>
+          <Text style={{ color: themeColors.secondary, marginTop: 4 }}>Exact location given after reservation</Text>
+          <View style={{ ...styles.mapContainer }}>
           {listing && <ListingMiniMap coordinates={{latitude: listing.latitude, longitude: listing.longitude}}/>}
+          </View>
         </ScrollView>
       )}
     </View>
@@ -103,12 +103,16 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     paddingTop: 12,
     padding: 16,
+    paddingRight: 0,
   },
   separator: {
     height: 1,
-    width: "100%",
+    width: Dimensions.get("window").width - 32,
     opacity: 0.5,
     marginVertical: 20,
+  },
+  mapContainer: {
+    width: Dimensions.get("window").width - 32,
   },
   location: {
     fontSize: 22,

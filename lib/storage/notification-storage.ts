@@ -1,20 +1,13 @@
+import { Message, MessageModel } from '@/types';
 import { NotificationModel } from '@/types/notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isAfter, isBefore } from 'date-fns';
 import { z } from 'zod';
+import { getKeys } from './storage-utils';
 
 const notificationKeysListKey = 'notification-keys'
 
 const getNotificationKeys = async () => {
-  try {
-    
-    const keysStr = await AsyncStorage.getItem(notificationKeysListKey);
-    const keys: string[] = keysStr ? JSON.parse(keysStr) : [];
-    return keys;
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
+  return await getKeys(notificationKeysListKey);
 }
 
 const createNotificationId = async (id: string) => {

@@ -19,7 +19,6 @@ Both files require:
       `http://<your LAN IP>:3000`
 - `GOOGLE_MAPS_API_KEY`
     - can be found in cloudflare environment variables
-=AIzaSyDlPaYY7NC5c1WGwoCIQ6KvwT6lEKaWOf4
 
 Here's an example `.env.prod`:
 ```

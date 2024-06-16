@@ -38,6 +38,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
       setError("");
       props.navigation.push(nextStep, {});
     } catch (err) {
+      console.error("Verification Error: ", (err as Error).message);
       setError((err as Error).message);
     }
   };
@@ -59,6 +60,7 @@ export const CodeVerification = (props: CodeVerificationProps) => {
         }
       }, 1000);
     } catch (err) {
+      console.error("Resend Error: ", (err as Error).message);
       setError((err as Error).message);
     }
   };
@@ -72,8 +74,10 @@ export const CodeVerification = (props: CodeVerificationProps) => {
           placeholder="123456"
           onChangeText={setCode}
           value={code}
-          keyboardType="default"
-          clearButtonMode="while-editing"
+          keyboardType="numeric"
+          returnKeyType="done"
+          clearButtonMode="always"
+          maxLength={6}
         />
         <TouchableOpacity style={{ marginTop: -6 }} onPressOut={resend}>
           <Text weight="bold">{resendT}</Text>

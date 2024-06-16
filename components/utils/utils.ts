@@ -17,7 +17,6 @@ export const showErrorPage = (errorMsg: string) => {
   router.push({pathname: "/error", params: {errorMsg}});
 }
 
-
 export interface SortOption {
   value: string,
   label: string
@@ -64,4 +63,29 @@ export const SortOptions = {
     value: "buyPriceHighLow",
     label: "Buy Price: High to Low"
   }
+}
+
+export const getLabel = (value: string): string => {
+  const option = Object.values(SortOptions).find(opt => opt.value === value);
+  return option ? option.label : "";
+};
+
+export const getRandomLocation = () => {
+  const locationsText = [
+    "No location",
+    "Mystery location",
+    "Off the grid",
+    "Wandering",
+    "Not on the map",
+    "In space",
+    "Exploring new places",
+    "Journeying",
+    "On an adventure",
+    "Unknown whereabouts",
+    "Off the radar",
+    "In transit",
+    "Out and about",
+  ];
+
+  return locationsText[Math.floor(Math.random() * locationsText.length)];
 }

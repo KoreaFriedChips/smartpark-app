@@ -8,10 +8,12 @@ interface RatingsProps {
   reviews?: number;
   rating?: number;
   full?: boolean;
+  hidden?: boolean;
+  fontSize?: number;
   style?: TextStyle | TextStyle[];
 }
 
-export default function RatingsText({ reviews, rating, full = false, style }: RatingsProps) {
+export default function RatingsText({ reviews, rating, full = false, hidden = false, fontSize = 16, style }: RatingsProps) {
   const themeColors = Colors[useColorScheme() || "light"];
 
   return (
@@ -20,25 +22,26 @@ export default function RatingsText({ reviews, rating, full = false, style }: Ra
         ...styles.rating,
       }}
     >
-      <Star size={14} color={Colors.accentAlt} fill={Colors.accent} strokeWidth={2} style={{ marginRight: 3 }} />
+      <Star size={fontSize - 2} color={Colors.accentAlt} fill={Colors.accent} strokeWidth={2} style={{ marginRight: 3 }} />
       <Text
         weight="semibold"
         style={{
-          ...styles.ratingText,
+          fontSize: fontSize,
           ...style,
         }}
       >
-        {`${reviews && reviews > 0 ? rating : "Unrated"} `}
+        {`${reviews && reviews > 0 ? rating?.toFixed(2) : "Unrated"}`}
       </Text>
       <Text
         italic
         style={{
-          ...styles.ratingText,
+          fontSize: fontSize,
           color: themeColors.secondary,
+          position: hidden ? "absolute" : "relative",
           ...style,
         }}
       >
-        ({full ? `${reviews} reviews` : reviews})
+        {!hidden && ` (${full ? `${reviews} reviews` : reviews})`}
       </Text>
     </View>
   );
@@ -51,8 +54,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "transparent",
-  },
-  ratingText: {
-    fontSize: 16,
   },
 });

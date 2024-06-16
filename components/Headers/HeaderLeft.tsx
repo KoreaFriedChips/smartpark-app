@@ -10,7 +10,7 @@ interface HeaderLeftProps {
   text?: boolean;
 }
 
-export default function HeaderLefte({ text = true }: HeaderLeftProps) {
+export default function HeaderLeft({ text = true }: HeaderLeftProps) {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const navigation = useNavigation();

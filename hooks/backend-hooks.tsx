@@ -78,7 +78,22 @@ export const useBackend = () => {
   const readCityStateFromCoordinates = async (coords: LatLng) => {
     return await backend.readCityStateFromCoordinates(getToken, coords);
   }
+
+  const createMessage = async (message: string, attachments: string[], toUserId: string) => {
+    return await backend.createMessage(getToken, message, attachments, toUserId);
+  }
+
+  const readMessages = async (userId: string) => {
+    return await backend.readMessages(getToken, userId);
+  }
   
+  const getUserWithId = async (id: string) => {
+    return await backend.getUserWithId(getToken, id);
+  }
+
+  const readLatestMessages = async () => {
+    return await backend.readLatestMessages(getToken);
+  }
 
   return { 
     registerDevicePushToken,
@@ -98,5 +113,9 @@ export const useBackend = () => {
     readMapsCoordinatesWithInput,
     readMapsCoordinates,
     readCityStateFromCoordinates,
+    createMessage,
+    readMessages,
+    getUserWithId,
+    readLatestMessages,
   };
 }

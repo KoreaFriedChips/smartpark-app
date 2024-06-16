@@ -1,7 +1,8 @@
+import * as Sentry from '@sentry/react-native';
 import { Clerk, ClerkProvider, SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import { DarkTheme, DefaultTheme, ThemeProvider, useNavigation } from "@react-navigation/native";
-import { Link } from "expo-router";
+import { Link, useNavigationContainerRef } from "expo-router";
 import { Pressable, Image, Share, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -17,6 +18,7 @@ import { ArrowLeft, Share as ShareIcon, MessageCircleMore, X } from "lucide-reac
 import * as Linking from 'expo-linking';
 import HeaderTitle from "@/components/Headers/HeaderTitle";
 import "react-native-reanimated";
+import HeaderLeft from '@/components/Headers/HeaderLeft';
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { useListing, UserContext, useUser } from "@/hooks";
@@ -30,10 +32,30 @@ import { remoteMessageToNotification } from "@/lib/utils";
 import { Notification } from "@/types";
 import { useBackend } from "@/hooks/backend-hooks";
 import { LocationContext, UserLocationObject } from "@/hooks/location-hooks";
+import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isRunningInExpoGo } from 'expo';
+
+
+const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
+
+Sentry.init({
+  dsn: "https://d78310986bdf0829d4455572782b0949@o4507354100924416.ingest.us.sentry.io/4507354232258560",
+  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+  integrations: [
+    new Sentry.ReactNativeTracing({
+      // Pass instrumentation to be used as `routingInstrumentation`
+      routingInstrumentation,
+      enableNativeFramesTracking: !isRunningInExpoGo(),
+      // ...
+    }),
+  ],
+});
+
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Message handled in the background!', remoteMessage);
-  storeNotification(remoteMessageToNotification(remoteMessage));
+  await storeRemoteMessage(remoteMessage);
   console.log(remoteMessage.data);
 });
 
@@ -61,7 +83,7 @@ const tokenCache = {
   },
 };
 
-export default function RootLayout() {
+function RootLayout() {
   const [loaded, error] = useFonts({
     "Soliden-Black": require("../assets/fonts/soliden/Soliden-Black.ttf"),
     "Soliden-BlackOblique": require("../assets/fonts/soliden/Soliden-BlackOblique.ttf"),
@@ -77,7 +99,7 @@ export default function RootLayout() {
 
   const [location, setLocation] = useState<UserLocationObject | null>(null);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
-
+  const navigationRef = useNavigationContainerRef();
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -92,6 +114,19 @@ export default function RootLayout() {
       setIsLocationFetched(true);
     })();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      await storeRemoteMessage(remoteMessage);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (navigationRef) {
+      routingInstrumentation.registerNavigationContainer(navigationRef);
+    }
+  }, [navigationRef])
 
   useEffect(() => {
     if (error) throw error;
@@ -191,6 +226,17 @@ function RootLayoutNav() {
 
   const headerRight = () => {
     const listing = useListing();
+    const { getSeller } = useBackend();
+    
+    const [seller, setSeller] = useState<User>();
+    useEffect(() => {
+      if (!listing) return;
+      const fetchSeller = async () => {
+        setSeller(await getSeller(listing));
+      }
+      fetchSeller();
+    }, [listing]);
+
     return (
       <View style={{ backgroundColor: "transparent", display: "flex", flexDirection: "row", alignItems: "center" }}>
         <TouchableOpacity onPress={() => handleShare(listing)}>
@@ -202,7 +248,9 @@ function RootLayoutNav() {
             }}
           />
         </TouchableOpacity>
-        <Link href="/messages" asChild>
+        <Link href={{
+          pathname: `/messages/${seller?.id}/`,
+        }} asChild>
           <Pressable>
             {({ pressed }) => (
               <MessageCircleMore
@@ -245,10 +293,50 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="messages"
+          name="reservation/[id]/settings"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Settings" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="messages/index"
           options={{
             title: "",
             headerTitle: () => <HeaderTitle name="Messages" />,
+            headerLeft: () => headerLeft(),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="(settings)/create-feedback"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Add feedback" />,
+            headerLeft: () => <HeaderLeft />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="listing/[id]/create-review"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Add review" />,
+            headerLeft: () => <HeaderLeft text={false} />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="user-profile"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Profile" />,
             headerLeft: () => headerLeft(),
             headerBackVisible: false,
             headerTitleAlign: "center",
@@ -343,3 +431,5 @@ function RootLayoutNav() {
     </UserContext.Provider>
   );
 }
+
+export default Sentry.wrap(RootLayout);

@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import Colors from "@/constants/Colors";
-import { Clock, TrendingUp, Sparkles, ShoppingCart} from "lucide-react-native";
+import { Clock, TrendingUp, Sparkles, ShoppingCart, Car} from "lucide-react-native";
 import { getAvailabilityFromIntervals, intervalToStr } from "@/components/utils/ListingUtils";
 import moment from "moment";
 import { isToday } from "date-fns";
@@ -59,7 +59,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               </Text>
             </View>
           ) : (
-            <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Not available in the near future</Text>
+            <Text style={{ color: themeColors.secondary, textAlign: "right" }}>Unavailable</Text>
           )}
         </View>
       </View>
@@ -94,7 +94,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               color: Colors["light"].primary,
             }}
           >
-            Bid now
+            Place bid
           </Text>
         </TouchableOpacity>
       </Link>
@@ -114,7 +114,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
         ]}
       >
         <TouchableOpacity>
-          <ShoppingCart
+          <Car
             size={14}
             color={themeColors.secondary}
             strokeWidth={3}
@@ -129,7 +129,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               color: themeColors.secondary,
             }}
           >
-            Buy Now
+            Park now
           </Text>
         </TouchableOpacity>
       </Link>
@@ -144,7 +144,7 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
               marginRight: 4,
             }}
           />
-          <Text weight="semibold" italic style={{ color: themeColors.secondary }}>
+          <Text weight="semibold" style={{ color: themeColors.secondary }}>
             Ends in: {timeRemaining}
           </Text>
         </View>
@@ -168,11 +168,12 @@ export function ListingBidWidget({listing}: {listing: Listing}) {
 
 const styles = StyleSheet.create({
   bidContainer: {
-    padding: 14,
+    padding: 16,
     borderRadius: 8,
     borderWidth: 1,
     marginVertical: 12,
     marginBottom: 4,
+    marginRight: 16,
     // shadowColor: "#000",
     // shadowOffset: {
     //   width: 0,

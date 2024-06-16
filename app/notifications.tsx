@@ -10,17 +10,18 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { Notification } from "@/types";
 import { startOfToday, subDays, subHours, subMinutes, subWeeks } from "date-fns";
-import { readAllNotifications, storeNotification } from "@/lib/storage";
+import { readAllNotifications, setNotificationRead, storeNotification } from "@/lib/storage";
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { remoteMessageToNotification } from "@/lib/utils";
+import { storeRemoteMessage } from "@/lib/storage/remote-message-storage";
 
 const defaultNotifications = [
   {
     id: "1",
     title: "New message received",
-    description: "You have received a new message from John Doe regarding your parking spot at 1414 Cedar St.",
+    description: "You have received a new message from John Park regarding your parking spot at 1414 Cedar St.",
     date: subHours(Date.now(), 1),
-    path: "/messages",
+    path: "/messages/",
     read: false,
   },
   {
@@ -139,20 +140,11 @@ export default function NotificationsScreen() {
   useEffect(() => {
     fetchNotifications();
   }, []);
-
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      const notification = remoteMessageToNotification(remoteMessage);
-      await storeNotification(notification);
-      fetchNotifications();
-    });
-
-    return unsubscribe;
-  },[]);
   
   return (
     <View style={{ ...styles.container, backgroundColor: themeColors.header }}>
       <FlatList
+        // data={defaultNotifications}
         data={notifications}
         renderItem={({ item }) => (
           <ListItem
@@ -163,6 +155,7 @@ export default function NotificationsScreen() {
             description={item.description}
             date={item.date}
             read={item.read}
+            onItemPress={() => setNotificationRead(item.id)}
           />
         )}
         keyExtractor={item => item.id.toString()}

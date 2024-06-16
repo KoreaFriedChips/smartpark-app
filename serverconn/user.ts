@@ -2,6 +2,7 @@ import { GetToken } from "@clerk/types";
 import { UserModel } from "@/types";
 import { create, read, update, serverDelete } from "./crud";
 
+
 export const getReviewer = async (getToken: GetToken, review: Review) => {
     const users = await readUsers(getToken, { id: review.userId });
     return users[0];
@@ -23,6 +24,12 @@ export const getUserFromClerkId = async (getToken: GetToken, clerkId: string) =>
     if (users.length === 0) throw new Error("clerkId not found");
     return users[0];
 };
+
+export const getUserWithId = async (getToken: GetToken, id: string) => {
+    const users: User[] = await readUsers(getToken, { id });
+    if (users.length === 0) throw new Error("user not found");
+    return users[0];
+}
 
 export const getUserIdFromClerkId = async (getToken: GetToken, clerkId: string) => {
     return (await getUserFromClerkId(getToken, clerkId)).id;

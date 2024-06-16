@@ -1,8 +1,7 @@
 import {  useRef } from 'react';
-import { showErrorPage } from '@/components/utils/utils';
 import ListingInput, { ListingInputRef } from '@/components/ListingInput';
 import { useBackend } from '@/hooks';
-
+import { router } from "expo-router";
 
 export default function CreateListing() {
   const { createListing } = useBackend();
@@ -36,15 +35,24 @@ export default function CreateListing() {
 
   const listingDataValid = () => {
     if (listingData.current.images[0] === "") {
-      showErrorPage("must include thumbnail (top left image)");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must include a thumbnail image." },
+      });
       return false;
     }
     if (Number(listingData.current.startingPrice) === 0 || Number(listingData.current.buyPrice) === 0) {
-      showErrorPage("must include both starting price and buy price");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must include both a starting and buy price." },
+      });
       return false;
     }
     if (listingData.current.address === "" || listingData.current.city === "" || listingData.current.state === "") {
-      showErrorPage("must input address, city, and state");
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Must input address, city, and state." },
+      });
       return false;
     }
     return true;

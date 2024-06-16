@@ -7,6 +7,7 @@ import { createContext, useContext, useMemo, useCallback } from "react";
 import { readListingsPaginated } from "@/serverconn";
 import { useSearchContext } from "./search-hooks";
 import { useLocationContext } from "./location-hooks";
+import { SortOption } from "@/components/utils/utils";
 
 export const useListing = () => {
   const { id } = useLocalSearchParams();
@@ -35,7 +36,7 @@ export const useListingWithId = (listingId: string) => {
 export interface ListingSearchOptions {
   amenities: string[],
   searchQuery: string | undefined,
-  sortOption: string | undefined
+  sortOption: any | undefined
 }
 
 interface ListingsState {
@@ -49,7 +50,7 @@ export const useListings = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const [amenities, setAmenities] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
-  const [sortOption, setSortOption] = useState<string | undefined>();
+  const [sortOption, setSortOption] = useState<any | undefined>();
   
   const [page, setPage] = useState(1);
   const [endReached, setEndReached] = useState(false);
@@ -120,22 +121,27 @@ export const useListings = () => {
   return { listings, fetchListings, fetchNextPage, isRefreshing }
 }
 
-export const useUserListings = () => {
+export const useUserListings = (userId?: string) => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { id: paramId } = useLocalSearchParams<{ id: string }>();
   const user = useUserContext();
   const [listings, setListings] = useState<Listing[]>();
+
   useEffect(() => {
     const fetchListings = async () => {
-      if (!isLoaded || !isSignedIn || !user) return;
-      const listings = await readListings(getToken, { userId: user.id });
-      setListings(listings);
+      if (!isLoaded || !isSignedIn || (!user && !userId && !paramId)) return;
+      const actualUserId = userId || paramId || user?.id;
+      if (actualUserId) {
+        const listings = await readListings(getToken, { userId: actualUserId });
+        setListings(listings);
+      }
     };
     try {
       fetchListings();
     } catch (err) {
       console.log(err);
     }
-  }, [isLoaded, isSignedIn, getToken, user]);
+  }, [isLoaded, isSignedIn, getToken, user, userId, paramId]);
+
   return listings;
 };
-
