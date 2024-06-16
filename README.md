@@ -12,19 +12,25 @@ store the environment variables to setup the application.
 
 Both files require:
 - `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`
-    - Can find this on the Clerk website
+    - Available in Cloudflare
 - `SERVER_URL`
     - If production, `https://trysmartpark.com`
     - If not production, depends on your local setup, but typically
       `http://<your LAN IP>:3000`
 - `GOOGLE_MAPS_API_KEY`
-    - can be found in cloudflare environment variables
+    - Available in Cloudflare
+- `SENTRY_AUTH_TOKEN`
+    - Available in Cloudflare
+- `STRIPE_PUBLISHABLE_KEY`
+    - Available in Cloudflare
 
-Here's an example `.env.prod`:
+Here's an example `.env.local`:
 ```
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXX
-SERVER_URL=https://trysmartpark.com
-GOOGLE_MAPS_API_KEY=xxxxxxxxxxxx
+SERVER_URL=http://192.0.1.10:3000
+GOOGLE_MAPS_API_KEY=XXXX_XXX_X
+SENTRY_AUTH_TOKEN=sntryu_XXXXXX
+STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXX
 ```
 
 ## Running
@@ -40,11 +46,17 @@ device is on the same one) IP address (using `ifconfig` on macOS and `ip addr`
 on Linux). 
 
 ## Native building & Running
+Install `EAS CLI` globally using `npm install -g eas-cli`.
+
 Run `eas login` to login to your expo.dev acount.
 
-For each environment variable created in Setup, run `eas secret:create --scope project --name VARNAME --value VARVALUE --type string`.
+Run `eas build:run -p ios | eas build:run -p andriod` to open an existing build. This command automatically runs and installs the build on your simulator. Afterwards, follow the instructions which are present on app load.
 
-Run `npm run build-android | npm run build-ios` to build. Install the resulting build on your device/emulator/simulator.
+For each NEW environment variable (variables which are NOT present in the .env file) created in Setup, run `eas secret:create --scope project --name VARNAME --value VARVALUE --type string`.
+
+Before creating a build for a physical Apple device, you must first register your iPhone by following the instructions on [expo.dev](https://expo.dev/accounts/smartpark/settings/apple-devices). Your build will not run on your device if you do not complete this step.
+
+Run `npm run build-android | npm run build-ios` to create a new build. Install the resulting build on your device/emulator/simulator. This is not necessary unless you've made a change to the `eas.json` or `app.config.js` files, or added a new environment variable.
 
 Run `npm run dev` to start the dev-client server.
 
