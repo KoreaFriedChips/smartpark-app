@@ -1,10 +1,10 @@
-import { StyleSheet, TouchableOpacity, Dimensions, ScrollView, useColorScheme, Linking } from "react-native";
+import { StyleSheet, TouchableOpacity, Dimensions, ScrollView, useColorScheme, Linking, Alert } from "react-native";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import { useAuth } from "@clerk/clerk-expo";
 import { useUserContext, useUser, useUserListings } from "@/hooks";
 import { useGivenReviews, useReceivedReviews } from "@/hooks/review-hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, router } from "expo-router";
 import { useTransactions } from "@/hooks/transaction-hooks";
 import ProfilePicture from "@/components/user/ProfilePicture";
@@ -25,12 +25,27 @@ import {
   PiggyBank,
   ReceiptText,
 } from "lucide-react-native";
+import { createConnectedAccount } from "@/serverconn/connect-stripe";
 
 export default function Profile() {
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme || "light"];
   const user = useUser();
   const { signOut } = useAuth();
+  const { getToken } = useAuth();
+
+  const handleSignUp = async () => {
+    try {
+      const response = await createConnectedAccount(getToken);
+      const { accountLink, account } = response;
+      if (accountLink) {
+        Linking.openURL(accountLink);
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+  
   // const givenReviews = useGivenReviews();
   // const receivedReviews = useReceivedReviews();
   // const transactions = useTransactions();
@@ -95,7 +110,9 @@ export default function Profile() {
         <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
         {!user?.verified && (
           <Link href={`/add`} asChild>
-            <TouchableOpacity style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+            <TouchableOpacity 
+              style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
+              onPress={handleSignUp}>
               <HandCoins size={32} color={themeColors.primary} strokeWidth={2} />
               <View
                 style={{
@@ -146,7 +163,7 @@ export default function Profile() {
               Seller tools
             </Text>
             <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
-            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} />
+            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} onPress={() => router.push("/report-screen")}/>
             <SettingsItem
               path="/"
               onPress={() => {
