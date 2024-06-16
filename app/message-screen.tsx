@@ -35,6 +35,7 @@ import {
   LucideIcon,
   Star,
   Lock,
+  CheckCircle,
 } from "lucide-react-native";
 import { Link } from "expo-router";
 import HeaderTitle from "@/components/Headers/HeaderTitle";
@@ -76,6 +77,18 @@ const messages: MessagesItem[] = [
     subtitle: `Pleace check the "Activity" page for more information on your reservation.`,
     LinkIcon: SquareParking,
     linkText: "View my spot",
+    path: "/activity",
+    id: "",
+    verify: false,
+  },
+  {
+    messageId: "listing-updated",
+    Icon: CheckCircle,
+    header: "Listing updated",
+    title: "Updates live!",
+    subtitle: `Your listing has been updated. You can view the changes on the "Activity" page.`,
+    LinkIcon: SquareParking,
+    linkText: "View listing",
     path: "/activity",
     id: "",
     verify: false,

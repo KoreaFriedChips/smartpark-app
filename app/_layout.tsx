@@ -323,6 +323,16 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="(settings)/edit-information"
+          options={{
+            title: "",
+            headerTitle: () => <HeaderTitle name="Edit information" />,
+            headerLeft: () => <HeaderLeft />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
           name="listing/[id]/create-review"
           options={{
             title: "",
@@ -377,7 +387,6 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
-        <Stack.Screen name="listing/[id]/bid/success" options={{presentation: "modal", title: ""}}/>
         <Stack.Screen
           name="listing-detail"
           options={{

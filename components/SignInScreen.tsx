@@ -230,7 +230,6 @@ export default function SignInScreen() {
     }
   };
 
-  // only use of signin function (no signup?)
   const completeSignUp = async (csi: string, setA: SetActive) => {
     try {
       await setA({ session: csi });

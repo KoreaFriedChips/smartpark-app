@@ -123,7 +123,7 @@ export default function Profile() {
         <Text weight="semibold" style={{ fontSize: 18, marginBottom: 8 }}>
           Account settings
         </Text>
-        <SettingsItem path="/" text="Personal information" Icon={CircleUserRound} />
+        <SettingsItem path="/edit-information" text="Personal information" Icon={CircleUserRound} />
         <SettingsItem path="/" text="Payment history" Icon={ReceiptText} />
         <SettingsItem
           path="/"
@@ -147,7 +147,17 @@ export default function Profile() {
             </Text>
             <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
             <SettingsItem path="/" text="Payouts" Icon={PiggyBank} />
-            <SettingsItem path="/" text="Scan QR code" Icon={Heart} />
+            <SettingsItem
+              path="/"
+              onPress={() => {
+                router.replace({
+                  pathname: "/message-screen",
+                  params: { id: "feature-beta" },
+                });
+              }}
+              text="Scan QR code"
+              Icon={Heart}
+            />
           </>
         )}
         <View style={{ backgroundColor: "transparent", height: 64 }}></View>
