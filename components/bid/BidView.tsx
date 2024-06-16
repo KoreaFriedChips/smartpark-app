@@ -91,10 +91,10 @@ export default function BidView({
 
   const fetchPaymentSheetParams = async () => {
     try {
-      //console.log("bidAmount: ", bidAmount);
+      const priceBeforeFees = (spotPrice().price - 0.3) / (1.029 * 1.05 * 1.075);
       const paymentIntent = await createPaymentIntent(
         getToken,
-        Number(bidAmount) * 100,
+        Number(priceBeforeFees.toFixed(2)) * 100,
         "usd",
         listing?.userId ?? ""
       );
@@ -234,7 +234,6 @@ export default function BidView({
         spotPrice.price = 0;
         break;
     }
-
     // Placeholder sales tax rate, replace with actual rate from Stripe Tax API
     const salesTaxRate = 0.05;
     const salesTax = spotPrice.price * salesTaxRate;
@@ -251,7 +250,7 @@ Sales tax: $${salesTax.toFixed(2)}
 Processing fee: $${processingFee.toFixed(2)}`;
 
     // Update the total price
-    spotPrice.price = Math.round(totalPrice * 100) / 100;
+    spotPrice.price = totalPrice;
 
     return spotPrice;
   };

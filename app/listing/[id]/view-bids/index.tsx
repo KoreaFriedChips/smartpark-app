@@ -78,10 +78,11 @@ export default function ListingBids() {
   const acceptBid = async (bidId: string) => {
     try {
       const response = await capturePaymentIntent(getToken, bidId);
-      if (response.status === 200) {
+      if (response.capturedPaymentIntent) {
         // if the bid is accepted, cancel all the other bids
         const otherBids = bids.filter((bid) => bid.id !== bidId);
         for (const bid of otherBids) {
+            console.log(bid.id);
           await cancelPaymentIntent(getToken, bid.id);
         }
       } else {
