@@ -141,6 +141,7 @@ export default function BidView({
   const fetchPaymentSheetParams = async () => {
     try {
       const priceBeforeFees = (spotPrice().price - 0.3) / (1.029 * 1.05 * 1.075);
+      console.log("Price before fees: ", priceBeforeFees);
       const paymentIntent = await createPaymentIntent(
         getToken,
         Number(priceBeforeFees.toFixed(2)) * 100,
@@ -331,12 +332,24 @@ Processing fee: $${processingFee.toFixed(2)}`;
     // Validate input to allow only numbers and up to 2 decimal places
     const formattedText = text.replace(/[^0-9.]/g, ""); // Remove non-numeric characters
     const decimalIndex = formattedText.indexOf(".");
+    let validText = formattedText;
+    console.log("formattedText: ", formattedText);
+    // If the user tries to bid higher than the buy price, show an alert and reset the bid amount
+    if (listing && Number(formattedText) > listing.buyPrice) {
+      console.log(listing.buyPrice, formattedText)
+      Alert.alert(
+        "Bid too high",
+        `Your bid cannot be higher than the buy price of $${listing.buyPrice}`
+      );
+      validText = "";
+    }
+
     if (decimalIndex >= 0) {
-      const beforeDecimal = formattedText.slice(0, decimalIndex);
-      const afterDecimal = formattedText.slice(decimalIndex, decimalIndex + 3); // Allow 2 decimal places
+      const beforeDecimal = validText.slice(0, decimalIndex);
+      const afterDecimal = validText.slice(decimalIndex, decimalIndex + 3); // Allow 2 decimal places
       setBidAmount(beforeDecimal + afterDecimal);
     } else {
-      setBidAmount(formattedText);
+      setBidAmount(validText);
     }
   };
 
@@ -822,3 +835,4 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 });
+
