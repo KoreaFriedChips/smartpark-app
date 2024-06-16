@@ -1,5 +1,5 @@
 import React, { memo, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
+import { Alert, StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Image } from "expo-image";
 import { Link, useRouter, useLocalSearchParams, useGlobalSearchParams, router } from "expo-router";
 import { useRoute } from "@react-navigation/native";
@@ -11,6 +11,10 @@ import DistanceText from "./DistanceText";
 import RatingsText from "./RatingsText";
 import { imageUriFromKey } from "@/lib/utils";
 import { truncateTitle } from "../utils/ListingUtils";
+import { useUserContext } from "@/hooks";
+import { readListings } from "@/serverconn/listing";
+import { useAuth } from "@clerk/clerk-expo";
+
 
 export interface Availability {
   day: string;
@@ -44,6 +48,22 @@ function ListingCard({
 }) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
+  const { getToken } = useAuth();
+  const user = useUserContext();
+  const [listing, setListing] = React.useState<Listing>();
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const res = await readListings(getToken, { id: item.id });
+        setListing(res[0]);
+      } catch (err) {
+        Alert.alert("Error", "Failed to fetch listing");
+        console.log(err);
+      }
+    };
+    fetchListing();
+  }, []);
 
   const blurhash = useColorScheme() === "light" ? "KaJbHpROD*T#jXRQ.9xtRl" : "CEEfl-0400?b?wI90K?b";
 
@@ -133,7 +153,7 @@ function ListingCard({
               </Text>
             </TouchableOpacity>
           </Link>
-          <TouchableOpacity
+          {listing?.userId == user?.id && <TouchableOpacity
             style={[
               styles.button,
               {
@@ -154,7 +174,7 @@ function ListingCard({
               }}>
               View Bids
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity>}
         </>
       )}
     </TouchableOpacity>
