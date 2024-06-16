@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
-import { Text, View, FlatList, StyleSheet, useColorScheme } from "react-native";
+import React, { useState, useMemo, useRef, ReactElement } from "react";
+import { FlatList, StyleSheet, useColorScheme } from "react-native";
+import {Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
