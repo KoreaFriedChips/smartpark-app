@@ -1,8 +1,8 @@
 import React, { memo, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import { Image } from "expo-image";
-import { Link, useRouter, useLocalSearchParams , useGlobalSearchParams, router } from "expo-router";
-import { useRoute } from "@react-navigation/native"
+import { Link, useRouter, useLocalSearchParams, useGlobalSearchParams, router } from "expo-router";
+import { useRoute } from "@react-navigation/native";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Star, Sparkles } from "lucide-react-native";
@@ -25,7 +25,23 @@ export interface Review {
   date: string;
 }
 
-function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, imgHeight = 250, hideButton, hideDistance }: {item: Listing, onPress?: ()=>void, locationLength?: number, marginRight?: number, imgHeight?: number, hideButton?: boolean, hideDistance?: boolean }) {
+function ListingCard({
+  item,
+  onPress,
+  locationLength = 25,
+  marginRight = 16,
+  imgHeight = 250,
+  hideButton,
+  hideDistance,
+}: {
+  item: Listing;
+  onPress?: () => void;
+  locationLength?: number;
+  marginRight?: number;
+  imgHeight?: number;
+  hideButton?: boolean;
+  hideDistance?: boolean;
+}) {
   const themeColors = Colors[useColorScheme() || "light"];
   const [isLiked, setIsLiked] = React.useState(false);
 
@@ -42,110 +58,106 @@ function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, img
       pathname: `/listing/${item.id}/`,
       params: { distance: item.distance },
     });
-  }
+  };
 
   const handleViewBidsPress = () => {
     router.push({
       pathname: `/listing/${item.id}/view-bids/`,
-      params: { listingId: item.id}
+      params: { listingId: item.id },
     });
-  }
+  };
 
   return (
-      <TouchableOpacity
-        onPress={handleCardPress}
-        style={[
-          styles.listingCard,
-          {
-            borderColor: themeColors.outline,
-            backgroundColor: themeColors.header,
-            marginRight: marginRight,
-            position: "relative",
-          },
-        ]}
-      >
-        <Image
-          source={{ uri: imageUriFromKey(item.thumbnail) }}
-          placeholder={blurhash}
-          style={{ ...styles.thumbnail, height: imgHeight }}
-        />
-        <HeartButton id={item.id} />
-        {!hideDistance && <DistanceText distance={item.distance} />}
-        <View
-          style={{
-            backgroundColor: "transparent",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 22,
-          }}
-        >
-          <Text weight="semibold" style={styles.location}>{truncateTitle(item.city, item.state, locationLength)}</Text>
-          <RatingsText rating={item.rating} reviews={item.reviews} />
-        </View>
-        <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
-        {/* <Text italic>3:00 - 5:00</Text> */}
-        {!hideButton && <Link
-          href={{
-						pathname: "/listing/[id]/bid/",
-						params: { id: item.id },
-					}}
-          asChild
-          style={[
-            styles.button,
-            {
-              backgroundColor: Colors["accent"],
-              borderColor: Colors["accentAlt"],
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            },
-          ]}
-        >
-          <TouchableOpacity>
-            <Sparkles
-              size={14}
-              color={Colors["light"].primary}
-              strokeWidth={3}
-              style={{
-                marginRight: 4,
-              }}
-            />
-            <Text
-              weight="bold"
-              style={{
-                ...styles.buttonText,
-                color: Colors["light"].primary,
-              }}
-            >
-              Bid now
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[
-            styles.button,
-            {
-              backgroundColor: themeColors.primary,
-              borderColor: themeColors.primary,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 8,
-            },
-          ]}
-            onPress={handleViewBidsPress}
-          >
+    <TouchableOpacity
+      onPress={handleCardPress}
+      style={[
+        styles.listingCard,
+        {
+          borderColor: themeColors.outline,
+          backgroundColor: themeColors.header,
+          marginRight: marginRight,
+          position: "relative",
+        },
+      ]}>
+      <Image source={{ uri: imageUriFromKey(item.thumbnail) }} placeholder={blurhash} style={{ ...styles.thumbnail, height: imgHeight }} />
+      <HeartButton id={item.id} />
+      {!hideDistance && <DistanceText distance={item.distance} />}
+      <View
+        style={{
+          backgroundColor: "transparent",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 22,
+        }}>
+        <Text weight="semibold" style={styles.location}>
+          {truncateTitle(item.city, item.state, locationLength)}
+        </Text>
+        <RatingsText rating={item.rating} reviews={item.reviews} />
+      </View>
+      <Text weight="bold" style={styles.price}>{`$${item.startingPrice} / ${item.duration}`}</Text>
+      {/* <Text italic>3:00 - 5:00</Text> */}
+      {!hideButton && (
+        <>
+          <Link
+            href={{
+              pathname: "/listing/[id]/bid/",
+              params: { id: item.id },
+            }}
+            asChild
+            style={[
+              styles.button,
+              {
+                backgroundColor: Colors["accent"],
+                borderColor: Colors["accentAlt"],
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              },
+            ]}>
+            <TouchableOpacity>
+              <Sparkles
+                size={14}
+                color={Colors["light"].primary}
+                strokeWidth={3}
+                style={{
+                  marginRight: 4,
+                }}
+              />
+              <Text
+                weight="bold"
+                style={{
+                  ...styles.buttonText,
+                  color: Colors["light"].primary,
+                }}>
+                Bid now
+              </Text>
+            </TouchableOpacity>
+          </Link>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                backgroundColor: themeColors.primary,
+                borderColor: themeColors.primary,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 8,
+              },
+            ]}
+            onPress={handleViewBidsPress}>
             <Text
               weight="bold"
               style={{
                 ...styles.buttonText,
                 color: themeColors.background,
-              }}
-            >
+              }}>
               View Bids
             </Text>
           </TouchableOpacity>
-        </Link>}
-          
-      </TouchableOpacity>
+        </>
+      )}
+    </TouchableOpacity>
   );
 }
 
