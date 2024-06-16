@@ -120,7 +120,6 @@ function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, img
               Bid now
             </Text>
           </TouchableOpacity>
-        </Link>
           <TouchableOpacity style={[
             styles.button,
             {
@@ -144,6 +143,8 @@ function ListingCard({ item, onPress, locationLength = 25, marginRight = 16, img
               View Bids
             </Text>
           </TouchableOpacity>
+        </Link>}
+          
       </TouchableOpacity>
   );
 }
