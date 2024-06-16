@@ -31,7 +31,14 @@ import * as Haptics from "expo-haptics";
 import TabRow from "@/components/TabRow";
 import { useListing, useUserContext } from "@/hooks";
 import moment from "moment";
-import { differenceInCalendarDays, differenceInHours, differenceInMonths, differenceInWeeks, intervalToDuration, set } from "date-fns";
+import {
+  differenceInCalendarDays,
+  differenceInHours,
+  differenceInMonths,
+  differenceInWeeks,
+  intervalToDuration,
+  set,
+} from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
 import { createPaymentIntent } from "@/serverconn/payments";
@@ -44,7 +51,7 @@ export interface BidViewProps {
   amount: MutableRefObject<number | undefined>;
   desiredSlot: MutableRefObject<Interval | undefined>;
   highestBid: MutableRefObject<Bid | undefined>;
-  handleSubmitBid: (paymentIntentId : string) => Promise<void>;
+  handleSubmitBid: (paymentIntentId: string) => Promise<void>;
   handleSubmitBuy: () => Promise<void>;
 }
 
@@ -88,25 +95,25 @@ export default function BidView({
   const showStart = () => {
     setStartVisible(true);
   };
-  
+
   const hideStart = () => {
     setStartVisible(false);
   };
-  
+
   const handleStartDate = (date: Date) => {
     setStartDate(date);
     setDesiredSlot((prev) => prev && { ...prev, start: date });
     hideStart();
   };
-  
+
   const showEnd = () => {
     setEndVisible(true);
   };
-  
+
   const hideEnd = () => {
     setEndVisible(false);
   };
-  
+
   const handleEndDate = (date: Date) => {
     setEndDate(date);
     setDesiredSlot((prev) => prev && { ...prev, end: date });
@@ -140,7 +147,8 @@ export default function BidView({
 
   const fetchPaymentSheetParams = async () => {
     try {
-      const priceBeforeFees = (spotPrice().price - 0.3) / (1.029 * 1.05 * 1.075);
+      const priceBeforeFees =
+        (spotPrice().price - 0.3) / (1.029 * 1.05 * 1.075);
       console.log("Price before fees: ", priceBeforeFees);
       const paymentIntent = await createPaymentIntent(
         getToken,
@@ -204,7 +212,7 @@ export default function BidView({
   }, [listing]);
 
   useEffect(() => {
-    if (listing) listingIdRef.current = listing.id
+    if (listing) listingIdRef.current = listing.id;
   }, [listing]);
 
   useEffect(() => {
@@ -224,6 +232,26 @@ export default function BidView({
     //console.log("highest Bid: ", highestBid);
   }, [highestBid]);
 
+  const [isHighestBidder, setIsHighestBidder] = useState(false);
+
+  useEffect(() => {
+    //console.log("highestBid: ", highestBid);
+    //console.log("bidAmount: ", bidAmount);
+    if (highestBid) {
+      if (Number(bidAmount) >= highestBid.amount) {
+        setIsHighestBidder(true);
+      } else {
+        setIsHighestBidder(false);
+      }
+    } else {
+      if (Number(bidAmount) > 0) {
+        setIsHighestBidder(true);
+      } else {
+        setIsHighestBidder(false);
+      }
+    }
+  }, [bidAmount, highestBid]);
+
   const setSelect = (selection: string) => {
     setSelection(selection);
     if (selection === "Buy now") {
@@ -240,7 +268,7 @@ export default function BidView({
       setEndDate(listing.availability[0].end);
     }
   }, [listing]);
-  
+
   useEffect(() => {
     if (desiredSlot) {
       desiredSlotRef.current = desiredSlot;
@@ -278,30 +306,30 @@ export default function BidView({
       case "hour":
         diff = differenceInHours(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} ${diff === 1 ? "hour" : "hours"} x ${amount.toFixed(
-          2
-        )} / hour) + 7.5% fee`;
+        spotPrice.calcText = `(${diff} ${
+          diff === 1 ? "hour" : "hours"
+        } x ${amount.toFixed(2)} / hour) + 7.5% fee`;
         break;
       case "day":
         diff = differenceInCalendarDays(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} ${diff === 1 ? "day" : "days"} x ${amount.toFixed(
-          2
-        )} / day) + 7.5% fee`;
+        spotPrice.calcText = `(${diff} ${
+          diff === 1 ? "day" : "days"
+        } x ${amount.toFixed(2)} / day) + 7.5% fee`;
         break;
       case "week":
         diff = differenceInWeeks(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} ${diff === 1 ? "week" : "weeks"} x ${amount.toFixed(
-          2
-        )} / week) + 7.5% fee`;
+        spotPrice.calcText = `(${diff} ${
+          diff === 1 ? "week" : "weeks"
+        } x ${amount.toFixed(2)} / week) + 7.5% fee`;
         break;
       case "month":
         diff = differenceInMonths(endDate, startDate);
         spotPrice.price = diff * amount * 1.075;
-        spotPrice.calcText = `(${diff} ${diff === 1 ? "month" : "months"} x ${amount.toFixed(
-          2
-        )} / month) + 7.5% fee`;
+        spotPrice.calcText = `(${diff} ${
+          diff === 1 ? "month" : "months"
+        } x ${amount.toFixed(2)} / month) + 7.5% fee`;
         break;
       default:
         spotPrice.price = 0;
@@ -333,10 +361,10 @@ Processing fee: $${processingFee.toFixed(2)}`;
     const formattedText = text.replace(/[^0-9.]/g, ""); // Remove non-numeric characters
     const decimalIndex = formattedText.indexOf(".");
     let validText = formattedText;
-    console.log("formattedText: ", formattedText);
+    //console.log("formattedText: ", formattedText);
     // If the user tries to bid higher than the buy price, show an alert and reset the bid amount
     if (listing && Number(formattedText) > listing.buyPrice) {
-      console.log(listing.buyPrice, formattedText)
+      console.log(listing.buyPrice, formattedText);
       Alert.alert(
         "Bid too high",
         `Your bid cannot be higher than the buy price of $${listing.buyPrice}`
@@ -451,10 +479,10 @@ Processing fee: $${processingFee.toFixed(2)}`;
                   }}
                 >
                   {selection === "Place bid"
-                    ? 
-                      highestBid && highestBid.userId === user?.id
-                        ? "You're the highest bidder!"
-                        : "You're not the highest bidder!"
+                    ? isHighestBidder ||
+                      (highestBid && highestBid.userId === user?.id)
+                      ? "You're the highest bidder!"
+                      : "You're not the highest bidder!"
                     : ""}
                 </Text>
                 {desiredSlot && (
@@ -462,18 +490,46 @@ Processing fee: $${processingFee.toFixed(2)}`;
                     <View style={styles.textRow}>
                       <Text style={styles.subheader}>Arrive after</Text>
                       <TouchableOpacity onPress={showStart}>
-                        <View style={{ ...styles.dateContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+                        <View
+                          style={{
+                            ...styles.dateContainer,
+                            borderColor: themeColors.outline,
+                            backgroundColor: themeColors.header,
+                          }}
+                        >
                           <Calendar size={16} color={themeColors.secondary} />
-                          <Text weight="semibold" style={{ color: themeColors.secondary, marginTop: 1 }}>{moment(startDate).format("ddd, MMM D, h:mm A")}</Text>
+                          <Text
+                            weight="semibold"
+                            style={{
+                              color: themeColors.secondary,
+                              marginTop: 1,
+                            }}
+                          >
+                            {moment(startDate).format("ddd, MMM D, h:mm A")}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     </View>
                     <View style={styles.textRow}>
                       <Text style={styles.subheader}>Leave before</Text>
                       <TouchableOpacity onPress={showEnd}>
-                        <View style={{ ...styles.dateContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}>
+                        <View
+                          style={{
+                            ...styles.dateContainer,
+                            borderColor: themeColors.outline,
+                            backgroundColor: themeColors.header,
+                          }}
+                        >
                           <Calendar size={16} color={themeColors.secondary} />
-                          <Text weight="semibold" style={{ color: themeColors.secondary, marginTop: 1 }}>{moment(endDate).format("ddd, MMM D, h:mm A")}</Text>
+                          <Text
+                            weight="semibold"
+                            style={{
+                              color: themeColors.secondary,
+                              marginTop: 1,
+                            }}
+                          >
+                            {moment(endDate).format("ddd, MMM D, h:mm A")}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -584,8 +640,7 @@ Processing fee: $${processingFee.toFixed(2)}`;
                   disabled={loading || !ready}
                 /> */}
                 <Text weight="bold" style={{ color: Colors["light"].primary }}>
-                  Review{" "}
-                  {selection === "Place bid" ? "bid" : "reservation"}
+                  Review {selection === "Place bid" ? "bid" : "reservation"}
                 </Text>
               </TouchableOpacity>
               <Modal
@@ -604,12 +659,29 @@ Processing fee: $${processingFee.toFixed(2)}`;
                       borderColor: themeColors.outline,
                     }}
                   >
-                    <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 8 }}>Enter vehicle information</Text>
-                    <Text style={{ textAlign: "center", color: themeColors.third, fontSize: 12, lineHeight: 14 }}>
-                      This information will be shared with the seller and must match the vehicle you plan to use.
+                    <Text
+                      weight="semibold"
+                      style={{ ...styles.modalText, marginBottom: 8 }}
+                    >
+                      Enter vehicle information
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        color: themeColors.third,
+                        fontSize: 12,
+                        lineHeight: 14,
+                      }}
+                    >
+                      This information will be shared with the seller and must
+                      match the vehicle you plan to use.
                     </Text>
                     <TextInput
-                      style={{ ...styles.modalInput, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
+                      style={{
+                        ...styles.modalInput,
+                        borderColor: themeColors.outline,
+                        backgroundColor: themeColors.header,
+                      }}
                       placeholder="Red Model S"
                       value={vehicleInfo}
                       onChangeText={(text) => {
@@ -624,14 +696,19 @@ Processing fee: $${processingFee.toFixed(2)}`;
                       clearButtonMode="while-editing"
                     />
                     {error ? (
-                      <Text italic weight="semibold" style={styles.errorText}>Error: {error}</Text>
+                      <Text italic weight="semibold" style={styles.errorText}>
+                        Error: {error}
+                      </Text>
                     ) : null}
                     <TouchableOpacity
                       onPress={() => {
-                        handleInfoSubmit()
+                        handleInfoSubmit();
                       }}
                     >
-                      <Text weight="semibold" style={{ ...styles.modalText, marginBottom: 12 }}>
+                      <Text
+                        weight="semibold"
+                        style={{ ...styles.modalText, marginBottom: 12 }}
+                      >
                         Submit
                       </Text>
                     </TouchableOpacity>
@@ -640,7 +717,13 @@ Processing fee: $${processingFee.toFixed(2)}`;
                         setModalVisible(!modalVisible);
                       }}
                     >
-                      <Text weight="semibold" style={{ ...styles.modalText, color: themeColors.secondary }}>
+                      <Text
+                        weight="semibold"
+                        style={{
+                          ...styles.modalText,
+                          color: themeColors.secondary,
+                        }}
+                      >
                         Cancel
                       </Text>
                     </TouchableOpacity>
@@ -835,4 +918,3 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 });
-
