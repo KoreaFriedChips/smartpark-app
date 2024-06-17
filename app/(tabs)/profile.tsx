@@ -109,7 +109,7 @@ export default function Profile() {
         )}
         <View style={{ ...styles.separator, backgroundColor: themeColors.outline }}></View>
         {!user?.verified && (
-          <Link href={`/add`} asChild>
+          //<Link href={`/add`} asChild>
             <TouchableOpacity 
               style={{ ...styles.sellerContainer, borderColor: themeColors.outline, backgroundColor: themeColors.header }}
               onPress={handleSignUp}>
@@ -135,7 +135,7 @@ export default function Profile() {
                 </Text> */}
               </View>
             </TouchableOpacity>
-          </Link>
+          //</Link>
         )}
         <Text weight="semibold" style={{ fontSize: 18, marginBottom: 8 }}>
           Account settings

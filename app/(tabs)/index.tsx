@@ -41,7 +41,7 @@ export default function HomeScreen() {
   }
 
   const filteredListings = listings?.filter(listing => listing.userId !== userId);
-  console.log(filteredListings);
+  //console.log(filteredListings);
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const diffClamp = Animated.diffClamp(scrollY, 0, 100);
 

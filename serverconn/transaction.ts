@@ -13,6 +13,7 @@ export const createTransaction = async (getToken: GetToken, data: any): Promise<
 
 export const readTransactions = async (getToken: GetToken, searchParams: any): Promise<Transaction[]> => {
     const res = await read(getToken, "/api/transactions", searchParams);
+    console.log(res);
     return res.map(TransactionModel.parse);
 };
 

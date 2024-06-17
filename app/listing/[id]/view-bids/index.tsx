@@ -47,10 +47,11 @@ export default function ListingBids() {
         setListing(res[0]);
         console.log(listingId);
         const response = await getListingBids(getToken, listingId as string);
+        const pendingBids = response.filter((bid: Bid) => bid.status === "pending");
         //console.log(response);
-        setBids(response);
+        setBids(pendingBids);
         const usersData = await Promise.all(
-          response.map(async (bid: Bid) => {
+          pendingBids.map(async (bid: Bid) => {
             const user = await fetchUser(bid.userId);
             return { [bid.userId]: user };
           })

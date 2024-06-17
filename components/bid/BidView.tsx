@@ -41,10 +41,11 @@ import {
 } from "date-fns";
 import { useBidCount, useHighestBid } from "@/hooks/bid-hooks";
 import { StripeProvider, usePaymentSheet } from "@stripe/stripe-react-native";
-import { createPaymentIntent } from "@/serverconn/payments";
+import { capturePaymentIntent, createPaymentIntent } from "@/serverconn/payments";
 import { useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { createTransaction } from "@/serverconn";
 
 export interface BidViewProps {
   listingId: MutableRefObject<string | undefined>;
@@ -187,10 +188,22 @@ export default function BidView({
       return;
     }
     console.log(paymentIntentIdRef.current);
+    const transactionData = {
+      transactionDate: Date.now(),
+      amount: Number(spotPrice().price),
+      paymentMethod: "card",
+      listingId: listing?.id,
+      sellerId: listing?.userId,
+      buyerId: user?.id,
+      type: "buy"
+    };
+    await createTransaction(getToken, transactionData);
+
     // Call handleSubmitBid or handleSubmitBuy based on the selection
     if (selection === "Place bid") {
       await handleSubmitBid(paymentIntentIdRef.current ?? "");
     } else {
+      await capturePaymentIntent(getToken, paymentIntentIdRef.current ?? "");
       await handleSubmitBuy();
     }
   }
