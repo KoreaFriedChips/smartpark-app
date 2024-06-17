@@ -141,7 +141,7 @@ export default function Profile() {
           Account settings
         </Text>
         <SettingsItem path="/edit-information" text="Personal information" Icon={CircleUserRound} />
-        <SettingsItem path="/" text="Payment history" Icon={ReceiptText} />
+        <SettingsItem path="/" text="Payment history" Icon={ReceiptText} onPress={() => router.push('/buy-history')}/>
         <SettingsItem
           path="/"
           onPress={() => {
@@ -163,7 +163,7 @@ export default function Profile() {
               Seller tools
             </Text>
             <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
-            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} onPress={() => router.push("/report-screen")}/>
+            <SettingsItem path="/" text="Payouts" Icon={PiggyBank} onPress={() => router.push("/sell-history")}/>
             <SettingsItem
               path="/"
               onPress={() => {

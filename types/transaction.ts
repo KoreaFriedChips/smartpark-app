@@ -5,6 +5,9 @@ export const TransactionModel = z.object({
   transactionDate: z.coerce.date(),
   amount: z.coerce.number(),
   paymentMethod: z.string().nullish(),
-  userId: z.string(),
   listingId: z.string(),
+  sellerId: z.string(),
+  buyerId: z.string(),
+  type: z.string().nullish(),
+  userId: z.string(),
 })

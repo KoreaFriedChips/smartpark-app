@@ -13,7 +13,7 @@ export default function ReportScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      title: "Earnings Report",
+      title: "Payment History",
       HeaderTitleAlign: "center",
     });
     const fetchTransactions = async () => {
@@ -23,7 +23,8 @@ export default function ReportScreen() {
           setLoading(false);
           return;
         }
-        setTransactions(transactionData);
+        const payoutTransactions = transactionData.filter((transaction) => transaction.type === "buy");
+        setTransactions(payoutTransactions);
       } catch (error) {
         setError(true);
         console.error("Error in fetchTransactions:", error);
@@ -47,42 +48,17 @@ export default function ReportScreen() {
     return <Text style={styles.error}>Something went wrong!</Text>;
   }
 
-  const calculateTotals = () => {
-    let totalEarned = 0;
-    let totalFee = 0;
-    let netPayout = 0;
-
-    if (transactions) {
-      transactions.forEach((transaction) => {
-        const amount = transaction.amount;
-        const fee = amount * 0.075;
-        totalEarned += amount;
-        totalFee += fee;
-        netPayout += amount - fee;
-      });
-    }
-
-    return { totalEarned, totalFee, netPayout };
-  };
-
-  const totals = calculateTotals();
-
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Earnings Report</Text>
-      <View style={styles.summary}>
-        <Text>Total Earned: ${totals.totalEarned.toFixed(2)}</Text>
-        <Text>Total Fee (7.5%): ${totals.totalFee.toFixed(2)}</Text>
-        <Text>Net Payout: ${totals.netPayout.toFixed(2)}</Text>
-      </View>
+      <Text style={styles.headerText}>Payment History</Text>
       <FlatList
         data={transactions}
         renderItem={({ item }) => (
           <View style={styles.transaction}>
             <Text>Transaction ID: {item.id}</Text>
+            <Text>Date: {set(new Date(item.transactionDate), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).toString()}</Text>
             <Text>Amount: ${item.amount.toFixed(2)}</Text>
-            <Text>Fee: ${(item.amount * 0.075).toFixed(2)}</Text>
-            <Text>Net: ${(item.amount * 0.925).toFixed(2)}</Text>
+            <Text>From: {item.sellerId}</Text>
           </View>
         )}
         keyExtractor={(item) => item.id}
@@ -100,9 +76,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  summary: {
-    marginBottom: 20,
   },
   transaction: {
     padding: 10,

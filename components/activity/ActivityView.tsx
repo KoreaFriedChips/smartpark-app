@@ -54,23 +54,6 @@ export default function ActivityView() {
    />
  ), [listings]);
 
-
- const transactionList = useMemo(() => (
-   <FlatList
-     data={transactions}
-     renderItem={({ item }) => (
-       <View style={styles.transactionItem}>
-         <Text>{item.listingId}</Text>
-         <Text>{item.amount}</Text>
-         <Text>{item.transactionDate.toISOString()}</Text>
-       </View>
-     )}
-     keyExtractor={item => item.id.toString()}
-     ListEmptyComponent={<Text style={styles.noListings}>No transactions found.</Text>}
-   />
- ), [transactions]);
-
-
  const setSelect = (selection: string) => {
    setSelection(selection);
    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -83,12 +66,10 @@ export default function ActivityView() {
        selection={selection}
        optOne="Your spots"
        optTwo="Your listings"
-       optThree="History"
        setSelection={setSelect}
      />
      {selection === "Your spots" && reservationList}
      {selection === "Your listings" && listingList}
-     {selection === "History" && transactionList}
    </View>
  );
 }
