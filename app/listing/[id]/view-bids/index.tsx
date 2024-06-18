@@ -15,8 +15,8 @@ import {
   cancelPaymentIntent,
   capturePaymentIntent,
 } from "@/serverconn/payments";
-import { createTransaction, getTransaction, getUserFromClerkId, getUserFromUserId, readBids, readTransactions, readUsers, updateBid, updateTransaction } from "@/serverconn";
-import { useUserContext } from "@/hooks";
+import { createReservationFromBid, createTransaction, getTransaction, getUserFromClerkId, getUserFromUserId, readBids, readTransactions, readUsers, updateBid, updateTransaction } from "@/serverconn";
+import { useBackend, useUserContext } from "@/hooks";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 interface Bid {
@@ -24,9 +24,11 @@ interface Bid {
   amount: number;
   createdAt: string;
   userId: string;
-  paymentIntentId: string;
+  stripePaymentIntentId: string;
   listingId: string;
   status: string;
+  starts: Date;
+  ends: Date;
 }
 
 interface User {
@@ -88,11 +90,17 @@ export default function ListingBids() {
   const acceptBid = async (bid: Bid) => {
     try {
       const bidId = bid.id
-      const response = await capturePaymentIntent(getToken, bid.paymentIntentId);
+      const response = await capturePaymentIntent(getToken, bid.stripePaymentIntentId);
+
+      // create reservation
+      const desiredSlot = {start: bid.starts, end: bid.ends};
+      const reservation = await createReservationFromBid(getToken, listingId.toString(), desiredSlot, bid.userId);
+      console.log("reservation created: ", reservation);
+
       await updateBid(getToken, bidId, { status: "captured" })
       if (response.capturedPaymentIntent) {
         // if the bid is accepted, cancel all the other bids
-        const otherBids = bids.filter((bid) => bid.id !== bidId);
+        const otherBids = bids.filter((bid) => bid.id !== bidId && bid.status === "pending");
         for (const cancelBid of otherBids) {
             console.log(cancelBid.id);
           await cancelPaymentIntent(getToken, cancelBid.id);
@@ -116,6 +124,8 @@ export default function ListingBids() {
         console.log("opposing transaction: ", opposingTransaction);
         await updateTransaction(getToken, opposingTransaction[0].id, { status: "confirmed" });
         await updateListing(getToken, bid.listingId, { spotsLeft: listing.spotsLeft - 1 });
+
+        Alert.alert("Bid Accepted", "Bid has been accepted");
       } else {
         setError(response.data.error);
       }

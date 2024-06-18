@@ -13,6 +13,17 @@ export const createReservation = async (getToken: GetToken, listingId: string, i
     return ReservationModel.parse(res);
 };
 
+export const createReservationFromBid = async (getToken: GetToken, listingId: string, interval: Interval, userId: string) => {
+    const reservationData = {
+        userId,
+        starts: interval.start,
+        ends: interval.end,
+        listingId
+    };
+    const res = await create(getToken, "/api/reservations/from-bid", reservationData);
+    return ReservationModel.parse(res);
+};
+
 export const readUserReservations = async (getToken: GetToken, userId: string) => {
     return await readReservations(getToken, { userId: userId });
 };

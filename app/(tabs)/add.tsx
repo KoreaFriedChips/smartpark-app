@@ -1,10 +1,21 @@
-import {  useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ListingInput, { ListingInputRef } from '@/components/ListingInput';
-import { useBackend } from '@/hooks';
+import { useBackend, useUserContext } from '@/hooks';
 import { router } from "expo-router";
+import { View, ActivityIndicator, Text } from 'react-native';
 
 export default function CreateListing() {
+  const user = useUserContext();
+  console.log("user: ", user);
+  if (!user?.verified) {
+    router.replace({
+      pathname: "/message-screen",
+      params: { id: "error", subtitle: "Your account must be verified to create a listing. Go to your profile and connect with SmartPark!" },
+    });
+  }
+
   const { createListing } = useBackend();
+  const [loading, setLoading] = useState(true);
 
   const initialListingData = {
     latitude: 37,
@@ -30,7 +41,7 @@ export default function CreateListing() {
     spotsLeft: 1,
     tags: [],
     amenities: [],
-  }
+  };
   const listingData = useRef<ListingInputRef>(initialListingData);
 
   const listingDataValid = () => {
@@ -59,10 +70,17 @@ export default function CreateListing() {
   };
 
   const handleSubmitCreateListing = async () => {
-    console.log(listingData);
-    //if (!listingDataValid()) {
-    //  return;
-    //}
+    if (!user?.verified) {
+      router.replace({
+        pathname: "/message-screen",
+        params: { id: "error", subtitle: "Your account must be verified to create a listing." },
+      });
+      return;
+    }
+
+    if (!listingDataValid()) {
+      return;
+    }
     const createdListing = await createListing({
       ...listingData.current,
       startingPrice: Number(listingData.current.startingPrice),
@@ -70,6 +88,15 @@ export default function CreateListing() {
     });
     console.log(createdListing);
   };
-  
+
+  // if (loading) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //       <ActivityIndicator size="large" color="#0000ff" />
+  //       <Text>Loading...</Text>
+  //     </View>
+  //   );
+  // }
+
   return ListingInput(listingData, handleSubmitCreateListing);
 }
