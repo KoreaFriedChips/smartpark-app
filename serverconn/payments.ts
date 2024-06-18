@@ -14,9 +14,9 @@ export const createPaymentIntent = async (getToken: GetToken, amount: number, cu
   }
 };
 
-export const capturePaymentIntent = async (getToken: GetToken, bidId: string) => {
+export const capturePaymentIntent = async (getToken: GetToken, paymentIntentId: string) => {
   try {
-    const res = await update(getToken, "/api/payments/capture", { bidId });
+    const res = await update(getToken, "/api/payments/capture", { paymentIntentId });
     return res;
   } catch (error) {
     console.error("Error in confirmPaymentIntent:", error);
@@ -24,9 +24,9 @@ export const capturePaymentIntent = async (getToken: GetToken, bidId: string) =>
   }
 };
 
-export const cancelPaymentIntent = async (getToken: GetToken, bidId: string) => {
+export const cancelPaymentIntent = async (getToken: GetToken, paymentIntentId: string) => {
   try {
-    const res = await update(getToken, "/api/payments/cancel", { bidId });
+    const res = await update(getToken, "/api/payments/cancel", { paymentIntentId });
     return res;
   } catch (error) {
     console.error("Error in cancelPaymentIntent:", error);

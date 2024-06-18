@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { router } from "expo-router";
 import BidView from "./BidView";
 import { useBackend } from "@/hooks";
-import { readBids } from "@/serverconn";
+import { readBids, updateBid } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { cancelPaymentIntent } from "@/serverconn/payments";
 
@@ -87,16 +87,18 @@ export default function BidController(){
     }
 
     try {
-      const reservation = await createReservation(listingId.current, desiredSlot.current);
+      const slot = desiredSlot.current;
+      const reservation = await createReservation(listingId.current, slot);
       console.log("reservation created");
       console.log(reservation);
       router.replace({pathname: "/message-screen", params: {id: "bid-won"}});
       desiredSlot.current = undefined;
 
       // cancel all bids for this listing interval
-      const bids = await readBids(getToken, { listingId: listingId.current, starts: desiredSlot.current!.start, ends: desiredSlot.current!.end} );
+      const bids = await readBids(getToken, { listingId: listingId.current, starts: slot.start, ends: slot.end} );
       for (const bid of bids) {
-        await cancelPaymentIntent(getToken, bid.id);
+        await cancelPaymentIntent(getToken, bid.stripePaymentIntentId);
+        await updateBid(getToken, bid.id, { status: "cancelled" });
       }
         
     } catch (err: any) {

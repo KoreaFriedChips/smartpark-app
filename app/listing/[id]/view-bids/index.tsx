@@ -15,8 +15,9 @@ import {
   cancelPaymentIntent,
   capturePaymentIntent,
 } from "@/serverconn/payments";
-import { createTransaction, getTransaction, getUserFromClerkId, getUserFromUserId, readBids, readTransactions, readUsers, updateTransaction } from "@/serverconn";
+import { createTransaction, getTransaction, getUserFromClerkId, getUserFromUserId, readBids, readTransactions, readUsers, updateBid, updateTransaction } from "@/serverconn";
 import { useUserContext } from "@/hooks";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 interface Bid {
   id: string;
@@ -87,7 +88,8 @@ export default function ListingBids() {
   const acceptBid = async (bid: Bid) => {
     try {
       const bidId = bid.id
-      const response = await capturePaymentIntent(getToken, bidId);
+      const response = await capturePaymentIntent(getToken, bid.paymentIntentId);
+      await updateBid(getToken, bidId, { status: "captured" })
       if (response.capturedPaymentIntent) {
         // if the bid is accepted, cancel all the other bids
         const otherBids = bids.filter((bid) => bid.id !== bidId);

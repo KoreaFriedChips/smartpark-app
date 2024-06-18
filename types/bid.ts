@@ -8,6 +8,7 @@ export const BidModel = z.object({
   starts: z.coerce.date(),
   ends: z.coerce.date(),
   userId: z.string(),
+  stripePaymentIntentId: z.string(),
   listingId: z.string(),
   status: z.string(),
 })

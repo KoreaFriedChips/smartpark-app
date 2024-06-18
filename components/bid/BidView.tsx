@@ -171,7 +171,8 @@ export default function BidView({
     // Go to error screen, or display some error notification
     if (
       highestBid?.amount !== undefined &&
-      Number(bidAmount) < highestBid?.amount
+      Number(bidAmount) < highestBid?.amount &&
+      selection === "Place bid"
     ) {
       Alert.alert(
         "Bid too low",
