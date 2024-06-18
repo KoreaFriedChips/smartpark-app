@@ -59,6 +59,7 @@ export default function ReportScreen() {
             <Text>Date: {set(new Date(item.transactionDate), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }).toString()}</Text>
             <Text>Amount: ${item.amount.toFixed(2)}</Text>
             <Text>From: {item.sellerId}</Text>
+            <Text>Status: {item.status}</Text>
           </View>
         )}
         keyExtractor={(item) => item.id}

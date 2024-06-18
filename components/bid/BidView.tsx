@@ -45,7 +45,7 @@ import { capturePaymentIntent, createPaymentIntent } from "@/serverconn/payments
 import { useAuth } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { createTransaction } from "@/serverconn";
+import { createTransaction, updateListing } from "@/serverconn";
 
 export interface BidViewProps {
   listingId: MutableRefObject<string | undefined>;
@@ -189,12 +189,12 @@ export default function BidView({
     }
     console.log(paymentIntentIdRef.current);
     const transactionData = {
-      transactionDate: Date.now(),
-      amount: Number(spotPrice().price),
+      transactionDate: new Date(),
+      amount: Number(spotPrice().price.toFixed(2)),
       paymentMethod: "card",
-      listingId: listing?.id,
-      sellerId: listing?.userId,
-      buyerId: user?.id,
+      listingId: listing!.id,
+      sellerId: listing!.userId,
+      buyerId: user!.id,
       type: "buy"
     };
     await createTransaction(getToken, transactionData);
@@ -203,8 +203,20 @@ export default function BidView({
     if (selection === "Place bid") {
       await handleSubmitBid(paymentIntentIdRef.current ?? "");
     } else {
+      const sellerTransactionData = {
+        transactionDate: new Date(),
+        amount: Number(spotPrice().price.toFixed(2)),
+        paymentMethod: "card",
+        listingId: listing?.id,
+        sellerId: listing?.userId,
+        buyerId: user?.id,
+        type: "sell",
+        status: "confirmed",
+      };
+      await createTransaction(getToken, sellerTransactionData);
       await capturePaymentIntent(getToken, paymentIntentIdRef.current ?? "");
       await handleSubmitBuy();
+      await updateListing(getToken, listing!.id, { spotsLeft: listing!.spotsLeft - 1 });
     }
   }
 

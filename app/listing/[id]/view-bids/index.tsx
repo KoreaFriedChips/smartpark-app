@@ -8,14 +8,15 @@ import {
   Alert,
 } from "react-native";
 import axios from "axios";
-import { getListingBids, readListings } from "@/serverconn/listing";
+import { getListingBids, readListings, updateListing } from "@/serverconn/listing";
 import { useAuth } from "@clerk/clerk-expo";
 import { useLocalSearchParams, useNavigation, useRouter, useSearchParams } from "expo-router";
 import {
   cancelPaymentIntent,
   capturePaymentIntent,
 } from "@/serverconn/payments";
-import { getUserFromClerkId, getUserFromUserId, readUsers } from "@/serverconn";
+import { createTransaction, getUserFromClerkId, getUserFromUserId, readUsers } from "@/serverconn";
+import { useUserContext } from "@/hooks";
 
 interface Bid {
   id: string;
@@ -23,6 +24,7 @@ interface Bid {
   createdAt: string;
   userId: string;
   paymentIntentId: string;
+  listingId: string;
   status: string;
 }
 
@@ -38,7 +40,9 @@ export default function ListingBids() {
   const { listingId } = useLocalSearchParams();
   const [listing, setListing] = useState<any>({});
   const [users, setUsers] = useState<{ [key: string]: User }>({});
-    const navigation = useNavigation();
+  const navigation = useNavigation();
+  const user = useUserContext();
+
   useEffect(() => {
     
     const fetchBids = async () => {
@@ -76,16 +80,29 @@ export default function ListingBids() {
     return response;
   };
 
-  const acceptBid = async (bidId: string) => {
+  const acceptBid = async (bid: Bid) => {
     try {
+      const bidId = bid.id
       const response = await capturePaymentIntent(getToken, bidId);
       if (response.capturedPaymentIntent) {
         // if the bid is accepted, cancel all the other bids
         const otherBids = bids.filter((bid) => bid.id !== bidId);
-        for (const bid of otherBids) {
-            console.log(bid.id);
-          await cancelPaymentIntent(getToken, bid.id);
+        for (const cancelBid of otherBids) {
+            console.log(cancelBid.id);
+          await cancelPaymentIntent(getToken, cancelBid.id);
         }
+        const transactionData = {
+          transactionDate: new Date(),
+          amount: bid.amount,
+          paymentMethod: "stripe",
+          listingId: bid.listingId,
+          sellerId: user?.id, // the seller is the current user
+          buyerId: bid.userId,
+          type: "sale",
+          status: "confirmed",
+        };
+        await createTransaction(getToken, transactionData);
+        await updateListing(getToken, bid.listingId, { spotsLeft: listing.spotsLeft - 1 });
       } else {
         setError(response.data.error);
       }
@@ -123,7 +140,7 @@ export default function ListingBids() {
             <Text>Created At: {new Date(item.createdAt).toLocaleString()}</Text>
             <Text>From: {users[item.userId]?.name|| 'Loading...'}</Text>
             <TouchableOpacity
-              onPress={() => acceptBid(item.id)}
+              onPress={() => acceptBid(item)}
               style={styles.button}
             >
               <Text style={styles.buttonText}>Accept</Text>

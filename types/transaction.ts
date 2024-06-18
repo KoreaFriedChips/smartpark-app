@@ -10,4 +10,5 @@ export const TransactionModel = z.object({
   buyerId: z.string(),
   type: z.string().nullish(),
   userId: z.string(),
+  status: z.string(),
 })
