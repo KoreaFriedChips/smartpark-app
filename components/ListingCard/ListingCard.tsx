@@ -153,8 +153,7 @@ function ListingCard({
               </Text>
             </TouchableOpacity>
           </Link>
-          {/* {listing?.userId == user?.id && <TouchableOpacity */}
-          {<TouchableOpacity
+          {listing?.userId == user?.id && <TouchableOpacity
             style={[
               styles.button,
               {
