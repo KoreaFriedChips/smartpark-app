@@ -15,7 +15,7 @@ import {
   cancelPaymentIntent,
   capturePaymentIntent,
 } from "@/serverconn/payments";
-import { createTransaction, getUserFromClerkId, getUserFromUserId, readUsers } from "@/serverconn";
+import { createTransaction, getTransaction, getUserFromClerkId, getUserFromUserId, readBids, readTransactions, readUsers, updateTransaction } from "@/serverconn";
 import { useUserContext } from "@/hooks";
 
 interface Bid {
@@ -34,7 +34,7 @@ interface User {
 }
 
 export default function ListingBids() {
-  const [bids, setBids] = useState<Bid[]>([]);
+  const [bids, setBids] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { getToken } = useAuth();
   const { listingId } = useLocalSearchParams();
@@ -50,12 +50,16 @@ export default function ListingBids() {
         const res = await readListings(getToken, { id: listingId });
         setListing(res[0]);
         console.log(listingId);
-        const response = await getListingBids(getToken, listingId as string);
-        const pendingBids = response.filter((bid: Bid) => bid.status === "pending");
+        //const response = await getListingBids(getToken, listingId as string);
+        const read = await readBids(getToken, { listingId: listingId });
+        console.log("read bids: ", read);
+        const pendingBids = read.filter((bid) => bid.status === "pending");
+
+
         //console.log(response);
         setBids(pendingBids);
         const usersData = await Promise.all(
-          pendingBids.map(async (bid: Bid) => {
+          pendingBids.map(async (bid) => {
             const user = await fetchUser(bid.userId);
             return { [bid.userId]: user };
           })
@@ -93,7 +97,7 @@ export default function ListingBids() {
         }
         const transactionData = {
           transactionDate: new Date(),
-          amount: bid.amount,
+          amount: Number((bid.amount * 1.029 * 1.05 * 1.075 + 0.3).toFixed(2)),
           paymentMethod: "stripe",
           listingId: bid.listingId,
           sellerId: user?.id, // the seller is the current user
@@ -102,6 +106,13 @@ export default function ListingBids() {
           status: "confirmed",
         };
         await createTransaction(getToken, transactionData);
+        
+        const transactions = await readTransactions(getToken, listingId);
+        console.log("transactions: ", transactions);
+        // get the transaction that corresponds to the bid based on opposingTransactionDat
+        const opposingTransaction = transactions.filter((transaction) => transaction.amount === transactionData.amount && transaction.type == "buy" && transaction.buyerId === transactionData.buyerId);
+        console.log("opposing transaction: ", opposingTransaction);
+        await updateTransaction(getToken, opposingTransaction[0].id, { status: "confirmed" });
         await updateListing(getToken, bid.listingId, { spotsLeft: listing.spotsLeft - 1 });
       } else {
         setError(response.data.error);

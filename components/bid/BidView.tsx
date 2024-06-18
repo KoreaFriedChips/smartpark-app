@@ -197,6 +197,7 @@ export default function BidView({
       buyerId: user!.id,
       type: "buy"
     };
+    console.log("transactionData: ", transactionData);
     await createTransaction(getToken, transactionData);
 
     // Call handleSubmitBid or handleSubmitBuy based on the selection

@@ -9,4 +9,5 @@ export const BidModel = z.object({
   ends: z.coerce.date(),
   userId: z.string(),
   listingId: z.string(),
+  status: z.string(),
 })

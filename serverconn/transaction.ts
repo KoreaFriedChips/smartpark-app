@@ -17,6 +17,12 @@ export const readTransactions = async (getToken: GetToken, searchParams: any): P
     return res.map(TransactionModel.parse);
 };
 
+export const getTransaction = async (getToken: GetToken, searchParams: any): Promise<Transaction[]> => {
+    const res = await read(getToken, "/api/transactions/get", searchParams);
+    console.log(res);
+    return res.map(TransactionModel.parse);
+};
+
 export const updateTransaction = async (getToken: GetToken, id: string, data: any) => {
     return await update(getToken, `/api/transactions/${id}`, data);
 };

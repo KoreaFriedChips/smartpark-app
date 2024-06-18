@@ -8,7 +8,8 @@ export const TransactionModel = z.object({
   listingId: z.string(),
   sellerId: z.string(),
   buyerId: z.string(),
-  type: z.string().nullish(),
+  type: z.string(),
+  confirmationId: z.string(),
   userId: z.string(),
   status: z.string(),
 })
