@@ -148,6 +148,8 @@ export default function BidView({
 
   const fetchPaymentSheetParams = async () => {
     try {
+      //console.log("bidAmount: ", bidAmount);
+      //console.log("spotPrice(): ", spotPrice().price.toFixed(2));
       const priceBeforeFees =
         (spotPrice().price - 0.3) / (1.029 * 1.05 * 1.075);
       console.log("Price before fees: ", priceBeforeFees);
@@ -180,6 +182,8 @@ export default function BidView({
       );
       return;
     }
+
+    console.log("bidAmount: ", bidAmount);
 
     await initializePaymentSheet();
     const { error: paymentError } = await presentPaymentSheet();
@@ -281,7 +285,7 @@ export default function BidView({
 
   const setSelect = (selection: string) => {
     setSelection(selection);
-    if (selection === "Buy now") {
+    if (selection === "Park now") {
       setBidAmount(String(listing?.buyPrice));
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -329,6 +333,7 @@ export default function BidView({
     let diff: number;
     const amount =
       selection === "Place bid" ? Number(bidAmount) : listing.buyPrice;
+    console.log("spotPrice() amount: ", amount);
     switch (listing.duration) {
       case "hour":
         diff = differenceInHours(endDate, startDate);
@@ -403,8 +408,10 @@ Processing fee: $${processingFee.toFixed(2)}`;
       const beforeDecimal = validText.slice(0, decimalIndex);
       const afterDecimal = validText.slice(decimalIndex, decimalIndex + 3); // Allow 2 decimal places
       setBidAmount(beforeDecimal + afterDecimal);
+      console.log("bidAmount: ", beforeDecimal + afterDecimal);
     } else {
       setBidAmount(validText);
+      console.log("bidAmount: ", validText);
     }
   };
 
