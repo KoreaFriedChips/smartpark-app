@@ -607,7 +607,7 @@ Processing fee: $${processingFee.toFixed(2)}`;
                   style={{
                     ...styles.infoRow,
                     borderColor: themeColors.outline,
-                    marginTop: 10,
+                    marginTop: 4,
                   }}
                 >
                   <View style={styles.buttonRow}>
@@ -625,27 +625,7 @@ Processing fee: $${processingFee.toFixed(2)}`;
                   </View>
                   <Pencil size={14} color={themeColors.primary} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    ...styles.infoRow,
-                    borderColor: themeColors.outline,
-                  }}
-                >
-                  <View style={styles.buttonRow}>
-                    <CreditCard size={16} color={themeColors.secondary} />
-                    <Text
-                      weight="semibold"
-                      style={{
-                        ...styles.subtitle,
-                        fontSize: 14,
-                        color: themeColors.secondary,
-                      }}
-                    >
-                      Payment method
-                    </Text>
-                  </View>
-                  <Pencil size={14} color={themeColors.primary} />
-                </TouchableOpacity>
+                
               </View>
               <TouchableOpacity
                 onPress={handlePayment}
