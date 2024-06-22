@@ -52,6 +52,7 @@ export default function ListingBids() {
       try {
         const res = await readListings(getToken, { id: listingId });
         setListing(res[0]);
+        navigation.setOptions({ title: 'Bids for ' + res[0].address });
         console.log(listingId);
         //const response = await getListingBids(getToken, listingId as string);
         const read = await readBids(getToken, { listingId: listingId });
@@ -77,7 +78,6 @@ export default function ListingBids() {
     };
 
     fetchBids();
-    navigation.setOptions({ title: 'Bids for ' + listing.address });
     console.log("users: ", users);
   }, [listingId]);
 

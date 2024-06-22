@@ -72,6 +72,7 @@ export default function ReportScreen() {
     <View style={styles.container}>
       <Text style={styles.headerText}>Earnings Report</Text>
       <View style={styles.summary}>
+        <Text>Payouts by Stripe are payed out montly. Check your Stripe account for more details.</Text>
         <Text>Total Earned: ${totals.totalEarned.toFixed(2)}</Text>
         <Text>Total Fee (7.5%): ${totals.totalFee.toFixed(2)}</Text>
         <Text>Net Payout: ${totals.netPayout.toFixed(2)}</Text>

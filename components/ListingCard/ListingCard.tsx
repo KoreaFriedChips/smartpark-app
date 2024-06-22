@@ -134,7 +134,7 @@ function ListingCard({
                 alignItems: "center",
               },
             ]}>
-            <TouchableOpacity>
+            {listing?.userId !== user?.id && <TouchableOpacity>
               <Sparkles
                 size={14}
                 color={Colors["light"].primary}
@@ -151,10 +151,10 @@ function ListingCard({
                 }}>
                 Bid now
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </Link>
-          {/* {listing?.userId == user?.id && <TouchableOpacity */}
-          {<TouchableOpacity
+          {listing?.userId == user?.id && <TouchableOpacity
+          // {<TouchableOpacity
             style={[
               styles.button,
               {

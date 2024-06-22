@@ -162,7 +162,7 @@ export default function Profile() {
             <Text weight="semibold" style={{ fontSize: 18, marginTop: 28, marginBottom: 8 }}>
               Seller tools
             </Text>
-            <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} />
+            <SettingsItem path="/" text="Incoming bids" Icon={ArrowDownUp} onPress={() => router.push("/incoming-bids")} />
             <SettingsItem path="/" text="Payouts" Icon={PiggyBank} onPress={() => router.push("/sell-history")}/>
             <SettingsItem
               path="/"
