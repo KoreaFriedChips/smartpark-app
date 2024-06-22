@@ -1,4 +1,4 @@
-import { getUserFromClerkId, readUsers } from "@/serverconn";
+import { checkVerified, getUserFromClerkId, readUsers } from "@/serverconn";
 import { useAuth } from "@clerk/clerk-expo";
 import { useLocalSearchParams } from "expo-router";
 import { useState, useEffect, createContext, useContext } from "react";
@@ -15,6 +15,7 @@ export const useUser = () => {
     const fetchUser = async () => {
       if (!isLoaded || !isSignedIn) return;
       const user = await getUserFromClerkId(getToken, clerkId);
+      await checkVerified(getToken);
       setUser(user);
     };
     try {

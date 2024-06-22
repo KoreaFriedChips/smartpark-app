@@ -55,3 +55,14 @@ export const deleteUser = async (getToken: GetToken, id: string) => {
     return await serverDelete(getToken, `/api/users/${id}`);
 };
 
+export const checkVerified = async (getToken: GetToken) => {
+    try {
+      const data = { };
+      const res = await update(getToken, "/api/verify", data);
+      console.log("checkVerified response:", res);
+      return res;
+    } catch (error) {
+      console.error("Error in checkVerified:", error);
+      throw error;
+    }
+  };
