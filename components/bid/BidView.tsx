@@ -129,13 +129,14 @@ export default function BidView({
   //console.log("Stripe Publishable Key:", stripePublishableKey);
   const initializePaymentSheet = async () => {
     const paymentIntent = await fetchPaymentSheetParams();
-    //console.log(paymentIntent);
+    console.log("paymentIntent: ", paymentIntent);
     const { error: paymentSheetError } = await initPaymentSheet({
       merchantDisplayName: "SmartPark",
       paymentIntentClientSecret: paymentIntent.client_secret,
       defaultBillingDetails: {
         name: "Jane Doe",
       },
+      returnURL: "https://trysmartpark.com/",
     });
     paymentIntentIdRef.current = paymentIntent.id;
     setPaymentIntentId(paymentIntent.id);
